@@ -942,11 +942,11 @@ export default function Map2D() {
       <div
         style={{
           position: 'absolute',
-          top: 10,
+          top: 8,
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 500,
-          width: 360,
+          width: 'min(260px, 35vw)',
           maxWidth: '85%',
         }}
       >
@@ -954,15 +954,15 @@ export default function Map2D() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 6,
             background: '#ffffff',
-            border: '2.5px solid #000000',
-            boxShadow: '3px 3px 0px #000000',
-            borderRadius: 8,
-            padding: '5px 12px',
+            border: '2px solid #000000',
+            boxShadow: '2px 2px 0px #000000',
+            borderRadius: 6,
+            padding: '3px 8px',
           }}
         >
-          <Search size={15} strokeWidth={2.5} color="#000000" />
+          <Search size={13} strokeWidth={2.5} color="#000000" />
           <input
             type="text"
             placeholder="Search village, location, or coordinates..."
@@ -1168,14 +1168,14 @@ export default function Map2D() {
       <div
         style={{
           position: 'absolute',
-          top: 10,
-          right: 10,
+          top: 8,
+          right: 8,
           zIndex: 500,
-          width: isLayersMinimized ? 'auto' : 205,
+          width: isLayersMinimized ? 'auto' : 185,
           background: '#ffffff',
-          border: '2.5px solid #000000',
-          boxShadow: '3px 3px 0px #000000',
-          borderRadius: 10,
+          border: '2px solid #000000',
+          boxShadow: '2px 2px 0px #000000',
+          borderRadius: 8,
           overflow: 'hidden',
           transition: 'all 0.15s ease',
         }}

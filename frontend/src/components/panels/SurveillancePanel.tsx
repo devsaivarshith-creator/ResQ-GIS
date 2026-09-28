@@ -83,14 +83,14 @@ export default function SurveillancePanel() {
   return (
     <div className="panel">
       {/* Header Banner */}
-      <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
+      <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '5px 8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 'var(--radius-md)',
+                width: 24,
+                height: 24,
+                borderRadius: 'var(--radius-sm)',
                 background: 'var(--accent-rose-subtle)',
                 color: 'var(--accent-rose)',
                 display: 'flex',
@@ -98,14 +98,14 @@ export default function SurveillancePanel() {
                 justifyContent: 'center',
               }}
             >
-              <Scan size={18} strokeWidth={2.5} />
+              <Scan size={14} strokeWidth={2.5} />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
-                Surveillance & AOI Marking
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                Surveillance & AOI
               </div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
-                Area of Interest Precision Radar & Vigilance
+              <div style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-muted)' }}>
+                Precision Radar & Sentry
               </div>
             </div>
           </div>
@@ -113,37 +113,39 @@ export default function SurveillancePanel() {
           <button
             onClick={toggleSurveillance}
             className={`btn-action ${isSurveillanceActive ? 'btn-action--rose' : 'btn-action--primary'}`}
-            style={{ padding: '5px 10px', fontSize: 11 }}
+            style={{ padding: '2px 6px', fontSize: 10 }}
           >
-            <Radio size={13} />
-            <span>{isSurveillanceActive ? 'Active Sentry' : 'Engage Radar'}</span>
+            <Radio size={11} />
+            <span>{isSurveillanceActive ? 'Active' : 'Engage'}</span>
           </button>
         </div>
       </div>
 
-      <div className="panel__list" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="panel__list" style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
         {/* Active Target Scope Card */}
         <div
           style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '12px 14px',
+            borderRadius: 'var(--radius-md)',
+            padding: '6px 8px',
             boxShadow: 'var(--shadow-xs)',
             display: 'flex',
             flexDirection: 'column',
-            gap: 10,
+            gap: 6,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Target Surveillance Sector
             </span>
             <span
-              className="risk-badge"
+              className="risk-badge risk-badge--sm"
               style={{
                 background: avgRisk >= 0.7 ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
                 color: avgRisk >= 0.7 ? 'var(--accent-rose)' : 'var(--accent-amber)',
+                padding: '1px 5px',
+                fontSize: 9,
               }}
             >
               RISK {avgRisk.toFixed(2)}
@@ -151,16 +153,16 @@ export default function SurveillancePanel() {
           </div>
           {/* Select Epicenter from ALL Habitations */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>
-              Select Habitation Epicenter ({habitations.length} Available)
+            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>
+              Epicenter ({habitations.length} Habitations)
             </label>
             <select
               style={{
                 width: '100%',
-                padding: '6px 10px',
-                fontSize: 12,
+                padding: '3px 6px',
+                fontSize: 10,
                 fontWeight: 600,
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-color)',
                 background: 'var(--bg-subtle)',
                 color: 'var(--text-primary)',
@@ -189,14 +191,14 @@ export default function SurveillancePanel() {
               <option value="">-- Choose Any Habitation --</option>
               {habitations.map((h) => (
                 <option key={h.id} value={h.id}>
-                  {h.name} ({h.district}, {h.state || 'India'}) - Pop: {h.population.toLocaleString()}
+                  {h.name} ({h.district}) - Pop: {h.population.toLocaleString()}
                 </option>
               ))}
             </select>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)' }}>
               Zone Label / Designation
             </label>
             <input
@@ -204,13 +206,13 @@ export default function SurveillancePanel() {
               value={zoneName}
               onChange={(e) => setZoneName(e.target.value)}
               style={{
-                padding: '6px 10px',
+                padding: '3px 6px',
                 fontFamily: 'var(--font-sans)',
-                fontSize: 13,
+                fontSize: 10,
                 fontWeight: 700,
                 background: 'var(--bg-subtle)',
                 border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-primary)',
                 outline: 'none',
               }}
@@ -219,11 +221,11 @@ export default function SurveillancePanel() {
 
           {/* Coordinates & Radius slider */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Surveillance Perimeter Radius
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                Perimeter Radius
               </span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-blue)' }}>
                 {radiusKm.toFixed(1)} km
               </span>
             </div>
@@ -241,39 +243,39 @@ export default function SurveillancePanel() {
           <div
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
+              fontSize: 9,
               color: 'var(--text-muted)',
               background: 'var(--bg-subtle)',
-              padding: '4px 8px',
+              padding: '3px 6px',
               borderRadius: 'var(--radius-sm)',
             }}
           >
-            Epicenter: {centerLat.toFixed(4)}°N, {centerLng.toFixed(4)}°E &bull; Target Workspace: {activeWs.name}
+            {centerLat.toFixed(3)}°N, {centerLng.toFixed(3)}°E &bull; {activeWs.name}
           </div>
         </div>
 
         {/* Live Surveillance Telemetry Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 5 }}>
           <div
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              padding: '5px 6px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 4,
+              gap: 2,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 11, fontWeight: 600 }}>
-              <Users size={13} color="var(--accent-blue)" />
-              <span>Pop. Inside Zone</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 9.5, fontWeight: 600 }}>
+              <Users size={11} color="var(--accent-blue)" />
+              <span>Zone Pop.</span>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
               {totalPop.toLocaleString()}
             </div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
-              {habitationsInZone.length} villages encircled
+            <div style={{ fontSize: 8.5, fontWeight: 500, color: 'var(--text-muted)' }}>
+              {habitationsInZone.length} villages
             </div>
           </div>
 
@@ -281,22 +283,22 @@ export default function SurveillancePanel() {
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              padding: '5px 6px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 4,
+              gap: 2,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 11, fontWeight: 600 }}>
-              <CloudRain size={13} color="var(--accent-cyan)" />
-              <span>24h Rainfall</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 9.5, fontWeight: 600 }}>
+              <CloudRain size={11} color="var(--accent-cyan)" />
+              <span>24h Rain</span>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
               {currentRain.toFixed(1)} mm
             </div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
-              Open-Meteo telemetry
+            <div style={{ fontSize: 8.5, fontWeight: 500, color: 'var(--text-muted)' }}>
+              Open-Meteo
             </div>
           </div>
 
@@ -304,22 +306,22 @@ export default function SurveillancePanel() {
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              padding: '5px 6px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 4,
+              gap: 2,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 11, fontWeight: 600 }}>
-              <Activity size={13} color="var(--accent-amber)" />
-              <span>River Warning Stage</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 9.5, fontWeight: 600 }}>
+              <Activity size={11} color="var(--accent-amber)" />
+              <span>Gauge</span>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {closestGauge ? `${closestGauge.waterLevel}m (${closestGauge.status.toUpperCase()})` : 'Normal Stage'}
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {closestGauge ? `${closestGauge.waterLevel}m` : 'Normal'}
             </div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
-              {closestGauge?.river || 'Alaknanda'} basin
+            <div style={{ fontSize: 8.5, fontWeight: 500, color: 'var(--text-muted)' }}>
+              {closestGauge?.river || 'Alaknanda'}
             </div>
           </div>
 
@@ -327,22 +329,22 @@ export default function SurveillancePanel() {
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 12px',
+              borderRadius: 'var(--radius-sm)',
+              padding: '5px 6px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 4,
+              gap: 2,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 11, fontWeight: 600 }}>
-              <Building size={13} color="var(--accent-emerald)" />
-              <span>Corridor Status</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 9.5, fontWeight: 600 }}>
+              <Building size={11} color="var(--accent-emerald)" />
+              <span>Corridor</span>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
-              NH-7 Passable
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+              NH-7 Open
             </div>
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
-              BRO heavy equipment standby
+            <div style={{ fontSize: 8.5, fontWeight: 500, color: 'var(--text-muted)' }}>
+              BRO standby
             </div>
           </div>
         </div>
@@ -351,15 +353,15 @@ export default function SurveillancePanel() {
         <button
           onClick={handleSaveToWorkspace}
           className="btn-action btn-action--primary"
-          style={{ width: '100%', padding: '9px', fontSize: 12, justifyContent: 'center' }}
+          style={{ width: '100%', padding: '5px 8px', fontSize: 10, justifyContent: 'center' }}
         >
-          <BookmarkPlus size={14} />
-          <span>{savedSuccess ? 'Saved to Workspace!' : `Save Sentry Zone to ${activeWs.name}`}</span>
+          <BookmarkPlus size={12} />
+          <span>{savedSuccess ? 'Saved!' : `Save Sentry Zone`}</span>
         </button>
 
         {/* Preset Surveillance Sectors */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
             Himalayan Surveillance Presets
           </div>
 
@@ -373,21 +375,21 @@ export default function SurveillancePanel() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '8px 10px',
+                  padding: '4px 6px',
                   background: isTarget ? 'var(--accent-blue-subtle)' : 'var(--bg-surface)',
                   border: '1px solid',
                   borderColor: isTarget ? 'var(--accent-blue)' : 'var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
                   textAlign: 'left',
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {zone.name}
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
-                    {zone.district} &bull; Perimeter: {zone.radiusKm} km &bull; {zone.populationExposed.toLocaleString()} exposed
+                  <div style={{ fontSize: 9, fontWeight: 500, color: 'var(--text-muted)' }}>
+                    {zone.district} &bull; {zone.radiusKm} km &bull; {zone.populationExposed.toLocaleString()}
                   </div>
                 </div>
                 <span
@@ -395,9 +397,11 @@ export default function SurveillancePanel() {
                   style={{
                     background: zone.riskScore >= 0.8 ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
                     color: zone.riskScore >= 0.8 ? 'var(--accent-rose)' : 'var(--accent-amber)',
+                    padding: '1px 4px',
+                    fontSize: 8.5,
                   }}
                 >
-                  {(zone.riskScore * 100).toFixed(0)}% RISK
+                  {(zone.riskScore * 100).toFixed(0)}%
                 </span>
               </button>
             );

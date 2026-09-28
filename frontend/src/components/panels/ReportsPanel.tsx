@@ -169,53 +169,53 @@ export default function ReportsPanel() {
   const activeRoute = activeReportHab && activeSite ? getRouteDetails(activeReportHab, activeSite) : null;
 
   return (
-    <div className="panel report-panel" style={{ padding: '12px' }}>
+    <div className="panel report-panel" style={{ padding: '6px' }}>
       {/* Top Banner */}
-      <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
+      <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '5px 8px' }}>
         <div className="panel__row panel__row--between">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 24,
+                height: 24,
                 background: 'var(--accent-indigo-subtle)',
-                border: '1.5px solid var(--accent-indigo)',
-                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--accent-indigo)',
+                borderRadius: 'var(--radius-sm)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--accent-indigo)',
               }}
             >
-              <FileText size={19} strokeWidth={2.5} />
+              <FileText size={14} strokeWidth={2.5} />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
-                DRISHTI — Evacuation &amp; Transit Memo
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                Evacuation &amp; Transit Memo
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                Institutional Settlement Risk, Safe House Logistics &amp; Route Brief
+              <div style={{ fontSize: 9.5, color: 'var(--text-muted)' }}>
+                Safe Haven Logistics &amp; Route Brief
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
             <button
               onClick={handleExportCSV}
               className="btn-action"
               title="Export Evacuation Data as CSV"
-              style={{ padding: '5px 9px', fontSize: 11 }}
+              style={{ padding: '3px 6px', fontSize: 10 }}
             >
-              <Download size={13} strokeWidth={2} />
+              <Download size={11} strokeWidth={2} />
               <span>CSV</span>
             </button>
             <button
               onClick={() => window.print()}
               className="btn-action"
               title="Print Full District Evacuation Memo"
-              style={{ padding: '5px 10px', fontSize: 11, background: 'var(--accent-blue)', color: '#ffffff', border: 'none' }}
+              style={{ padding: '3px 8px', fontSize: 10, background: 'var(--accent-blue)', color: '#ffffff', border: 'none' }}
             >
-              <Printer size={13} strokeWidth={2} />
+              <Printer size={11} strokeWidth={2} />
               <span>Print PDF</span>
             </button>
           </div>
@@ -223,19 +223,19 @@ export default function ReportsPanel() {
       </div>
 
       {/* State & District Selector and Search */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 8 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 4, padding: '5px 8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, marginBottom: 5 }}>
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
-              Target State Filter
+            <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+              Target State
             </label>
             <select
               value={selectedState}
               onChange={(e) => handleStateChange(e.target.value)}
               style={{
                 width: '100%',
-                padding: '5px 8px',
-                fontSize: 11,
+                padding: '3px 6px',
+                fontSize: 10,
                 fontWeight: 600,
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-color)',
@@ -243,7 +243,7 @@ export default function ReportsPanel() {
                 color: 'var(--text-primary)',
               }}
             >
-              <option value="ALL">All States (Pan-India Matrix)</option>
+              <option value="ALL">All States</option>
               {availableStates.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -251,16 +251,16 @@ export default function ReportsPanel() {
           </div>
 
           <div>
-            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
-              District Sector Filter
+            <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+              District Sector
             </label>
             <select
               value={selectedDistrict}
               onChange={(e) => handleDistrictChange(e.target.value)}
               style={{
                 width: '100%',
-                padding: '5px 8px',
-                fontSize: 11,
+                padding: '3px 6px',
+                fontSize: 10,
                 fontWeight: 600,
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-color)',
@@ -278,7 +278,7 @@ export default function ReportsPanel() {
 
         {/* Search Input */}
         <div style={{ position: 'relative' }}>
-          <Search size={13} style={{ position: 'absolute', left: 8, top: 7, color: 'var(--text-muted)' }} />
+          <Search size={11} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--text-muted)' }} />
           <input
             type="text"
             placeholder="Search village or settlement..."
@@ -286,8 +286,8 @@ export default function ReportsPanel() {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: '100%',
-              padding: '5px 8px 5px 26px',
-              fontSize: 11,
+              padding: '3px 6px 3px 22px',
+              fontSize: 10,
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-color)',
               background: 'var(--bg-subtle)',
@@ -298,52 +298,52 @@ export default function ReportsPanel() {
       </div>
 
       {/* KPI Logistics Overview */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, margin: '10px 0' }}>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>EXPOSED POP</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, margin: '6px 0' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '5px 4px', textAlign: 'center' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>EXPOSED</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
             {exposedPop.toLocaleString()}
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>{atRiskHabs.length} at-risk settlements</div>
+          <div style={{ fontSize: 7.5, color: 'var(--text-muted)' }}>{atRiskHabs.length} at risk</div>
         </div>
 
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>SAFE BEDS</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '5px 4px', textAlign: 'center' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>SAFE BEDS</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>
             {totalSafeCapacity.toLocaleString()}
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>{distSites.length} safe havens</div>
+          <div style={{ fontSize: 7.5, color: 'var(--text-muted)' }}>{distSites.length} havens</div>
         </div>
 
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>BUSES / AMB</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-blue)', fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '5px 4px', textAlign: 'center' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>FLEET</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-blue)', fontFamily: 'var(--font-mono)' }}>
             {busesNeeded} / {ambulancesNeeded}
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Fleet required</div>
+          <div style={{ fontSize: 7.5, color: 'var(--text-muted)' }}>Bus / Amb</div>
         </div>
 
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>RATIONS (14-DAY)</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '5px 4px', textAlign: 'center' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>RATIONS</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
             {rationsTonnes} T
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Buffer grain stocks</div>
+          <div style={{ fontSize: 7.5, color: 'var(--text-muted)' }}>14-day stock</div>
         </div>
       </div>
 
       {/* DASHBOARD-STYLE CARDS LIST (Instead of plain table) */}
-      <div style={{ marginTop: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-            Settlement Evacuation Roster ({distHabs.length} Habitations)
+      <div style={{ marginTop: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+            Evacuation Roster ({distHabs.length})
           </div>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-            Select any card to view transit map &amp; memo
+          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+            Click card for transit map &amp; memo
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {distHabs.map((h) => {
             const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
             const route = getRouteDetails(h, haven);
@@ -354,28 +354,28 @@ export default function ReportsPanel() {
                 key={h.id}
                 style={{
                   background: 'var(--bg-surface)',
-                  border: isHighRisk ? '1.5px solid var(--accent-rose)' : '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-lg)',
-                  boxShadow: 'var(--shadow-sm)',
-                  padding: '12px 14px',
+                  border: isHighRisk ? '1px solid var(--accent-rose)' : '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-sm)',
+                  boxShadow: 'var(--shadow-xs)',
+                  padding: '6px 8px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 10,
+                  gap: 5,
                   transition: 'all 0.15s ease',
                 }}
               >
                 {/* 1. Card Top Bar: Village Name, District, Risk Badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
                         {h.name}
                       </span>
                       <span
                         style={{
-                          fontSize: 10,
+                          fontSize: 8.5,
                           fontWeight: 700,
-                          padding: '1px 6px',
+                          padding: '1px 5px',
                           borderRadius: 'var(--radius-pill)',
                           background: isHighRisk ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
                           color: isHighRisk ? 'var(--accent-rose)' : 'var(--accent-amber)',
@@ -385,8 +385,8 @@ export default function ReportsPanel() {
                         {(h.riskScore * 100).toFixed(0)}% • {h.riskLevel}
                       </span>
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-                      📍 {h.district}, {h.state || 'India'} • Elev: {h.location.elevation || 1500}m ASL
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 1 }}>
+                      📍 {h.district} • Elev: {h.location.elevation || 1500}m
                     </div>
                   </div>
 
@@ -399,85 +399,84 @@ export default function ReportsPanel() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 5,
-                      padding: '6px 12px',
+                      gap: 4,
+                      padding: '3px 8px',
                       background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                       color: '#ffffff',
                       border: 'none',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: 11,
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: 9.5,
                       fontWeight: 700,
                       cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(37, 99, 235, 0.25)',
                       flexShrink: 0,
                     }}
                   >
-                    <FileText size={13} strokeWidth={2.2} />
-                    <span>Generate Report</span>
+                    <FileText size={11} strokeWidth={2.2} />
+                    <span>Report</span>
                   </button>
                 </div>
 
                 {/* 2. Structured 2-Column Metrics Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 5 }}>
                   {/* Metric 1: Demographics & Threats */}
-                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  <div style={{ background: 'var(--bg-subtle)', padding: '4px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                       POPULATION &amp; THREATS
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
-                      {h.population.toLocaleString()} <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>({h.households || 0} HH)</span>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', marginTop: 1 }}>
+                      {h.population.toLocaleString()} <span style={{ fontSize: 8.5, fontWeight: 500, color: 'var(--text-muted)' }}>({h.households || 0} HH)</span>
                     </div>
                     <div
                       title={h.hazardExposure.map(he => he.type).join(', ')}
-                      style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      style={{ fontSize: 8.5, color: 'var(--text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                     >
-                      ⚠️ {h.hazardExposure.map(he => he.type).join(', ') || 'Slope subsidence'}
+                      ⚠️ {h.hazardExposure.map(he => he.type).join(', ') || 'Subsidence'}
                     </div>
                   </div>
 
                   {/* Metric 2: Safe Haven Destination */}
-                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                      ASSIGNED SAFE HAVEN
+                  <div style={{ background: 'var(--bg-subtle)', padding: '4px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      ASSIGNED HAVEN
                     </div>
                     <div
-                      title={haven?.name || 'District Safe Haven'}
-                      style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      title={haven?.name || 'Safe Haven'}
+                      style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--accent-emerald)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                     >
-                      🏰 {haven?.name || 'District Safe Haven'}
+                      🏰 {haven?.name || 'Safe Haven'}
                     </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Cap: <strong>{haven?.capacity?.toLocaleString() || 5000}</strong> beds • {(haven?.dailyWaterLiters || 12000).toLocaleString()}L H₂O
+                    <div style={{ fontSize: 8.5, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Cap: <strong>{haven?.capacity?.toLocaleString() || 5000}</strong> beds
                     </div>
                   </div>
                 </div>
 
                 {/* 3. Transit Logistics Strip */}
-                <div style={{ background: 'var(--bg-subtle)', padding: '7px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minWidth: 0, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
-                    <span style={{ fontSize: 13, flexShrink: 0 }}>{route.modeIcon}</span>
+                <div style={{ background: 'var(--bg-subtle)', padding: '4px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: 11, flexShrink: 0 }}>{route.modeIcon}</span>
                     <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--accent-blue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {route.modeLabel}
                       </div>
-                      <div style={{ fontSize: 9, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontSize: 8, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         🛣️ {route.corridor}
                       </div>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)' }}>
                       {route.journeyTimeStr}
                     </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: 8, color: 'var(--text-muted)' }}>
                       {route.distKm} km
                     </div>
                   </div>
                 </div>
 
                 {/* 4. Bottom Agency Strip */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-color)', paddingTop: 5, marginTop: -2 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Security Corridor</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 8.5, color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-color)', paddingTop: 3, marginTop: -1 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Security</span>
                   <span style={{ color: 'var(--accent-indigo)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
                     {haven?.managingAgency || 'District Admin & NDRF'}
                   </span>

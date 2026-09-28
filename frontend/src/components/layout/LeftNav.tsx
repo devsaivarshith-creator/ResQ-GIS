@@ -71,37 +71,37 @@ export default function LeftNav() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        width: isLeftNavCollapsed ? 50 : 172,
+        width: isLeftNavCollapsed ? 40 : 148,
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--shadow-sm)',
-        padding: '8px 5px',
+        padding: '6px 3px',
         flexShrink: 0,
-        gap: 8,
+        gap: 6,
         transition: 'width 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
       }}
     >
       {/* Top Header & Fold Toggle Button */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: isLeftNavCollapsed ? 'center' : 'space-between',
-            padding: '2px 6px 8px 6px',
+            padding: '2px 4px 4px 4px',
             borderBottom: '1px solid var(--border-color)',
           }}
         >
           {!isLeftNavCollapsed && (
             <span
               style={{
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: 700,
                 color: 'var(--text-muted)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.6px',
+                letterSpacing: '0.5px',
               }}
             >
               Operations
@@ -111,7 +111,7 @@ export default function LeftNav() {
             onClick={toggleLeftNav}
             className="btn-action"
             style={{
-              padding: '4px',
+              padding: '2px',
               borderRadius: 'var(--radius-sm)',
               color: 'var(--text-muted)',
               border: 'none',
@@ -120,12 +120,12 @@ export default function LeftNav() {
             }}
             title={isLeftNavCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
-            {isLeftNavCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+            {isLeftNavCollapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
           </button>
         </div>
 
         {/* Navigation Menu Stack */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -149,14 +149,14 @@ export default function LeftNav() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 6,
                   width: '100%',
-                  padding: isLeftNavCollapsed ? '8px 0' : '7px 10px',
+                  padding: isLeftNavCollapsed ? '5px 0' : '4px 6px',
                   justifyContent: isLeftNavCollapsed ? 'center' : 'flex-start',
                   background: isActive ? 'var(--accent-blue-subtle)' : 'transparent',
                   border: '1px solid',
                   borderColor: isActive ? 'rgba(59, 130, 246, 0.25)' : 'transparent',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.12s ease',
@@ -177,14 +177,14 @@ export default function LeftNav() {
                       left: 0,
                       top: '20%',
                       bottom: '20%',
-                      width: 3,
+                      width: 2.5,
                       background: 'var(--accent-blue)',
                       borderRadius: '0 2px 2px 0',
                     }}
                   />
                 )}
                 <Icon
-                  size={16}
+                  size={13}
                   color={isActive ? 'var(--accent-blue)' : (item.id === 'relocation' ? '#10b981' : 'var(--text-secondary)')}
                   strokeWidth={isActive || item.id === 'relocation' ? 2.5 : 2}
                 />
@@ -193,10 +193,12 @@ export default function LeftNav() {
                     <span
                       style={{
                         fontFamily: 'var(--font-sans)',
-                        fontSize: 12,
+                        fontSize: 10.5,
                         fontWeight: isActive ? 700 : (item.id === 'relocation' ? 700 : 500),
                         color: isActive ? 'var(--accent-blue)' : (item.id === 'relocation' ? '#10b981' : 'var(--text-primary)'),
                         whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
                       }}
                     >
                       {item.label}

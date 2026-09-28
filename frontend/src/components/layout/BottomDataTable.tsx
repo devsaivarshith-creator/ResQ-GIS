@@ -112,7 +112,7 @@ export default function BottomDataTable() {
   };
 
   const panelHeight =
-    bottomTableState === 'collapsed' ? 34 : bottomTableState === 'expanded' ? 380 : 215;
+    bottomTableState === 'collapsed' ? 28 : bottomTableState === 'expanded' ? 280 : 155;
 
   return (
     <div
@@ -121,7 +121,7 @@ export default function BottomDataTable() {
         flexDirection: 'column',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--shadow-sm)',
         overflow: 'hidden',
         height: panelHeight,
@@ -137,11 +137,11 @@ export default function BottomDataTable() {
           justifyContent: 'space-between',
           background: 'var(--bg-subtle)',
           borderBottom: bottomTableState === 'collapsed' ? 'none' : '1px solid var(--border-color)',
-          padding: '0 8px',
-          height: 34,
+          padding: '0 6px',
+          height: 28,
         }}
       >
-        <div style={{ display: 'flex', gap: 4, height: '100%', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 3, height: '100%', alignItems: 'center' }}>
           {[
             { id: 'habitations', label: 'Habitations at Risk', count: filteredHabs.length },
             { id: 'sites', label: 'Relocation Grounds', count: relocationSites.length },
@@ -160,30 +160,30 @@ export default function BottomDataTable() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '5px 10px',
+                  gap: 4,
+                  padding: '3px 7px',
                   background: isActive ? 'var(--bg-surface)' : 'transparent',
                   color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
                   border: '1px solid',
                   borderColor: isActive ? 'var(--border-color)' : 'transparent',
                   borderBottom: isActive ? '1px solid var(--bg-surface)' : 'transparent',
-                  borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+                  borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: isActive ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.12s ease',
-                  marginTop: isActive ? 2 : 0,
+                  marginTop: isActive ? 1 : 0,
                 }}
               >
                 <span>{tab.label}</span>
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 8.5,
                     fontWeight: 700,
                     background: isActive ? 'var(--accent-blue-subtle)' : 'var(--border-color)',
                     color: isActive ? 'var(--accent-blue)' : 'var(--text-muted)',
-                    padding: '1px 5px',
+                    padding: '0.5px 4px',
                     borderRadius: 'var(--radius-pill)',
                   }}
                 >
@@ -195,25 +195,25 @@ export default function BottomDataTable() {
         </div>
 
         {/* Panel Height Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           {bottomTableState !== 'collapsed' && (
             <button
               onClick={() => setBottomTableState(bottomTableState === 'expanded' ? 'normal' : 'expanded')}
               className="btn-action"
-              style={{ padding: '3px 6px', border: 'none', background: 'transparent', boxShadow: 'none' }}
+              style={{ padding: '2px 4px', border: 'none', background: 'transparent', boxShadow: 'none' }}
               title={bottomTableState === 'expanded' ? 'Restore height' : 'Expand table'}
             >
-              {bottomTableState === 'expanded' ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              {bottomTableState === 'expanded' ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
             </button>
           )}
 
           <button
             onClick={() => setBottomTableState(bottomTableState === 'collapsed' ? 'normal' : 'collapsed')}
             className="btn-action"
-            style={{ padding: '3px 6px', border: 'none', background: 'transparent', boxShadow: 'none' }}
+            style={{ padding: '2px 4px', border: 'none', background: 'transparent', boxShadow: 'none' }}
             title={bottomTableState === 'collapsed' ? 'Expand Data Table' : 'Minimize Data Table'}
           >
-            {bottomTableState === 'collapsed' ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            {bottomTableState === 'collapsed' ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </button>
         </div>
       </div>
@@ -227,28 +227,28 @@ export default function BottomDataTable() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '3px 10px',
+              padding: '2px 8px',
               background: 'var(--bg-surface)',
               borderBottom: '1px solid var(--border-color)',
-              gap: 8,
+              gap: 6,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
               {/* Search Box */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 5,
+                  gap: 4,
                   background: 'var(--bg-subtle)',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-sm)',
-                  padding: '2px 6px',
-                  maxWidth: 240,
+                  padding: '1px 5px',
+                  maxWidth: 200,
                   width: '100%',
                 }}
               >
-                <Search size={13} color="var(--text-muted)" />
+                <Search size={11} color="var(--text-muted)" />
                 <input
                   type="text"
                   placeholder={`Search ${activeTab}...`}
@@ -259,7 +259,7 @@ export default function BottomDataTable() {
                     background: 'transparent',
                     outline: 'none',
                     fontFamily: 'var(--font-sans)',
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: 500,
                     color: 'var(--text-primary)',
                     width: '100%',
@@ -269,19 +269,19 @@ export default function BottomDataTable() {
 
               {/* Risk Level Filter */}
               {activeTab === 'habitations' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Risk</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>Risk</span>
                   <select
                     value={selectedRiskFilter}
                     onChange={(e) => setSelectedRiskFilter(e.target.value)}
                     style={{
-                      padding: '3px 8px',
+                      padding: '2px 5px',
                       fontFamily: 'var(--font-sans)',
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 600,
                       color: 'var(--text-primary)',
                       border: '1px solid var(--border-color)',
-                      borderRadius: 'var(--radius-md)',
+                      borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-subtle)',
                       cursor: 'pointer',
                       outline: 'none',
@@ -300,9 +300,9 @@ export default function BottomDataTable() {
             <button
               onClick={handleExport}
               className="btn-action btn-action--primary"
-              style={{ padding: '4px 10px', fontSize: 11 }}
+              style={{ padding: '2px 8px', fontSize: 10 }}
             >
-              <Download size={13} />
+              <Download size={11} />
               <span>Export CSV</span>
             </button>
           </div>
@@ -310,17 +310,17 @@ export default function BottomDataTable() {
           {/* Structured High-Density Table */}
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {activeTab === 'habitations' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 35, fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Settlement</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Block</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Population</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Primary Threat</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>Severity</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Mitigation Directive</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 45, fontWeight: 700 }}>View</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 30, fontWeight: 700 }}>#</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Settlement</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Block</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Population</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Threat</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Severity</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Directive</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 35, fontWeight: 700 }}>View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -338,32 +338,34 @@ export default function BottomDataTable() {
                         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-blue-subtle)')}
                         onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)')}
                       >
-                        <td style={{ padding: '5px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>{idx + 1}</td>
-                        <td style={{ padding: '5px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{hab.name}</td>
-                        <td style={{ padding: '5px 10px', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                        <td style={{ padding: '3px 6px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)' }}>{idx + 1}</td>
+                        <td style={{ padding: '3px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{hab.name}</td>
+                        <td style={{ padding: '3px 8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
                           {hab.block ? `${hab.block}, ${hab.district}` : `${hab.district}, ${hab.state || ''}`}
                         </td>
-                        <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+                        <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
                           {hab.population.toLocaleString()}
                         </td>
-                        <td style={{ padding: '5px 10px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        <td style={{ padding: '3px 8px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                           {primaryHazard}
                         </td>
-                        <td style={{ padding: '5px 10px', textAlign: 'center' }}>
+                        <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                           <span
                             className="risk-badge risk-badge--sm"
                             style={{
                               background: badge.bg,
                               color: badge.color,
+                              padding: '1px 4px',
+                              fontSize: 9,
                             }}
                           >
                             {badge.label}
                           </span>
                         </td>
-                        <td style={{ padding: '5px 10px', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                        <td style={{ padding: '3px 8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
                           {hab.recommendedAction || 'Prepare for relocation'}
                         </td>
-                        <td style={{ padding: '5px 8px', textAlign: 'center' }}>
+                        <td style={{ padding: '3px 6px', textAlign: 'center' }}>
                           <button
                             onClick={() => {
                               selectHabitation(hab.id);
@@ -371,10 +373,10 @@ export default function BottomDataTable() {
                               if (hab.location) flyToHabitation(hab.location.lng, hab.location.lat);
                             }}
                             className="btn-action"
-                            style={{ padding: '3px 6px', borderRadius: 'var(--radius-sm)' }}
+                            style={{ padding: '2px 4px', borderRadius: 'var(--radius-sm)' }}
                             title={`Inspect ${hab.name}`}
                           >
-                            <Eye size={12} />
+                            <Eye size={11} />
                           </button>
                         </td>
                       </tr>
@@ -386,16 +388,16 @@ export default function BottomDataTable() {
 
             {/* Relocation Sites Table */}
             {activeTab === 'sites' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 35, fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Safe Haven Name</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>District & State</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Capacity (Beds)</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>Suitability</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Slope Gradient</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 45, fontWeight: 700 }}>View</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 30, fontWeight: 700 }}>#</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Safe Haven Name</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>District & State</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Capacity (Beds)</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Suitability</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Slope Gradient</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 35, fontWeight: 700 }}>View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,17 +409,17 @@ export default function BottomDataTable() {
                         background: idx % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)',
                       }}
                     >
-                      <td style={{ padding: '5px 8px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                      <td style={{ padding: '5px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{site.name}</td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)' }}>{site.district}, {site.state}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{site.capacity.toLocaleString()}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'center' }}>
-                        <span className="risk-badge risk-badge--sm risk--low">
+                      <td style={{ padding: '3px 6px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                      <td style={{ padding: '3px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{site.name}</td>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)' }}>{site.district}, {site.state}</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{site.capacity.toLocaleString()}</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'center' }}>
+                        <span className="risk-badge risk-badge--sm risk--low" style={{ padding: '1px 4px', fontSize: 9 }}>
                           {site.suitability}
                         </span>
                       </td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)' }}>{site.slopeGrade}</td>
-                      <td style={{ padding: '5px 8px', textAlign: 'center' }}>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)' }}>{site.slopeGrade}</td>
+                      <td style={{ padding: '3px 6px', textAlign: 'center' }}>
                         <button
                           onClick={() => {
                             selectSite(site.id);
@@ -425,9 +427,9 @@ export default function BottomDataTable() {
                             if (site.location) flyToSite(site.location.lng, site.location.lat);
                           }}
                           className="btn-action"
-                          style={{ padding: '3px 6px' }}
+                          style={{ padding: '2px 4px' }}
                         >
-                          <Eye size={12} />
+                          <Eye size={11} />
                         </button>
                       </td>
                     </tr>
@@ -438,16 +440,16 @@ export default function BottomDataTable() {
 
             {/* River Gauges Table */}
             {activeTab === 'rivers' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 35, fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Gauge Station</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>River Basin</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Current Level</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Warning Level</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>Status</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 45, fontWeight: 700 }}>View</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 30, fontWeight: 700 }}>#</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Gauge Station</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>River Basin</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Current Level</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Warning Level</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Status</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 35, fontWeight: 700 }}>View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -459,19 +461,20 @@ export default function BottomDataTable() {
                         background: idx % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)',
                       }}
                     >
-                      <td style={{ padding: '5px 8px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                      <td style={{ padding: '5px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{river.name}</td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)' }}>{river.river}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{river.waterLevel ?? '—'}m</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{river.warningLevel ?? '—'}m</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'center' }}>
+                      <td style={{ padding: '3px 6px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                      <td style={{ padding: '3px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{river.name}</td>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)' }}>{river.river}</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{river.waterLevel ?? '—'}m</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{river.warningLevel ?? '—'}m</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                         <span
                           className={`risk-badge risk-badge--sm ${river.status === 'danger' ? 'risk--critical' : river.status === 'warning' ? 'risk--moderate' : 'risk--low'}`}
+                          style={{ padding: '1px 4px', fontSize: 9 }}
                         >
                           {river.status}
                         </span>
                       </td>
-                      <td style={{ padding: '5px 8px', textAlign: 'center' }}>
+                      <td style={{ padding: '3px 6px', textAlign: 'center' }}>
                         <button
                           onClick={() => {
                             selectRiver(river.id);
@@ -479,9 +482,9 @@ export default function BottomDataTable() {
                             if (river.location) flyToSite(river.location.lng, river.location.lat);
                           }}
                           className="btn-action"
-                          style={{ padding: '3px 6px' }}
+                          style={{ padding: '2px 4px' }}
                         >
-                          <Eye size={12} />
+                          <Eye size={11} />
                         </button>
                       </td>
                     </tr>
@@ -492,15 +495,15 @@ export default function BottomDataTable() {
 
             {/* Corridors / Infrastructure Table */}
             {activeTab === 'infrastructure' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 35, fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Highway / Corridor</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Classification</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>Passability</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Lanes / Span</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>Evacuation Lifeline</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 30, fontWeight: 700 }}>#</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Highway / Corridor</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Classification</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Passability</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Lanes / Span</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Lifeline</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -512,22 +515,23 @@ export default function BottomDataTable() {
                         background: idx % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)',
                       }}
                     >
-                      <td style={{ padding: '5px 8px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                      <td style={{ padding: '5px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{road.name}</td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                      <td style={{ padding: '3px 6px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                      <td style={{ padding: '3px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{road.name}</td>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
                         {road.highwayType || (road as any).type || 'Primary'}
                       </td>
-                      <td style={{ padding: '5px 10px', textAlign: 'center' }}>
+                      <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                         <span
                           className={`risk-badge risk-badge--sm ${road.passabilityStatus === 'blocked' ? 'risk--critical' : 'risk--low'}`}
+                          style={{ padding: '1px 4px', fontSize: 9 }}
                         >
                           {road.passabilityStatus}
                         </span>
                       </td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
                         {road.lanes ? `${road.lanes} lanes` : (road.distanceKm ? `${road.distanceKm} km` : '2 lanes')}
                       </td>
-                      <td style={{ padding: '5px 10px', textAlign: 'center' }}>
+                      <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                         <span style={{ color: road.isEvacuationRoute ? 'var(--accent-emerald)' : 'var(--text-muted)', fontWeight: 700 }}>
                           {road.isEvacuationRoute ? '✓ Lifeline' : 'Secondary'}
                         </span>
@@ -540,16 +544,16 @@ export default function BottomDataTable() {
 
             {/* Weather Forecast Table */}
             {activeTab === 'weather' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                 <thead>
                   <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', top: 0, zIndex: 10 }}>
-                    <th style={{ padding: '6px 8px', textAlign: 'center', width: 35, fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Date</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Day</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>24h Rainfall</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Max Temp</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'right', fontWeight: 700 }}>Min Temp</th>
-                    <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 700 }}>Condition</th>
+                    <th style={{ padding: '4px 6px', textAlign: 'center', width: 30, fontWeight: 700 }}>#</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Date</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Day</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>24h Rain</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Max Temp</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Min Temp</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Condition</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -561,19 +565,19 @@ export default function BottomDataTable() {
                         background: idx % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)',
                       }}
                     >
-                      <td style={{ padding: '5px 8px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                      <td style={{ padding: '5px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{w.date}</td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)' }}>{w.dayLabel || (w as any).day || '—'}</td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+                      <td style={{ padding: '3px 6px', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                      <td style={{ padding: '3px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{w.date}</td>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)' }}>{w.dayLabel || (w as any).day || '—'}</td>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
                         {(w.rainfall ?? 0).toFixed(1)} mm
                       </td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
                         {w.maxTemp !== undefined ? `${w.maxTemp}°C` : (w as any).tempMax !== undefined ? `${(w as any).tempMax}°C` : '—'}
                       </td>
-                      <td style={{ padding: '5px 10px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                      <td style={{ padding: '3px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
                         {w.minTemp !== undefined ? `${w.minTemp}°C` : (w as any).tempMin !== undefined ? `${(w as any).tempMin}°C` : '—'}
                       </td>
-                      <td style={{ padding: '5px 10px', color: 'var(--text-secondary)' }}>{w.condition}</td>
+                      <td style={{ padding: '3px 8px', color: 'var(--text-secondary)' }}>{w.condition}</td>
                     </tr>
                   ))}
                 </tbody>

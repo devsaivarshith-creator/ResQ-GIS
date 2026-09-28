@@ -66,30 +66,30 @@ export default function AnalysisPanel() {
   return (
     <div className="panel">
       {/* Header Banner */}
-      <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
+      <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '5px 8px' }}>
         <div className="panel__row panel__row--between">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div
               style={{
-                width: 34,
-                height: 34,
+                width: 24,
+                height: 24,
                 background: 'var(--accent-amber-subtle)',
                 border: '1px solid var(--accent-amber)',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-sm)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--accent-amber)',
               }}
             >
-              <Trophy size={18} strokeWidth={2} />
+              <Trophy size={14} strokeWidth={2} />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
                 Analysis Dashboard
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                Multi-Criteria Evacuation Staging ({filteredResults.length} Habitations)
+              <div style={{ fontSize: 9.5, color: 'var(--text-muted)' }}>
+                Evacuation Staging ({filteredResults.length} Habitations)
               </div>
             </div>
           </div>
@@ -97,18 +97,19 @@ export default function AnalysisPanel() {
           <button
             className={`btn-action ${filtersOpen ? 'btn-action--primary' : ''}`}
             onClick={() => setFiltersOpen(!filtersOpen)}
+            style={{ padding: '2px 6px', fontSize: 10 }}
           >
-            <Filter size={13} strokeWidth={2} />
-            <span>{filtersOpen ? 'Close' : 'Filters'}</span>
+            <Filter size={11} strokeWidth={2} />
+            <span>{filtersOpen ? 'Close' : 'Filter'}</span>
           </button>
         </div>
       </div>
 
       {/* Dynamic Filters Drawer */}
       {filtersOpen && (
-        <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
-          <div className="panel__row panel__row--between" style={{ marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '6px 8px' }}>
+          <div className="panel__row panel__row--between" style={{ marginBottom: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Dashboard Filters
             </span>
             <button
@@ -117,18 +118,18 @@ export default function AnalysisPanel() {
                 background: 'none',
                 border: 'none',
                 color: 'var(--accent-blue)',
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
             >
-              Reset All
+              Reset
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>State Filter</label>
+              <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>State</label>
               <select 
                 value={stateFilter} 
                 onChange={e => {
@@ -138,7 +139,7 @@ export default function AnalysisPanel() {
                     setSelectedState(e.target.value);
                   }
                 }}
-                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                style={{ width: '100%', padding: '3px 6px', fontSize: 10, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All States ({uniqueStates.length})</option>
                 {uniqueStates.map(s => (
@@ -148,7 +149,7 @@ export default function AnalysisPanel() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>District Filter</label>
+              <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>District</label>
               <select 
                 value={districtFilter} 
                 onChange={e => {
@@ -157,7 +158,7 @@ export default function AnalysisPanel() {
                     setSelectedDistrict(e.target.value);
                   }
                 }}
-                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                style={{ width: '100%', padding: '3px 6px', fontSize: 10, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All Districts ({uniqueDistricts.length})</option>
                 {uniqueDistricts.map(d => (
@@ -167,11 +168,11 @@ export default function AnalysisPanel() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>Risk Level Filter</label>
+              <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>Risk Level</label>
               <select 
                 value={riskFilter} 
                 onChange={e => setRiskFilter(e.target.value)}
-                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                style={{ width: '100%', padding: '3px 6px', fontSize: 10, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All Risk Levels</option>
                 <option value="CRITICAL">Critical Risk</option>
@@ -182,11 +183,11 @@ export default function AnalysisPanel() {
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>Primary Hazard Filter</label>
+              <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>Primary Threat</label>
               <select 
                 value={hazardFilter} 
                 onChange={e => setHazardFilter(e.target.value)}
-                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                style={{ width: '100%', padding: '3px 6px', fontSize: 10, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All Hazard Types</option>
                 <option value="landslide">Landslide Susceptibility</option>
@@ -200,7 +201,7 @@ export default function AnalysisPanel() {
       )}
 
       {/* Ranked List */}
-      <div className="panel__list" style={{ padding: '12px', gap: 8 }}>
+      <div className="panel__list" style={{ padding: '6px', gap: 6 }}>
         {filteredResults.map((item) => {
           const hab = habitations.find((h) => h.id === item.habitationId);
           const site = relocationSites.find((s) => s.id === item.nearestRelocationSite);
@@ -225,22 +226,22 @@ export default function AnalysisPanel() {
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--shadow-xs)',
-                borderRadius: 'var(--radius-md)',
-                padding: '12px',
+                borderRadius: 'var(--radius-sm)',
+                padding: '6px 8px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 8,
+                gap: 5,
                 transition: 'all 0.15s ease',
               }}
             >
               {/* Card Header */}
               <div className="panel__row panel__row--between">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: 700,
-                      padding: '2px 7px',
+                      padding: '1px 5px',
                       background: rankBadgeBg,
                       color: rankBadgeColor,
                       border: '1px solid var(--border-color)',
@@ -250,25 +251,25 @@ export default function AnalysisPanel() {
                     #{item.rank}
                   </span>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
                       {item.name}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                      {item.district} ({hab?.state || 'India'}) &bull; Pop: {item.population.toLocaleString()}
+                    <div style={{ fontSize: 9.5, color: 'var(--text-muted)' }}>
+                      {item.district} &bull; Pop: {item.population.toLocaleString()}
                     </div>
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Priority Index</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
+                  <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Priority</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
                     {item.score.toFixed(3)}
                   </div>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div style={{ width: '100%', height: 6, background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: 4, background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}>
                 <div
                   style={{
                     width: `${Math.min(item.score * 100, 100)}%`,
@@ -279,7 +280,7 @@ export default function AnalysisPanel() {
               </div>
 
               {/* Factor reasoning */}
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              <div style={{ fontSize: 9.5, color: 'var(--text-secondary)', lineHeight: 1.3 }}>
                 <strong>Factors:</strong> {item.reason}
               </div>
 
@@ -293,11 +294,11 @@ export default function AnalysisPanel() {
                     background: 'var(--bg-subtle)',
                     border: '1px solid var(--border-color)',
                     borderRadius: 'var(--radius-sm)',
-                    padding: '6px 10px',
-                    marginTop: 2,
+                    padding: '3px 6px',
+                    marginTop: 1,
                   }}
                 >
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 9.5, color: 'var(--text-muted)' }}>
                     Haven: <strong style={{ color: 'var(--text-primary)' }}>{site.name}</strong> ({site.distanceFromAffected} km)
                   </div>
                   <button
@@ -306,10 +307,10 @@ export default function AnalysisPanel() {
                       if (hab) flyToHabitation(hab.location.lng, hab.location.lat);
                     }}
                     className="btn-action"
-                    style={{ padding: '3px 8px', fontSize: 10 }}
+                    style={{ padding: '1px 5px', fontSize: 9.5 }}
                   >
                     <span>View</span>
-                    <ArrowRight size={11} />
+                    <ArrowRight size={10} />
                   </button>
                 </div>
               )}

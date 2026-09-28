@@ -205,8 +205,8 @@ export default function RightOperationsPanel() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: 295,
-        gap: 6,
+        width: 240,
+        gap: 4,
         overflowY: 'auto',
         flexShrink: 0,
         height: '100%',
@@ -216,7 +216,7 @@ export default function RightOperationsPanel() {
     >
       {/* If a contextual tool is active, render the tool view with a quick back button */}
       {isContextualTool ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%', minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', minHeight: 0 }}>
           <div
             style={{
               display: 'flex',
@@ -225,19 +225,19 @@ export default function RightOperationsPanel() {
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
               boxShadow: 'var(--shadow-xs)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '8px 12px',
+              borderRadius: 'var(--radius-md)',
+              padding: '4px 8px',
             }}
           >
             <span
               style={{
                 fontFamily: 'var(--font-sans)',
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 800,
                 color: 'var(--accent-blue)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 5,
               }}
             >
               <span>⚡</span>
@@ -346,7 +346,7 @@ export default function RightOperationsPanel() {
             <div
               style={{
                 background: 'var(--bg-subtle)',
-                padding: '8px 12px',
+                padding: '5px 8px',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
@@ -354,21 +354,21 @@ export default function RightOperationsPanel() {
               }}
             >
               <div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
                   Current Situation &bull; {selectedDistrict}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: 9.5, fontWeight: 500, color: 'var(--text-muted)' }}>
                   Multi-Feed Telemetry Evaluation
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <button
                   onClick={toggleRightPanel}
                   className="btn-action"
-                  style={{ padding: '4px', border: 'none', background: 'transparent', boxShadow: 'none' }}
+                  style={{ padding: '2px', border: 'none', background: 'transparent', boxShadow: 'none' }}
                   title="Collapse Panel"
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={13} />
                 </button>
               </div>
             </div>
@@ -378,8 +378,8 @@ export default function RightOperationsPanel() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: 5,
-                padding: '6px 8px',
+                gap: 4,
+                padding: '4px 6px',
               }}
             >
               {/* Card 1: Habitations At Risk */}
@@ -389,19 +389,19 @@ export default function RightOperationsPanel() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 8px',
+                  gap: 6,
+                  padding: '4px 6px',
                   background: 'var(--bg-surface)',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 16 }}>🏠</div>
+                <div style={{ fontSize: 13 }}>🏠</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1.1 }}>
                     {atRiskCount}
                   </div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                     At Risk
                   </div>
                 </div>
@@ -414,19 +414,19 @@ export default function RightOperationsPanel() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 8px',
+                  gap: 6,
+                  padding: '4px 6px',
                   background: 'var(--bg-surface)',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 16 }}>🏕️</div>
+                <div style={{ fontSize: 13 }}>🏕️</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-emerald)', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', lineHeight: 1.1 }}>
                     {readySitesCount}
                   </div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                     Safe Sites
                   </div>
                 </div>
@@ -439,19 +439,19 @@ export default function RightOperationsPanel() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 8px',
+                  gap: 6,
+                  padding: '4px 6px',
                   background: 'var(--bg-surface)',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 16 }}>🚧</div>
+                <div style={{ fontSize: 13 }}>🚧</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-amber)', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-amber)', lineHeight: 1.1 }}>
                     {blockedRoadsCount}
                   </div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                     Cutoffs
                   </div>
                 </div>
@@ -464,19 +464,19 @@ export default function RightOperationsPanel() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 8px',
+                  gap: 6,
+                  padding: '4px 6px',
                   background: 'var(--bg-surface)',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                   textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 16 }}>🌊</div>
+                <div style={{ fontSize: 13 }}>🌊</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-cyan)', lineHeight: 1.1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-cyan)', lineHeight: 1.1 }}>
                     {warningRiversCount}
                   </div>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                     High Stage
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export default function RightOperationsPanel() {
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
               boxShadow: 'var(--shadow-sm)',
-              borderRadius: 'var(--radius-lg)',
+              borderRadius: 'var(--radius-md)',
               overflow: 'hidden',
               flexShrink: 0,
             }}
@@ -498,20 +498,20 @@ export default function RightOperationsPanel() {
             <div
               style={{
                 background: 'var(--bg-subtle)',
-                padding: '7px 12px',
+                padding: '4px 8px',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
                 Live Ingestion Feeds
               </div>
               <button
                 onClick={() => setActiveNav('datasources')}
                 className="btn-action"
-                style={{ padding: '2px 6px', fontSize: 10 }}
+                style={{ padding: '1px 5px', fontSize: 9.5 }}
               >
                 Details &rarr;
               </button>
@@ -525,23 +525,23 @@ export default function RightOperationsPanel() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '6px 10px',
+                    padding: '3px 7px',
                     borderBottom: idx < liveFeeds.length - 1 ? '1px solid var(--border-color)' : 'none',
-                    fontSize: 11,
+                    fontSize: 10,
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                    <span>{feed.icon}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0 }}>
+                    <span style={{ fontSize: 11 }}>{feed.icon}</span>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                       {feed.name}
                     </span>
                     <span
                       style={{
-                        fontSize: 9,
+                        fontSize: 8,
                         fontWeight: 700,
                         background: feed.status === 'LIVE' ? 'var(--accent-emerald-subtle)' : 'var(--bg-subtle)',
                         color: feed.status === 'LIVE' ? 'var(--accent-emerald)' : 'var(--text-muted)',
-                        padding: '1px 5px',
+                        padding: '0.5px 4px',
                         borderRadius: 'var(--radius-pill)',
                         border: '1px solid var(--border-color)',
                       }}
@@ -552,7 +552,7 @@ export default function RightOperationsPanel() {
                   <span
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: 10,
+                      fontSize: 9.5,
                       fontWeight: 500,
                       color: 'var(--text-secondary)',
                       whiteSpace: 'nowrap',
@@ -571,7 +571,7 @@ export default function RightOperationsPanel() {
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
               boxShadow: 'var(--shadow-sm)',
-              borderRadius: 'var(--radius-lg)',
+              borderRadius: 'var(--radius-md)',
               overflow: 'hidden',
               flexShrink: 0,
             }}
@@ -579,27 +579,27 @@ export default function RightOperationsPanel() {
             <div
               style={{
                 background: 'var(--bg-subtle)',
-                padding: '7px 12px',
+                padding: '4px 8px',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
                 District Risk Distribution
               </div>
               <button
                 onClick={() => setActiveNav('reports')}
                 className="btn-action"
-                style={{ padding: '2px 6px', fontSize: 10 }}
+                style={{ padding: '1px 5px', fontSize: 9.5 }}
               >
                 Report &rarr;
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', padding: '12px 14px', gap: 14 }}>
-              <div style={{ position: 'relative', width: 68, height: 68, flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '6px 8px', gap: 8 }}>
+              <div style={{ position: 'relative', width: 48, height: 48, flexShrink: 0 }}>
                 <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
                   <circle cx="18" cy="18" r="14" fill="none" stroke="var(--bg-subtle)" strokeWidth="4" />
                   <circle
@@ -634,36 +634,36 @@ export default function RightOperationsPanel() {
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
                     {totalHabs}
                   </span>
-                  <span style={{ fontSize: 8, fontWeight: 600, color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: 7, fontWeight: 600, color: 'var(--text-muted)' }}>
                     VILLAGES
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--accent-rose)' }} />
-                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>High/Critical</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 2, background: 'var(--accent-rose)' }} />
+                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>High</span>
                   </div>
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{highRiskCount} ({highPct}%)</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--accent-amber)' }} />
-                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Moderate</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 2, background: 'var(--accent-amber)' }} />
+                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Mod</span>
                   </div>
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{modRiskCount} ({modPct}%)</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--accent-emerald)' }} />
-                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Low / Safe</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 2, background: 'var(--accent-emerald)' }} />
+                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Safe</span>
                   </div>
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{lowRiskCount} ({lowPct}%)</span>
                 </div>

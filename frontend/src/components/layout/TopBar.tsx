@@ -123,13 +123,13 @@ export default function TopBar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 44,
-        padding: '0 10px',
+        height: 38,
+        padding: '0 8px',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-md)',
         boxShadow: 'var(--shadow-sm)',
-        gap: 6,
+        gap: 5,
         flexShrink: 0,
         position: 'relative',
         zIndex: 10000,
@@ -140,64 +140,48 @@ export default function TopBar() {
       }}
     >
       {/* 1. Brand Logo + Version + Workspace Dropdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
         {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div
             style={{
-              width: 26,
-              height: 26,
-              borderRadius: 'var(--radius-sm)',
+              width: 22,
+              height: 22,
+              borderRadius: 4,
               background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
               fontWeight: 800,
-              fontSize: 13,
-              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)',
+              fontSize: 11,
+              boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)',
             }}
           >
             ▲
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'nowrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'nowrap' }}>
               <span
                 style={{
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 900,
                   background: 'linear-gradient(90deg, var(--text-primary), var(--accent-blue))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  letterSpacing: '0.4px',
+                  letterSpacing: '0.3px',
                   whiteSpace: 'nowrap',
                 }}
               >
                 DRISHTI
-              </span>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: 'var(--text-secondary)',
-                  marginLeft: '4px',
-                  whiteSpace: 'nowrap',
-                  maxWidth: 320,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: 'none',
-                }}
-                className="xl:inline-block"
-              >
-                — Disaster Risk Intelligence &amp; Spatial Hazard Tracking Interface
               </span>
             </div>
           </div>
         </div>
 
         {/* Vertical Divider */}
-        <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
+        <div style={{ width: 1, height: 18, background: 'var(--border-color)' }} />
 
         {/* Workspace Folder Dropdown */}
         <div ref={workspaceDropdownRef} style={{ position: 'relative' }}>
@@ -207,21 +191,22 @@ export default function TopBar() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 7,
-              padding: '5px 10px',
+              gap: 5,
+              padding: '2px 7px',
+              height: 24,
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 12,
+              borderRadius: 'var(--radius-sm)',
+              fontSize: 10.5,
               fontWeight: 600,
               color: 'var(--text-primary)',
             }}
           >
-            <FolderKanban size={14} color="var(--accent-indigo)" />
-            <span style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <FolderKanban size={12} color="var(--accent-indigo)" />
+            <span style={{ maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {activeWorkspace?.name || 'Workspace'}
             </span>
-            <ChevronDown size={13} color="var(--text-muted)" />
+            <ChevronDown size={11} color="var(--text-muted)" />
           </button>
 
           {/* Dropdown Menu */}
