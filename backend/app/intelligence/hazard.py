@@ -125,3 +125,44 @@ def compute_hazard_score(inputs: HazardInput) -> HazardScore:
         earthquake=round(earthquake, 3),
         contributors=contributors,
     )
+
+
+def calculate_risk_score(
+    hazard_scores: dict[str, float] | list[float],
+    exposure: float,
+    vulnerability: float,
+    weights: dict[str, float] | list[float] | None = None,
+) -> float:
+    """
+    R_i = [sum(w_k * H_ik)] * E_i * V_i
+    Where:
+      w_k = Weight of hazard k (sum(w_k) = 1)
+      H_ik = Hazard k score for location i (0-1)
+      E_i = Exposure Score (0-1)
+      V_i = Vulnerability Score (0-1)
+      Final Risk Score in [0, 1]
+    """
+    if isinstance(hazard_scores, dict):
+        if weights is None:
+            w_sum = len(hazard_scores) or 1
+            w_dict = {k: 1.0 / w_sum for k in hazard_scores}
+        else:
+            tot = sum(weights.values()) or 1.0
+            w_dict = {k: v / tot for k, v in weights.items()}
+        h_comp = sum(w_dict.get(k, 0.0) * max(0.0, min(1.0, v)) for k, v in hazard_scores.items())
+    elif isinstance(hazard_scores, list):
+        n = len(hazard_scores) or 1
+        if weights is None or len(weights) != n:
+            w_list = [1.0 / n] * n
+        else:
+            tot = sum(weights) or 1.0
+            w_list = [w / tot for w in weights]
+        h_comp = sum(w_list[i] * max(0.0, min(1.0, hazard_scores[i])) for i in range(n))
+    else:
+        h_comp = float(hazard_scores)
+
+    e_norm = max(0.0, min(1.0, float(exposure)))
+    v_norm = max(0.0, min(1.0, float(vulnerability)))
+    r_i = h_comp * e_norm * v_norm
+    return round(max(0.0, min(1.0, r_i)), 4)
+

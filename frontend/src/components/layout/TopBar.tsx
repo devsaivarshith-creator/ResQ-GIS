@@ -129,14 +129,18 @@ export default function TopBar() {
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-sm)',
-        gap: 12,
+        gap: 8,
         flexShrink: 0,
         position: 'relative',
         zIndex: 10000,
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
       }}
     >
       {/* 1. Brand Logo + Version + Workspace Dropdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div
@@ -328,15 +332,15 @@ export default function TopBar() {
       </div>
 
       {/* 2. Unified Filter Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
         {/* State Select */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>State</span>
           <select
             value={selectedState || 'Uttarakhand'}
             onChange={(e) => handleStateChange(e.target.value)}
             style={{
-              padding: '4px 8px',
+              padding: '4px 6px',
               fontFamily: 'var(--font-sans)',
               fontSize: 11,
               fontWeight: 600,
@@ -346,6 +350,7 @@ export default function TopBar() {
               borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
               outline: 'none',
+              maxWidth: 110,
             }}
           >
             {Object.keys(STATES_AND_DISTRICTS).map((s) => (
@@ -355,13 +360,13 @@ export default function TopBar() {
         </div>
 
         {/* District Select */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>District</span>
           <select
             value={selectedDistrict}
             onChange={(e) => handleDistrictChange(e.target.value)}
             style={{
-              padding: '4px 8px',
+              padding: '4px 6px',
               fontFamily: 'var(--font-sans)',
               fontSize: 11,
               fontWeight: 600,
@@ -371,7 +376,7 @@ export default function TopBar() {
               borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
               outline: 'none',
-              maxWidth: 140,
+              maxWidth: 120,
             }}
           >
             {(STATES_AND_DISTRICTS[selectedState] || ['Chamoli', 'Rudraprayag', 'Pithoragarh', 'Uttarkashi']).map((d) => (
@@ -381,13 +386,13 @@ export default function TopBar() {
         </div>
 
         {/* Hazard Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Hazard</span>
           <select
             value={selectedHazardType ?? 'all'}
             onChange={(e) => setSelectedHazardType(e.target.value === 'all' ? null : (e.target.value as any))}
             style={{
-              padding: '4px 8px',
+              padding: '4px 6px',
               fontFamily: 'var(--font-sans)',
               fontSize: 11,
               fontWeight: 600,
@@ -397,6 +402,7 @@ export default function TopBar() {
               borderRadius: 'var(--radius-md)',
               cursor: 'pointer',
               outline: 'none',
+              maxWidth: 115,
             }}
           >
             <option value="all">All Hazards</option>
@@ -414,16 +420,17 @@ export default function TopBar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 5,
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.16))',
             border: '1px solid rgba(16, 185, 129, 0.4)',
-            padding: '3px 9px',
+            padding: '3px 8px',
             borderRadius: 'var(--radius-pill)',
             cursor: 'pointer',
             color: '#10b981',
             fontSize: 11,
             fontWeight: 700,
             whiteSpace: 'nowrap',
+            flexShrink: 0,
             boxShadow: '0 1px 4px rgba(16, 185, 129, 0.15)',
           }}
           title="Open Flagship Relocation & Safe Haven Logistics Hub"
@@ -442,10 +449,14 @@ export default function TopBar() {
               gap: 6,
               background: topAlert.severity === 'red' ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
               border: `1px solid ${topAlert.severity === 'red' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-              padding: '3px 10px',
+              padding: '3px 8px',
               borderRadius: 'var(--radius-pill)',
               cursor: 'pointer',
-              marginLeft: 4,
+              marginLeft: 2,
+              minWidth: 0,
+              maxWidth: 200,
+              overflow: 'hidden',
+              flexShrink: 1,
             }}
           >
             <span
@@ -453,6 +464,7 @@ export default function TopBar() {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
+                flexShrink: 0,
                 background: topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)',
                 boxShadow: `0 0 6px ${topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)'}`,
               }}
@@ -463,6 +475,8 @@ export default function TopBar() {
                 fontWeight: 700,
                 color: topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)',
                 whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               {topAlert.eventType || 'Active Warning'}: {topAlert.area ? topAlert.area.split(',')[0] : 'Regional'}
@@ -472,7 +486,7 @@ export default function TopBar() {
       </div>
 
       {/* 3. Action Tools: Surveillance, Map Mode, Telemetry & Theme */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
         {/* Surveillance Mode Toggle Button */}
         <button
           onClick={() => {

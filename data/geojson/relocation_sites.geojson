@@ -1144,6 +1144,207 @@
           }
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "id": "site-wayanad-civil-station",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.084,
+          11.611,
+          780
+        ]
+      },
+      "properties": {
+        "id": "site-wayanad-civil-station",
+        "name": "Kalpetta Mini Civil Station & SKMJ Ground",
+        "facilityType": "District Administrative Safe Ground",
+        "district": "Wayanad",
+        "state": "Kerala",
+        "region": "Western Ghats",
+        "block": "Kalpetta",
+        "latitude": 11.611,
+        "longitude": 76.084,
+        "elevation": 780,
+        "capacity": 5500,
+        "suitability": "HIGH",
+        "suitabilityScore": 0.91,
+        "distanceFromAffected": 12.5,
+        "slopeGrade": "Gentle (<6°)",
+        "hasRoadAccess": true,
+        "hasWaterAccess": true,
+        "nearInfrastructure": true,
+        "elevationAboveFloodPlane": 120,
+        "structuralType": "Reinforced RCC Multi-Storey Administrative Complex",
+        "managingAgency": "Wayanad DDMA & Kerala State Disaster Management Authority (KSDMA)",
+        "amenities": [
+          "120 kVA DG Generator",
+          "District Hospital 1.5km",
+          "Direct NH-766 Road Corridor",
+          "Helipad at SKMJ School Ground"
+        ],
+        "operationalStatus": "READY",
+        "lifelineCorridor": "NH-766 (Kozhikode-Kollegal National Highway)",
+        "constraints": [
+          {
+            "label": "Low slope gradient",
+            "met": true
+          },
+          {
+            "label": "Above flood level",
+            "met": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-idukki-painavu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.946,
+          9.852,
+          920
+        ]
+      },
+      "properties": {
+        "id": "site-idukki-painavu",
+        "name": "Painavu Idukki District Stadium Ground",
+        "facilityType": "Elevated Sports Complex & Relief Hub",
+        "district": "Idukki",
+        "state": "Kerala",
+        "region": "Western Ghats",
+        "block": "Idukki",
+        "latitude": 9.852,
+        "longitude": 76.946,
+        "elevation": 920,
+        "capacity": 4200,
+        "suitability": "HIGH",
+        "suitabilityScore": 0.88,
+        "distanceFromAffected": 8.0,
+        "slopeGrade": "Engineered Terrace (<5°)",
+        "hasRoadAccess": true,
+        "hasWaterAccess": true,
+        "nearInfrastructure": true,
+        "elevationAboveFloodPlane": 180,
+        "structuralType": "Engineered Heavy Column Indoor Pavilion",
+        "managingAgency": "Idukki DDMA & DEOC Painavu",
+        "amenities": [
+          "Solar-Diesel Hybrid Power",
+          "20-bed Medical Camp",
+          "Direct SH-33 Lifeline"
+        ],
+        "operationalStatus": "READY",
+        "lifelineCorridor": "SH-33 (Thodupuzha-Puliyanmala Road)",
+        "constraints": [
+          {
+            "label": "Engineered drainage",
+            "met": true
+          },
+          {
+            "label": "Stable bedrock",
+            "met": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-kottayam-collectorate",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.522,
+          9.591,
+          35
+        ]
+      },
+      "properties": {
+        "id": "site-kottayam-collectorate",
+        "name": "Kottayam Collectorate High Ground Shelter",
+        "facilityType": "District Civic Enclave",
+        "district": "Kottayam",
+        "state": "Kerala",
+        "region": "Coastal & Backwaters",
+        "block": "Kottayam",
+        "latitude": 9.591,
+        "longitude": 76.522,
+        "elevation": 35,
+        "capacity": 6000,
+        "suitability": "HIGH",
+        "suitabilityScore": 0.93,
+        "distanceFromAffected": 10.4,
+        "slopeGrade": "Elevated Ridge (<4°)",
+        "hasRoadAccess": true,
+        "hasWaterAccess": true,
+        "nearInfrastructure": true,
+        "elevationAboveFloodPlane": 30,
+        "structuralType": "Multi-tier RCC Disaster Center",
+        "managingAgency": "Kottayam District Administration",
+        "amenities": [
+          "Water Filtration Unit",
+          "Direct MC Road Lifeline Access",
+          "Helicopter Triage Pad"
+        ],
+        "operationalStatus": "READY",
+        "lifelineCorridor": "SH-1 (Main Central MC Road)",
+        "constraints": [
+          {
+            "label": "Safe from Lake Vembanad storm surges",
+            "met": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-alappuzha-relief",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.462,
+          9.288,
+          18
+        ]
+      },
+      "properties": {
+        "id": "site-alappuzha-relief",
+        "name": "Haripad / Alappuzha Model College Cyclone Shelter",
+        "facilityType": "Multi-Purpose Cyclone & Flood Shelter (MPCS)",
+        "district": "Alappuzha",
+        "state": "Kerala",
+        "region": "Coastal & Backwaters",
+        "block": "Haripad",
+        "latitude": 9.288,
+        "longitude": 76.462,
+        "elevation": 18,
+        "capacity": 4800,
+        "suitability": "HIGH",
+        "suitabilityScore": 0.89,
+        "distanceFromAffected": 4.5,
+        "slopeGrade": "Elevated Mound",
+        "hasRoadAccess": true,
+        "hasWaterAccess": true,
+        "nearInfrastructure": true,
+        "elevationAboveFloodPlane": 14,
+        "structuralType": "RCC Stilt Structure",
+        "managingAgency": "NDMA / Alappuzha DDMA",
+        "amenities": [
+          "Rooftop Solar Array",
+          "Water Tankers",
+          "Ambulance Station"
+        ],
+        "operationalStatus": "READY",
+        "lifelineCorridor": "NH-66 (Panvel-Kanyakumari Highway)",
+        "constraints": [
+          {
+            "label": "Stilt elevation protects against 4m flood surge",
+            "met": true
+          }
+        ]
+      }
     }
   ]
 }

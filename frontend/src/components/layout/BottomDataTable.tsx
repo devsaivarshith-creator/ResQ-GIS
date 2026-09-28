@@ -112,7 +112,7 @@ export default function BottomDataTable() {
   };
 
   const panelHeight =
-    bottomTableState === 'collapsed' ? 38 : bottomTableState === 'expanded' ? 420 : 255;
+    bottomTableState === 'collapsed' ? 38 : bottomTableState === 'expanded' ? 360 : 190;
 
   return (
     <div

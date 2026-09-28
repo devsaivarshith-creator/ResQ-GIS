@@ -57,6 +57,7 @@ async def get_prioritization(
         hab_meta[h.id] = {
             "hab": h,
             "hazard_score": hz.composite_hazard_score,
+            "exposure": vuln.exposure,
             "hvi": vuln.overall_hvi,
             "drivers": hz.factors.contributors,
         }
@@ -92,6 +93,12 @@ async def get_prioritization(
         drivers = meta.get("drivers", [])
         driver_str = "; ".join(drivers) if drivers else r.reason
 
+        # Exact formula: R_i = H_i * E_i * V_i
+        h_score = float(meta.get("hazard_score", 0.7))
+        e_score = float(meta.get("exposure", 0.75))
+        v_score = float(meta.get("hvi", 0.6))
+        exact_risk = round(h_score * e_score * v_score, 4)
+
         ranked_items.append(
             PrioritizationItemResponse(
                 rank=r.rank,
@@ -99,7 +106,7 @@ async def get_prioritization(
                 name=r.name,
                 district=hab.district if hab else "Chamoli",
                 population=hab.population if hab else 0,
-                score=round(max(0.20, float(meta.get('hazard_score', 0.7)) * 0.55 + float(meta.get('hvi', 0.6)) * 0.45), 4),
+                score=exact_risk,
                 reason=driver_str,
                 hvi=meta.get("hvi", 0.0),
                 hazard_score=meta.get("hazard_score", 0.0),

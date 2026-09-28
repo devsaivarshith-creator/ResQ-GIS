@@ -14,6 +14,10 @@ export default function App() {
     loadData();
     // Initialize theme attribute on root element
     document.documentElement.setAttribute('data-theme', theme);
+    // Guarantee window scroll is at (0, 0)
+    window.scrollTo(0, 0);
+    document.body.scrollLeft = 0;
+    document.documentElement.scrollLeft = 0;
   }, [loadData, theme]);
 
   // Periodic background telemetry refresh

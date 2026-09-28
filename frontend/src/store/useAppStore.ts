@@ -515,38 +515,58 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     }
 
-    // Local deterministic fallback calculation based on TOPSIS-like criteria
+    // Exact user-specified Risk Score formula:
+    // R_i = [sum(w_k * H_ik)] * E_i * V_i
+    // Where w_k is hazard weight (sum(w_k) = 1), H_ik is hazard score (0-1),
+    // E_i is Exposure Score (0-1), and V_i is Vulnerability Score (0-1).
+    const defaultWeights: Record<string, number> = {
+      landslide: 0.45,
+      flood: 0.35,
+      glof: 0.10,
+      earthquake: 0.10,
+    };
+
     const ranked: PrioritizationItem[] = [...habitations]
-      .sort((a, b) => {
-        const scoreA =
-          a.riskScore * 0.4 +
-          a.vulnerabilityIndex.overall * 0.3 +
-          (a.population / 5000) * 0.3;
-        const scoreB =
-          b.riskScore * 0.4 +
-          b.vulnerabilityIndex.overall * 0.3 +
-          (b.population / 5000) * 0.3;
-        return scoreB - scoreA;
+      .map((h) => {
+        const hazards = h.hazardExposure || [];
+        const rawWeights = hazards.map((hz) => hz.score !== undefined ? (defaultWeights[hz.type?.toLowerCase() || ''] ?? 0.25) : 0.25);
+        const totalW = rawWeights.reduce((a, b) => a + b, 0) || 1.0;
+        const H_i = hazards.length > 0
+          ? hazards.reduce((sum, hz, idx) => sum + (rawWeights[idx] / totalW) * Math.max(0, Math.min(1, hz.score)), 0)
+          : h.riskScore || 0.5;
+
+        const E_i = Math.max(0, Math.min(1, h.vulnerabilityIndex?.exposure ?? 0.75));
+        const V_i = Math.max(0, Math.min(1, h.vulnerabilityIndex?.overall ?? 0.75));
+        const R_i = Math.max(0, Math.min(1, +(H_i * E_i * V_i).toFixed(4)));
+
+        return {
+          ...h,
+          computedRisk: R_i,
+          computedHazard: +H_i.toFixed(4),
+        };
       })
+      .sort((a, b) => b.computedRisk - a.computedRisk)
       .map((h, idx) => {
         const site = relocationSites.find((s) => s.id === h.nearestRelocationSite);
         const reasons: string[] = [];
-        if (h.riskScore >= 0.7) reasons.push('Severe hazard exposure');
-        if (h.vulnerabilityIndex.overall >= 0.7) reasons.push('High vulnerability index');
-        if (h.population > 1000) reasons.push(`${h.population.toLocaleString()} exposed`);
-        if (reasons.length === 0) reasons.push('Routine surveillance');
+        if (h.computedRisk >= 0.5) reasons.push(`Severe Compound Risk (R_i=${h.computedRisk})`);
+        else if (h.computedRisk >= 0.35) reasons.push(`High Compound Risk (R_i=${h.computedRisk})`);
+        else if (h.computedRisk >= 0.20) reasons.push(`Moderate Risk (R_i=${h.computedRisk})`);
+        else reasons.push('Low Compound Risk');
 
-        const score = Math.max(0.2, +(h.riskScore * 0.55 + h.vulnerabilityIndex.overall * 0.45).toFixed(4));
+        if (h.vulnerabilityIndex?.overall >= 0.7) reasons.push('High Vulnerability');
+        if (h.population > 1000) reasons.push(`${h.population.toLocaleString()} exposed`);
+
         return {
           rank: idx + 1,
           habitationId: h.id,
           name: h.name,
           district: h.district,
           population: h.population,
-          score,
+          score: h.computedRisk,
           reason: reasons.join('; '),
-          hvi: h.vulnerabilityIndex.overall,
-          hazardScore: h.riskScore,
+          hvi: h.vulnerabilityIndex?.overall ?? 0.5,
+          hazardScore: h.computedHazard,
           nearestRelocationSite: site?.id,
         };
       });
