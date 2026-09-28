@@ -75,7 +75,7 @@ export default function AlertsPanel() {
       }
 
       return true;
-    });
+    }).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
   }, [alerts, timeRange, stateFilter, hazardFilter, severityFilter, searchQuery]);
 
   return (

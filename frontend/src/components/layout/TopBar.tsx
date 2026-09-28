@@ -131,7 +131,8 @@ export default function TopBar() {
         boxShadow: 'var(--shadow-sm)',
         gap: 12,
         flexShrink: 0,
-        zIndex: 50,
+        position: 'relative',
+        zIndex: 10000,
       }}
     >
       {/* 1. Brand Logo + Version + Workspace Dropdown */}
@@ -249,7 +250,7 @@ export default function TopBar() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 4,
-                zIndex: 100,
+                zIndex: 10001,
               }}
             >
               <div

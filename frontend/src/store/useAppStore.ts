@@ -1,3 +1,4 @@
+import { flyToDistrict, flyToState } from '../cesium/camera';
 import { create } from 'zustand';
 import type {
   Habitation,
@@ -285,9 +286,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedHazardType: null,
   adminHierarchy: null,
   setSelectedRegion: (region) => set({ selectedRegion: region, selectedDistrict: '', selectedBlock: null }),
-  setSelectedState: (state) => set({ selectedState: state, selectedDistrict: '', selectedBlock: null }),
+  setSelectedState: (state) => {
+    set({ selectedState: state, selectedDistrict: '', selectedBlock: null });
+    flyToState(state);
+  },
   setSelectedDistrict: (district) => {
     set({ selectedDistrict: district, selectedBlock: null });
+    flyToDistrict(district);
     get().loadDistrictReport(district);
   },
   setSelectedBlock: (block) => set({ selectedBlock: block }),

@@ -3,11 +3,12 @@ import {
   FileText,
   Printer,
   Download,
+  Search,
+  X,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { flyToDistrict, flyToState, flyToHabitation } from '../../cesium/camera';
 import type { Habitation, RelocationSite } from '../../types';
-
-
 
 // Helper: Determine mode of travel & journey time based on distance and hazard exposure
 function getRouteDetails(hab: Habitation, site?: RelocationSite) {
@@ -16,22 +17,26 @@ function getRouteDetails(hab: Habitation, site?: RelocationSite) {
   const isGLOF = hab.hazardExposure.some((he) => he.type === 'glof' && (he.level === 'HIGH' || he.level === 'CRITICAL'));
   const isHighAltitude = (hab.location.elevation || 1500) > 1800;
 
-  let modeLabel = '🚌 Heavy Evacuation Bus';
+  let modeLabel = 'Heavy Evacuation Bus';
   let modeIcon = '🚌';
   let speedKmH = 32;
+  let vehicleType = '45-Seater High-Clearance State Transport Bus';
 
   if (isGLOF || (isHighAltitude && hab.riskLevel === 'CRITICAL')) {
-    modeLabel = '🚁 Air / Helicopter Sortie';
+    modeLabel = 'Air / Helicopter Sortie';
     modeIcon = '🚁';
-    speedKmH = 75; // Helicopters in mountainous terrain
+    speedKmH = 80;
+    vehicleType = 'Mi-17V5 / ALH Dhruv SAR Helicopter Sortie';
   } else if (isFlood && hab.vulnerabilityIndex.overall > 0.6) {
-    modeLabel = '🚤 Motorboat / Flood Vessel';
+    modeLabel = 'Motorboat / Flood Vessel';
     modeIcon = '🚤';
-    speedKmH = 20; // Flood rescue vessels
+    speedKmH = 22;
+    vehicleType = 'NDRF Inflatable Motorized Rescue Boat';
   } else if (isHighAltitude) {
-    modeLabel = '🚜 Heavy 4x4 Off-Road Truck';
+    modeLabel = 'Heavy 4x4 Off-Road Truck';
     modeIcon = '🚜';
-    speedKmH = 22; // Mountainous offroad rescue trucks
+    speedKmH = 24;
+    vehicleType = 'Army 4x4 All-Terrain Stallion Troop Carrier';
   }
 
   const travelMins = Math.round((distKm / speedKmH) * 60);
@@ -40,6 +45,7 @@ function getRouteDetails(hab: Habitation, site?: RelocationSite) {
   return {
     modeLabel,
     modeIcon,
+    vehicleType,
     distKm,
     journeyTimeStr,
     corridor: site?.lifelineCorridor || 'NH Lifeline Highway',
@@ -47,37 +53,53 @@ function getRouteDetails(hab: Habitation, site?: RelocationSite) {
 }
 
 export default function ReportsPanel() {
-  const { habitations, relocationSites } = useAppStore();
+  const { habitations, relocationSites, selectHabitation } = useAppStore();
 
   const [selectedState, setSelectedState] = useState<string>('ALL');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeReportHab, setActiveReportHab] = useState<Habitation | null>(null);
 
   // Dynamically extract unique states from all habitations
   const availableStates = useMemo(() => {
-    const states = habitations.map(h => h.state).filter(Boolean);
+    const states = habitations.map(h => h.state).filter(Boolean) as string[];
     return Array.from(new Set(states)).sort();
   }, [habitations]);
 
   // Dynamically extract districts for selected state
   const availableDistricts = useMemo(() => {
     const filtered = habitations.filter(h => selectedState === 'ALL' || h.state === selectedState);
-    const dists = filtered.map(h => h.district).filter(Boolean);
+    const dists = filtered.map(h => h.district).filter(Boolean) as string[];
     return Array.from(new Set(dists)).sort();
   }, [habitations, selectedState]);
 
-  // Auto select ALL or first district when state changes
+  // Auto select ALL or first district when state changes and trigger camera
   const handleStateChange = (st: string) => {
     setSelectedState(st);
     setSelectedDistrict('ALL');
+    if (st !== 'ALL') {
+      flyToState(st);
+    }
+  };
+
+  const handleDistrictChange = (dist: string) => {
+    setSelectedDistrict(dist);
+    if (dist !== 'ALL') {
+      flyToDistrict(dist);
+    }
   };
 
   const distHabs = useMemo(() => {
     return habitations.filter((h) => {
       const matchState = selectedState === 'ALL' || (h.state && h.state.toLowerCase() === selectedState.toLowerCase());
       const matchDist = selectedDistrict === 'ALL' || (h.district && h.district.toLowerCase() === selectedDistrict.toLowerCase());
-      return matchState && matchDist;
+      const matchSearch = !searchQuery.trim() || 
+        h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        h.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (h.block && h.block.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchState && matchDist && matchSearch;
     });
-  }, [habitations, selectedState, selectedDistrict]);
+  }, [habitations, selectedState, selectedDistrict, searchQuery]);
 
   const distSites = useMemo(() => {
     return relocationSites.filter((s) => {
@@ -94,7 +116,7 @@ export default function ReportsPanel() {
   // Logistics calculations
   const busesNeeded = Math.ceil(exposedPop / 50);
   const ambulancesNeeded = Math.max(2, Math.ceil(exposedPop / 350));
-  const rationsTonnes = ((exposedPop * 0.45 * 14) / 1000).toFixed(1); // 14-day food requirement
+  const rationsTonnes = ((exposedPop * 0.45 * 14) / 1000).toFixed(1);
 
   const handleExportCSV = () => {
     const csvHeader = 'Settlement,District,State,Population,Households,Elevation_m,RiskScore,PrimaryHazard,AssignedSafeHaven,CapacityBeds,Occupants,RationsDays,WaterLiters,TravelMode,DistanceKm,ExpectedJourneyTime,LifelineCorridor';
@@ -108,11 +130,16 @@ export default function ReportsPanel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `drishti_relocation_report_${selectedDistrict.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`);
+    link.setAttribute('download', `drishti_evacuation_manifest_${selectedDistrict.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  const activeSite = activeReportHab 
+    ? (relocationSites.find(s => s.id === activeReportHab.nearestRelocationSite) || relocationSites[0])
+    : null;
+  const activeRoute = activeReportHab && activeSite ? getRouteDetails(activeReportHab, activeSite) : null;
 
   return (
     <div className="panel report-panel" style={{ padding: '12px' }}>
@@ -137,10 +164,10 @@ export default function ReportsPanel() {
             </div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
-                DRISHTI — National Evacuation Memo
+                DRISHTI — Evacuation &amp; Transit Memo
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                Institutional Situation, Safe House Registry & Transit Route Brief
+                Institutional Settlement Risk, Safe House Logistics &amp; Route Brief
               </div>
             </div>
           </div>
@@ -149,7 +176,7 @@ export default function ReportsPanel() {
             <button
               onClick={handleExportCSV}
               className="btn-action"
-              title="Export Full Relocation Brief as CSV"
+              title="Export Evacuation Data as CSV"
               style={{ padding: '5px 9px', fontSize: 11 }}
             >
               <Download size={13} strokeWidth={2} />
@@ -158,7 +185,7 @@ export default function ReportsPanel() {
             <button
               onClick={() => window.print()}
               className="btn-action"
-              title="Print or Save Briefing as PDF"
+              title="Print Full District Evacuation Memo"
               style={{ padding: '5px 10px', fontSize: 11, background: 'var(--accent-blue)', color: '#ffffff', border: 'none' }}
             >
               <Printer size={13} strokeWidth={2} />
@@ -168,10 +195,10 @@ export default function ReportsPanel() {
         </div>
       </div>
 
-      {/* State & District Selector */}
+      {/* State & District Selector and Search */}
       <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 8 }}>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+          <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
               Target State Filter
             </label>
@@ -189,20 +216,20 @@ export default function ReportsPanel() {
                 color: 'var(--text-primary)',
               }}
             >
-              <option value="ALL">All States (Pan-India Relocation Matrix)</option>
+              <option value="ALL">All States (Pan-India Matrix)</option>
               {availableStates.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div>
             <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
               District Sector Filter
             </label>
             <select
               value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.target.value)}
+              onChange={(e) => handleDistrictChange(e.target.value)}
               style={{
                 width: '100%',
                 padding: '5px 8px',
@@ -220,6 +247,26 @@ export default function ReportsPanel() {
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Search Input */}
+        <div style={{ position: 'relative' }}>
+          <Search size={13} style={{ position: 'absolute', left: 8, top: 7, color: 'var(--text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Search village or settlement..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '5px 8px 5px 26px',
+              fontSize: 11,
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-subtle)',
+              color: 'var(--text-primary)',
+            }}
+          />
         </div>
       </div>
 
@@ -242,11 +289,11 @@ export default function ReportsPanel() {
         </div>
 
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>BUSES / AMBULANCES</div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>BUSES / AMB</div>
           <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-blue)', fontFamily: 'var(--font-mono)' }}>
             {busesNeeded} / {ambulancesNeeded}
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Evac &amp; Triage fleet</div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Fleet required</div>
         </div>
 
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
@@ -254,152 +301,432 @@ export default function ReportsPanel() {
           <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
             {rationsTonnes} T
           </div>
-          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Dry grain stocks</div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Buffer grain stocks</div>
         </div>
       </div>
 
-      {/* SECTION 1: HABITATION SITUATION DIRECTORY */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
-          1. Habitation Situation &amp; Population Profile
+      {/* DASHBOARD-STYLE CARDS LIST (Instead of plain table) */}
+      <div style={{ marginTop: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            Settlement Evacuation Roster ({distHabs.length} Habitations)
+          </div>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+            Select any card to view transit map &amp; memo
+          </span>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Settlement</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>State / District</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Pop.</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Households</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Elev (m)</th>
-                <th style={{ padding: '6px 8px', textAlign: 'center' }}>Risk Score</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Primary Threats</th>
-              </tr>
-            </thead>
-            <tbody>
-              {distHabs.map((h) => (
-                <tr key={h.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{h.name}</td>
-                  <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{h.district}, {h.state || 'India'}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{h.population.toLocaleString()}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{h.households || 0}</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{h.location.elevation || 1500}m</td>
-                  <td style={{ padding: '6px 8px', textAlign: 'center' }}>
-                    <span
-                      style={{
-                        padding: '1px 6px',
-                        borderRadius: 'var(--radius-xs)',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        background: h.riskScore >= 0.7 ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
-                        color: h.riskScore >= 0.7 ? 'var(--accent-rose)' : 'var(--accent-amber)',
-                      }}
-                    >
-                      {(h.riskScore * 100).toFixed(0)}% ({h.riskLevel})
-                    </span>
-                  </td>
-                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: 10 }}>
-                    {h.hazardExposure.map(he => he.type).join(', ') || 'Slope instability'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {distHabs.map((h) => {
+            const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
+            const route = getRouteDetails(h, haven);
+            const isHighRisk = h.riskScore >= 0.7 || h.riskLevel === 'CRITICAL';
+
+            return (
+              <div
+                key={h.id}
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: isHighRisk ? '1.5px solid var(--accent-rose)' : '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-lg)',
+                  boxShadow: 'var(--shadow-sm)',
+                  padding: '12px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {/* 1. Card Top Bar: Village Name, District, Risk Badge */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>
+                        {h.name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: 'var(--radius-pill)',
+                          background: isHighRisk ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
+                          color: isHighRisk ? 'var(--accent-rose)' : 'var(--accent-amber)',
+                          border: `1px solid ${isHighRisk ? 'var(--accent-rose)' : 'var(--accent-amber)'}`,
+                        }}
+                      >
+                        {(h.riskScore * 100).toFixed(0)}% • {h.riskLevel}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                      📍 {h.district}, {h.state || 'India'} • Elev: {h.location.elevation || 1500}m ASL
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (h.location) flyToHabitation(h.location.lng, h.location.lat);
+                      selectHabitation(h.id);
+                      setActiveReportHab(h);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '6px 12px',
+                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(37, 99, 235, 0.25)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <FileText size={13} strokeWidth={2.2} />
+                    <span>Generate Report</span>
+                  </button>
+                </div>
+
+                {/* 2. Three Metric Pill Blocks: Population, Assigned Safe Haven, Transit Mode */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {/* Metric 1: Demographics & Threats */}
+                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      POPULATION &amp; THREATS
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+                      {h.population.toLocaleString()} <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>({h.households || 0} HH)</span>
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      ⚠️ {h.hazardExposure.map(he => he.type).join(', ') || 'Slope subsidence'}
+                    </div>
+                  </div>
+
+                  {/* Metric 2: Safe Haven Destination */}
+                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      ASSIGNED SAFE HAVEN
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      🏰 {haven?.name || 'District Safe Haven'}
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
+                      Capacity: {haven?.capacity?.toLocaleString() || 5000} Beds • Water: {(haven?.dailyWaterLiters || 12000).toLocaleString()}L
+                    </div>
+                  </div>
+
+                  {/* Metric 3: Mode of Travel & Duration */}
+                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      MODE &amp; TRANSIT DURATION
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-blue)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span>{route.modeIcon}</span>
+                      <span>{route.modeLabel}</span>
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {route.distKm} km • Est: <strong style={{ color: 'var(--text-primary)' }}>{route.journeyTimeStr}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Bottom Route Corridor Strip */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-color)', paddingTop: 6 }}>
+                  <span>🛣️ <strong>Corridor:</strong> {route.corridor}</span>
+                  <span style={{ color: 'var(--accent-indigo)', fontWeight: 600 }}>
+                    Managed by {haven?.managingAgency || 'District Administration & NDRF'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* SECTION 2: SAFE HOUSE SHELTER REGISTRY & FOOD/WATER METRICS */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
-          2. Safe House Haven Registry &amp; Logistics Readiness
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Safe Haven Facility</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Cap (Beds)</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Occupants</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Water (L/day)</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Power (h)</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Med Beds</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Rations</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Managing Agency</th>
-              </tr>
-            </thead>
-            <tbody>
-              {distSites.map((site) => (
-                <tr key={site.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {site.name}
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 500 }}>{site.facilityType}</div>
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                    {site.capacity.toLocaleString()}
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {site.currentOccupants || 0}
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {(site.dailyWaterLiters || 12000).toLocaleString()}L
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {site.powerBackupHours || 48}h
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {site.medicalBayBeds || 15}
-                  </td>
-                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--accent-amber)', fontWeight: 700 }}>
-                    {site.foodStockDays || 14} Days
-                  </td>
-                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: 10 }}>
-                    {site.managingAgency || 'District Administration & NDRF'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* EXECUTIVE EVACUATION REPORT MODAL WITH VECTOR ROUTE MAP */}
+      {activeReportHab && activeSite && activeRoute && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: 16,
+          }}
+          onClick={() => setActiveReportHab(null)}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              color: '#0f172a',
+              borderRadius: 'var(--radius-lg)',
+              maxWidth: 780,
+              width: '100%',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              border: '2px solid #1e293b',
+              padding: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              fontFamily: 'var(--font-sans)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '2px solid #0f172a', paddingBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: 20, fontWeight: 900 }}>
+                  ▲
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#dc2626' }}>
+                    NATIONAL DISASTER MANAGEMENT AUTHORITY • RELOCATION DIRECTIVE
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>
+                    DRISHTI EVACUATION &amp; TRANSIT REPORT: {activeReportHab.name.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#64748b' }}>
+                    Ref: DRISHTI-MEMO-{activeReportHab.id.toUpperCase()}-2026 • Security Level: OFFICIAL USE ONLY
+                  </div>
+                </div>
+              </div>
 
-      {/* SECTION 3: EVACUATION ROUTE MATRIX & TRAVEL MODE */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
-          3. Evacuation Route Matrix &amp; Mode of Travel Brief
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => window.print()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Printer size={13} />
+                  <span>Print PDF</span>
+                </button>
+                <button
+                  onClick={() => setActiveReportHab(null)}
+                  style={{
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 6,
+                    width: 30,
+                    height: 30,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#475569',
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Section 1: Habitation & Site Profile Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {/* Origin Village Box */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  ORIGIN: AT-RISK HABITATION
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', marginTop: 4 }}>
+                  {activeReportHab.name} ({activeReportHab.district})
+                </div>
+                <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
+                  State: {activeReportHab.state || 'Uttarakhand'} • Elevation: {activeReportHab.location.elevation || 1500}m ASL
+                </div>
+                <div style={{ marginTop: 8, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div>👥 <strong>Exposed Population:</strong> {activeReportHab.population.toLocaleString()} ({activeReportHab.households || 0} households)</div>
+                  <div>⚡ <strong>Hazard Risk Score:</strong> {(activeReportHab.riskScore * 100).toFixed(0)}% ({activeReportHab.riskLevel})</div>
+                  <div>⚠️ <strong>Primary Threats:</strong> {activeReportHab.hazardExposure.map(he => he.type).join(', ') || 'Landslide subsidence'}</div>
+                  <div>🛡️ <strong>Vulnerability Index:</strong> Overall {activeReportHab.vulnerabilityIndex.overall.toFixed(2)} (Adaptive: {activeReportHab.vulnerabilityIndex.adaptiveCapacity.toFixed(2)})</div>
+                </div>
+              </div>
+
+              {/* Destination Safe Haven Box */}
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#16a34a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  DESTINATION: DESIGNATED SAFE HAVEN
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', marginTop: 4 }}>
+                  {activeSite.name} ({activeSite.facilityType})
+                </div>
+                <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
+                  Location: {activeSite.district} • Elevation: {activeSite.location.elevation || 900}m ASL
+                </div>
+                <div style={{ marginTop: 8, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div>🛏️ <strong>Total Shelter Capacity:</strong> {activeSite.capacity.toLocaleString()} beds (Occupants: {activeSite.currentOccupants || 0})</div>
+                  <div>💧 <strong>Daily Water Allocation:</strong> {(activeSite.dailyWaterLiters || 14000).toLocaleString()} Litres/day</div>
+                  <div>🍞 <strong>Rations Stock Buffer:</strong> {activeSite.foodStockDays || 14} Days dry grain inventory</div>
+                  <div>⚡ <strong>Auxiliary Power:</strong> {activeSite.powerBackupHours || 48} Hours diesel generator run-time</div>
+                  <div>🏥 <strong>Medical Beds:</strong> {activeSite.medicalBayBeds || 15} isolation/triage beds</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Transit Corridor Blueprint */}
+            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                TRANSIT LOGISTICS &amp; MOBILIZATION DIRECTIVE
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
+                <div>
+                  <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' }}>Primary Transit Mode</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#1e3a8a', marginTop: 2 }}>{activeRoute.modeIcon} {activeRoute.modeLabel}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' }}>Corridor Distance</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#1e3a8a', marginTop: 2 }}>{activeRoute.distKm} km</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' }}>Estimated Journey Time</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#1e3a8a', marginTop: 2 }}>{activeRoute.journeyTimeStr}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 9, color: '#64748b', textTransform: 'uppercase' }}>Fleet Allocation</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#1e3a8a', marginTop: 2 }}>{Math.ceil(activeReportHab.population / 45)} Vehicles / Units</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 11, color: '#334155' }}>
+                <strong>Vehicle Specification:</strong> {activeRoute.vehicleType} via <strong>{activeRoute.corridor}</strong>. Managing Authority: <strong>{activeSite.managingAgency || 'District Administration & NDRF'}</strong>.
+              </div>
+            </div>
+
+            {/* Section 3: High-End Vector Route Map Visualizer */}
+            <div style={{ background: '#0f172a', border: '2px solid #000000', borderRadius: 8, padding: 14, color: '#ffffff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #334155', paddingBottom: 6, marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#38bdf8' }}>
+                  🗺️ OPERATIONAL EVACUATION TRANSIT ROUTE MAP
+                </div>
+                <div style={{ fontSize: 9, color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                  ORIGIN [{activeReportHab.location.lat.toFixed(4)}°N, {activeReportHab.location.lng.toFixed(4)}°E] ➔ DEST [{activeSite.location.lat.toFixed(4)}°N, {activeSite.location.lng.toFixed(4)}°E]
+                </div>
+              </div>
+
+              {/* Vector SVG Map Canvas */}
+              <div style={{ position: 'relative', width: '100%', height: 180, background: '#1e293b', borderRadius: 6, overflow: 'hidden' }}>
+                <svg width="100%" height="100%" viewBox="0 0 680 180">
+                  {/* Grid Lines */}
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" strokeWidth="0.7" />
+                    </pattern>
+                    <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#ef4444" />
+                      <stop offset="50%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+
+                  {/* Terrain Contour / Ridge Visualizer */}
+                  <path d="M 0 140 Q 120 70 240 110 T 480 80 T 680 130" fill="none" stroke="#475569" strokeWidth="1.5" strokeDasharray="4, 4" />
+                  <path d="M 0 160 Q 180 100 360 130 T 680 150" fill="none" stroke="#334155" strokeWidth="1" />
+
+                  {/* Route Polyline (Origin to Destination) */}
+                  <path
+                    d="M 80 110 C 180 40, 280 150, 420 80 S 540 120, 600 70"
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="6"
+                    opacity="0.35"
+                  />
+                  <path
+                    d="M 80 110 C 180 40, 280 150, 420 80 S 540 120, 600 70"
+                    fill="none"
+                    stroke="url(#routeGrad)"
+                    strokeWidth="3"
+                    strokeDasharray="6, 6"
+                  />
+
+                  {/* Waypoint 1 (Staging Node) */}
+                  <circle cx="240" cy="95" r="4" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" />
+                  <text x="240" y="115" fill="#cbd5e1" fontSize="9" fontWeight="700" textAnchor="middle">Waypoint Alpha (Bridge)</text>
+
+                  {/* Waypoint 2 (Triage Post) */}
+                  <circle cx="420" cy="80" r="4" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" />
+                  <text x="420" y="65" fill="#cbd5e1" fontSize="9" fontWeight="700" textAnchor="middle">NDRF Medical Checkpost</text>
+
+                  {/* Transport Vehicle Icon along corridor */}
+                  <g transform="translate(330, 85)">
+                    <circle cx="0" cy="0" r="16" fill="#0284c7" stroke="#ffffff" strokeWidth="2" />
+                    <text x="0" y="4" fill="#ffffff" fontSize="12" textAnchor="middle">{activeRoute.modeIcon}</text>
+                  </g>
+
+                  {/* Origin Settlement Marker */}
+                  <g transform="translate(80, 110)">
+                    <circle cx="0" cy="0" r="10" fill="#ef4444" stroke="#ffffff" strokeWidth="2.5" />
+                    <circle cx="0" cy="0" r="18" fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.5">
+                      <animate attributeName="r" values="10;24;10" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <text x="0" y="-16" fill="#fca5a5" fontSize="11" fontWeight="900" textAnchor="middle">{activeReportHab.name.toUpperCase()}</text>
+                    <text x="0" y="22" fill="#ffffff" fontSize="9" fontWeight="600" textAnchor="middle">{activeReportHab.location.elevation || 1500}m ASL</text>
+                  </g>
+
+                  {/* Destination Safe Haven Marker */}
+                  <g transform="translate(600, 70)">
+                    <rect x="-12" y="-12" width="24" height="24" rx="4" fill="#10b981" stroke="#ffffff" strokeWidth="2" />
+                    <text x="0" y="4" fill="#ffffff" fontSize="11" fontWeight="900" textAnchor="middle">🏰</text>
+                    <text x="0" y="-18" fill="#86efac" fontSize="11" fontWeight="900" textAnchor="middle">{activeSite.name.toUpperCase()}</text>
+                    <text x="0" y="24" fill="#ffffff" fontSize="9" fontWeight="600" textAnchor="middle">SAFE HAVEN ({activeSite.capacity} BEDS)</text>
+                  </g>
+
+                  {/* Scale Bar */}
+                  <g transform="translate(20, 160)">
+                    <line x1="0" y1="0" x2="60" y2="0" stroke="#ffffff" strokeWidth="2" />
+                    <line x1="0" y1="-4" x2="0" y2="4" stroke="#ffffff" strokeWidth="2" />
+                    <line x1="60" y1="-4" x2="60" y2="4" stroke="#ffffff" strokeWidth="2" />
+                    <text x="30" y="-6" fill="#ffffff" fontSize="8" fontWeight="700" textAnchor="middle">10 KM</text>
+                  </g>
+
+                  {/* Compass Rose */}
+                  <g transform="translate(650, 25)">
+                    <circle cx="0" cy="0" r="12" fill="#1e293b" stroke="#64748b" strokeWidth="1" />
+                    <polygon points="0,-10 3,-2 0,0 -3,-2" fill="#ef4444" />
+                    <polygon points="0,10 3,2 0,0 -3,2" fill="#94a3b8" />
+                    <text x="0" y="-12" fill="#ef4444" fontSize="8" fontWeight="900" textAnchor="middle">N</text>
+                  </g>
+                </svg>
+              </div>
+
+              {/* Elevation & Slope Profile Strip */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: '#94a3b8' }}>
+                <div>Elevation Profile: <strong>{activeReportHab.location.elevation || 1500}m</strong> (Origin) ➔ <strong>{activeSite.location.elevation || 900}m</strong> (Haven)</div>
+                <div>Slope Grade: <strong>{activeSite.slopeGrade || 'Gentle (5-10°)'}</strong></div>
+                <div>Total Transit Time: <strong style={{ color: '#38bdf8' }}>{activeRoute.journeyTimeStr}</strong></div>
+              </div>
+            </div>
+
+            {/* Official Sign-off Footer */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: 10, fontSize: 10, color: '#64748b' }}>
+              <div>Authorized by: <strong>DRISHTI Disaster Intelligence Operations Center</strong></div>
+              <div>System Timestamp: {new Date().toLocaleString()}</div>
+            </div>
+          </div>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Evacuation Settlement</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Assigned Safe Haven</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Mode of Travel</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Distance</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Journey Time</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Lifeline Corridor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {distHabs.map((h) => {
-                const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
-                const route = getRouteDetails(h, haven);
-                return (
-                  <tr key={h.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{h.name}</td>
-                    <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{haven?.name || 'District Safe Haven'}</td>
-                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{route.modeLabel}</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{route.distKm} km</td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-blue)' }}>
-                      {route.journeyTimeStr}
-                    </td>
-                    <td style={{ padding: '6px 8px', color: 'var(--text-muted)', fontSize: 10 }}>{route.corridor}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

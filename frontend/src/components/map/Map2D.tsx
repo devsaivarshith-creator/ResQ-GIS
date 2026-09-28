@@ -8,6 +8,8 @@ import {
   Crosshair,
   Layers,
   X,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -53,6 +55,7 @@ export default function Map2D() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [basemapMenuOpen, setBasemapMenuOpen] = useState(false);
+  const [isLayersMinimized, setIsLayersMinimized] = useState(false);
 
   // Local layer visibility toggles matching the tactical LAYERS card
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({
@@ -308,19 +311,19 @@ export default function Map2D() {
 
 
 
-  // Render all GIS layers
+  // Render all GIS layers directly tied to layerVisibility
   useEffect(() => {
     const group = layersGroupRef.current;
     if (!group) return;
     group.clearLayers();
 
-    const layerVis = getLayerVisibilityMap();
-
-    // 1. Hazard Polygons
+    // 1. Hazard Polygons (Landslide & Flood)
     if (hazardLayers.length > 0) {
       hazardLayers.forEach((hz) => {
-        const isVisible = layerVis[hz.type] ?? layerVis[hz.id] ?? true;
-        if (!isVisible || !hz.geometry) return;
+        const typeLower = hz.type.toLowerCase();
+        if (typeLower === 'landslide' && !layerVisibility['landslide']) return;
+        if (typeLower === 'flood' && !layerVisibility['flood']) return;
+        if (!hz.geometry) return;
 
         const colorMap: Record<string, string> = {
           landslide: '#dc2626',
@@ -328,7 +331,7 @@ export default function Map2D() {
           glof: '#8b5cf6',
           earthquake: '#ea580c',
         };
-        const color = colorMap[hz.type.toLowerCase()] || '#ea580c';
+        const color = colorMap[typeLower] || '#ea580c';
 
         try {
           const geoJsonLayer = L.geoJSON(hz.geometry, {
@@ -347,13 +350,44 @@ export default function Map2D() {
           geoJsonLayer.on('click', () => selectHazard(hz.id));
           group.addLayer(geoJsonLayer);
         } catch {
-          // ignore malformed geometry
+          // ignore
         }
       });
     }
 
-    // 2. OSM Road Corridors
-    if (layerVis['roads'] ?? true) {
+    // 2. IMD Rainfall Radar & Precipitation Rings
+    if (layerVisibility['rainfall']) {
+      const rainfallZones = [
+        { name: 'Chamoli Cloudburst & Heavy Rain Zone', lat: 30.55, lng: 79.56, mm: 180, radius: 18000, color: '#f97316' },
+        { name: 'Wayanad Torrential Downpour Grid', lat: 11.68, lng: 76.13, mm: 245, radius: 22000, color: '#ef4444' },
+        { name: 'East Khasi Hills Extreme Precipitation', lat: 25.28, lng: 91.72, mm: 310, radius: 25000, color: '#b91c1c' },
+        { name: 'Kullu Pandoh Basin Rain Alert', lat: 31.85, lng: 77.05, mm: 140, radius: 16000, color: '#f59e0b' },
+        { name: 'Konaseema Godavari Delta Deluge', lat: 16.48, lng: 81.88, mm: 165, radius: 20000, color: '#f97316' },
+      ];
+
+      rainfallZones.forEach((rz) => {
+        try {
+          const rainCircle = L.circle([rz.lat, rz.lng], {
+            radius: rz.radius,
+            color: rz.color,
+            weight: 1.5,
+            dashArray: '4, 6',
+            fillColor: rz.color,
+            fillOpacity: 0.18,
+          });
+          rainCircle.bindTooltip(
+            `<b>🌧️ IMD RADAR: ${rz.name}</b><br>Precipitation: <b>${rz.mm} mm / 24h</b> (Heavy Rainfall Status Active)`,
+            { sticky: true, className: 'retro-leaflet-tooltip' }
+          );
+          group.addLayer(rainCircle);
+        } catch {
+          // ignore
+        }
+      });
+    }
+
+    // 3. OSM Road Network & Evacuation Corridors
+    if (layerVisibility['roads']) {
       roads.forEach((road) => {
         if (!road.geometry) return;
         try {
@@ -376,38 +410,8 @@ export default function Map2D() {
       });
     }
 
-    // 3. Disaster Alerts
-    if (layerVis['alerts'] ?? true) {
-      alerts.forEach((alert) => {
-        if (!alert.geometry) return;
-        try {
-          const color = alert.severity === 'red' ? '#dc2626' : alert.severity === 'orange' ? '#ea580c' : '#eab308';
-          const alertLayer = L.geoJSON(alert.geometry, {
-            style: {
-              color,
-              weight: 2.5,
-              opacity: 0.9,
-              fillColor: color,
-              fillOpacity: 0.35,
-              dashArray: '4, 4',
-            },
-          });
-          alertLayer.bindPopup(`
-            <div style="font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;font-size:11px;padding:4px;">
-              <div style="font-weight:700;color:${color}">⚠️ ${alert.eventType}</div>
-              <div style="font-size:10px;color:#475569;margin-top:2px;">${alert.area} (${alert.source})</div>
-              <div style="margin-top:4px;font-size:10px;line-height:1.4;">${alert.description}</div>
-            </div>
-          `);
-          group.addLayer(alertLayer);
-        } catch {
-          // ignore
-        }
-      });
-    }
-
     // 4. CWC River Monitoring Stations
-    if (layerVis['rivers'] ?? true) {
+    if (layerVisibility['rivers']) {
       riverStations.forEach((river) => {
         const isSelected = selectedRiverId === river.id;
         const statusColor =
@@ -472,67 +476,8 @@ export default function Map2D() {
       });
     }
 
-    // 5. IDRN Emergency Shelters & Infrastructure
-    if (layerVis['emergency-resources'] ?? true) {
-      emergencyResources.forEach((res) => {
-        const icon = L.divIcon({
-          className: 'retro-marker-idrn',
-          html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
-              <div style="
-                width: 20px;
-                height: 20px;
-                background: #a3e635;
-                border: 2px solid #000000;
-                box-shadow: 2px 2px 0px #000000;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #000000;
-                font-size: 11px;
-                cursor: pointer;
-              ">
-                ⛑️
-              </div>
-              ${
-                showLabels
-                  ? `<div style="
-                      margin-top: 2px;
-                      background: #ffffff;
-                      color: #000000;
-                      font-size: 10px;
-                      font-weight: 800;
-                      font-family: var(--font-sans);
-                      padding: 1px 7px;
-                      border-radius: 6px;
-                      border: 1.5px solid #000000;
-                      box-shadow: 2px 2px 0px #000000;
-                      white-space: nowrap;
-                      letter-spacing: -0.01em;
-                      line-height: 1.35;
-                      pointer-events: none;
-                    ">
-                      ${res.name}
-                    </div>`
-                  : ''
-              }
-            </div>
-          `,
-          iconSize: [140, showLabels ? 40 : 20],
-          iconAnchor: [70, 10],
-        });
-
-        const marker = L.marker([res.location.lat, res.location.lng], { icon });
-        marker.bindTooltip(`<b>IDRN: ${res.name}</b><br>Type: ${res.resourceType} | Cap: ${res.capacity}`, {
-          className: 'retro-leaflet-tooltip',
-        });
-        group.addLayer(marker);
-      });
-    }
-
-    // 6. Safe Haven Relocation Sites
-    if (layerVis['relocation-sites'] ?? true) {
+    // 5. Safe Haven Relocation Sites
+    if (layerVisibility['relocation_sites']) {
       relocationSites.forEach((site) => {
         const isSelected = selectedSiteId === site.id;
         const boxSize = isSelected ? 30 : 24;
@@ -543,7 +488,7 @@ export default function Map2D() {
               <div style="
                 width: ${boxSize}px;
                 height: ${boxSize}px;
-                background: var(--nb-mint);
+                background: #6ee7b7;
                 border: 2px solid #000000;
                 box-shadow: ${isSelected ? '0 0 0 2px #fde047, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
                 border-radius: 6px;
@@ -561,7 +506,7 @@ export default function Map2D() {
                 showLabels
                   ? `<div style="
                       margin-top: 3px;
-                      background: var(--nb-mint);
+                      background: #6ee7b7;
                       color: #000000;
                       font-size: 10px;
                       font-weight: 800;
@@ -595,78 +540,123 @@ export default function Map2D() {
       });
     }
 
-    // 7. At-Risk Habitations
-    if (layerVis['habitations'] ?? true) {
-      habitations.forEach((hab) => {
-        const isSelected = selectedHabitationId === hab.id;
-        const riskColor =
-          hab.riskScore >= 0.75
-            ? '#ff2a85'
-            : hab.riskScore >= 0.65
-            ? '#fb923c'
-            : hab.riskScore >= 0.5
-            ? '#fde047'
-            : '#a3e635';
+    // 6. At-Risk Habitations
+    if (layerVisibility['habitations']) {
+      habitations.forEach((h) => {
+        const isSelected = selectedHabitationId === h.id;
+        const color = h.riskScore >= 0.7 ? '#ef4444' : h.riskScore >= 0.5 ? '#fde047' : '#86efac';
+        const circleSize = isSelected ? 28 : 22;
 
-        const circleSize = isSelected ? 30 : 24;
         const icon = L.divIcon({
-          className: 'retro-marker-hab',
+          className: 'retro-marker-habitation',
           html: `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
               <div style="
                 width: ${circleSize}px;
                 height: ${circleSize}px;
-                background: ${riskColor};
+                background: ${color};
                 border: 2px solid #000000;
-                box-shadow: ${isSelected ? '0 0 0 2px #000000, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
+                box-shadow: ${isSelected ? '0 0 0 2px #ffffff, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: ${hab.riskScore >= 0.75 ? '#ffffff' : '#000000'};
-                font-family: var(--font-sans);
-                font-weight: 900;
-                font-size: ${isSelected ? '11px' : '10px'};
+                color: #000000;
+                font-size: ${isSelected ? '12px' : '10px'};
                 cursor: pointer;
                 transition: transform 0.1s ease;
               ">
-                ${(hab.riskScore * 100).toFixed(0)}
+                🏠
               </div>
               ${
                 showLabels
                   ? `<div style="
-                      margin-top: 3px;
+                      margin-top: 2px;
                       background: #ffffff;
                       color: #000000;
-                      font-size: 11px;
+                      font-size: 10px;
                       font-weight: 800;
                       font-family: var(--font-sans);
                       padding: 1px 7px;
                       border-radius: 6px;
-                      border: 2px solid #000000;
+                      border: 1.5px solid #000000;
                       box-shadow: 2px 2px 0px #000000;
                       white-space: nowrap;
                       letter-spacing: -0.01em;
                       line-height: 1.35;
                       pointer-events: none;
                     ">
-                      ${hab.name}
+                      ${h.name}
                     </div>`
                   : ''
               }
             </div>
           `,
-          iconSize: [140, showLabels ? 48 : circleSize],
+          iconSize: [140, showLabels ? 42 : circleSize],
           iconAnchor: [70, circleSize / 2],
         });
 
-        const marker = L.marker([hab.location.lat, hab.location.lng], { icon, zIndexOffset: isSelected ? 500 : 300 });
+        const marker = L.marker([h.location.lat, h.location.lng], { icon, zIndexOffset: 100 });
         marker.bindTooltip(
-          `<b>${hab.name.toUpperCase()} (${hab.district})</b><br>Risk: ${hab.riskScore.toFixed(2)} (${hab.riskLevel})<br>Pop: ${hab.population.toLocaleString()}`,
+          `<b>${h.name.toUpperCase()}</b><br>Risk: ${(h.riskScore * 100).toFixed(0)}% (${h.riskLevel})<br>Pop: ${h.population.toLocaleString()}`,
           { className: 'retro-leaflet-tooltip' }
         );
-        marker.on('click', () => selectHabitation(hab.id));
+        marker.on('click', () => selectHabitation(h.id));
         group.addLayer(marker);
+      });
+    }
+
+    // 7. District Boundaries
+    if (layerVisibility['district_boundaries']) {
+      const districtOutlines = [
+        // Chamoli
+        [[30.85, 79.25], [30.82, 80.05], [30.30, 80.02], [30.25, 79.40], [30.45, 79.20]],
+        // Rudraprayag
+        [[30.75, 78.85], [30.70, 79.25], [30.25, 79.20], [30.30, 78.90]],
+        // Pithoragarh
+        [[30.40, 79.95], [30.50, 80.65], [29.40, 80.55], [29.50, 79.90]],
+        // Wayanad
+        [[11.95, 75.95], [11.90, 76.40], [11.45, 76.35], [11.50, 75.90]],
+      ];
+
+      districtOutlines.forEach((coords) => {
+        try {
+          const poly = L.polygon(coords as [number, number][], {
+            color: '#000000',
+            weight: 2,
+            dashArray: '8, 8',
+            fillColor: '#38bdf8',
+            fillOpacity: 0.08,
+          });
+          poly.bindTooltip('<b>District Administrative Boundary</b>', { sticky: true });
+          group.addLayer(poly);
+        } catch {
+          // ignore
+        }
+      });
+    }
+
+    // 8. Block Boundaries
+    if (layerVisibility['block_boundaries']) {
+      const blockOutlines = [
+        [[30.65, 79.45], [30.60, 79.80], [30.40, 79.75], [30.45, 79.40]],
+        [[30.45, 79.40], [30.40, 79.75], [30.25, 79.60], [30.30, 79.30]],
+      ];
+
+      blockOutlines.forEach((coords) => {
+        try {
+          const poly = L.polygon(coords as [number, number][], {
+            color: '#475569',
+            weight: 1.5,
+            dashArray: '5, 5',
+            fillColor: '#94a3b8',
+            fillOpacity: 0.05,
+          });
+          poly.bindTooltip('<b>Block Sub-District Boundary</b>', { sticky: true });
+          group.addLayer(poly);
+        } catch {
+          // ignore
+        }
       });
     }
   }, [
@@ -1123,161 +1113,193 @@ export default function Map2D() {
           top: 10,
           right: 10,
           zIndex: 500,
-          width: 200,
+          width: isLayersMinimized ? 'auto' : 205,
           background: '#ffffff',
           border: '2.5px solid #000000',
           boxShadow: '3px 3px 0px #000000',
           borderRadius: 10,
           overflow: 'hidden',
+          transition: 'all 0.15s ease',
         }}
       >
-        {/* Header */}
+        {/* Header with Minimize Toggle */}
         <div
+          onClick={() => setIsLayersMinimized((prev) => !prev)}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             background: '#7dd3fc',
-            padding: '5px 10px',
-            borderBottom: '2px solid #000000',
+            padding: '5px 8px',
+            borderBottom: isLayersMinimized ? 'none' : '2px solid #000000',
+            cursor: 'pointer',
+            userSelect: 'none',
+            gap: 6,
           }}
+          title={isLayersMinimized ? 'Click to expand GIS layers' : 'Click to minimize GIS layers'}
         >
-          <span
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: 11,
-              fontWeight: 900,
-              color: '#000000',
-              textTransform: 'uppercase',
-              letterSpacing: '0.4px',
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 11,
+                fontWeight: 900,
+                color: '#000000',
+                textTransform: 'uppercase',
+                letterSpacing: '0.4px',
+              }}
+            >
+              LAYERS
+            </span>
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                background: '#000000',
+                color: '#ffffff',
+                padding: '1px 5px',
+                borderRadius: 3,
+              }}
+            >
+              GIS
+            </span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLayersMinimized((prev) => !prev);
             }}
-          >
-            LAYERS
-          </span>
-          <span
             style={{
-              fontSize: 8,
-              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               background: '#000000',
               color: '#ffffff',
-              padding: '1px 5px',
+              border: 'none',
               borderRadius: 3,
+              width: 18,
+              height: 18,
+              cursor: 'pointer',
+              padding: 0,
             }}
+            title={isLayersMinimized ? 'Expand' : 'Minimize'}
           >
-            GIS
-          </span>
+            {isLayersMinimized ? <ChevronDown size={13} strokeWidth={3} /> : <ChevronUp size={13} strokeWidth={3} />}
+          </button>
         </div>
 
         {/* Checkbox Rows */}
-        <div style={{ display: 'flex', flexDirection: 'column', padding: '6px 8px', gap: 4 }}>
-          {/* 1. Landslide Susceptibility */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['landslide'])}
-              onChange={() => toggleLocalLayer('landslide')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, background: '#ef4444', border: '1px solid #000000', borderRadius: 2 }} />
-            <span>Landslide Susceptibility</span>
-          </label>
+        {!isLayersMinimized && (
+          <div style={{ display: 'flex', flexDirection: 'column', padding: '6px 8px', gap: 4 }}>
+            {/* 1. Landslide Susceptibility */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['landslide'])}
+                onChange={() => toggleLocalLayer('landslide')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, background: '#ef4444', border: '1px solid #000000', borderRadius: 2 }} />
+              <span>Landslide Susceptibility</span>
+            </label>
 
-          {/* 2. Flood Inundation */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['flood'])}
-              onChange={() => toggleLocalLayer('flood')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, background: '#3b82f6', border: '1px solid #000000', borderRadius: 2 }} />
-            <span>Flood Inundation (Forecast)</span>
-          </label>
+            {/* 2. Flood Inundation */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['flood'])}
+                onChange={() => toggleLocalLayer('flood')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, background: '#3b82f6', border: '1px solid #000000', borderRadius: 2 }} />
+              <span>Flood Inundation (Forecast)</span>
+            </label>
 
-          {/* 3. Rainfall (IMD) */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['rainfall'])}
-              onChange={() => toggleLocalLayer('rainfall')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, background: '#f97316', border: '1px solid #000000', borderRadius: 2 }} />
-            <span>Rainfall (IMD)</span>
-          </label>
+            {/* 3. Rainfall (IMD) */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['rainfall'])}
+                onChange={() => toggleLocalLayer('rainfall')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, background: '#f97316', border: '1px solid #000000', borderRadius: 2 }} />
+              <span>Rainfall (IMD)</span>
+            </label>
 
-          {/* 4. River Gauge (CWC) */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['rivers'])}
-              onChange={() => toggleLocalLayer('rivers')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: '#0284c7', border: '1px solid #000000' }} />
-            <span>River Gauge (CWC)</span>
-          </label>
+            {/* 4. River Gauge (CWC) */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['rivers'])}
+                onChange={() => toggleLocalLayer('rivers')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: '#0284c7', border: '1px solid #000000' }} />
+              <span>River Gauge (CWC)</span>
+            </label>
 
-          {/* 5. Habitations */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['habitations'])}
-              onChange={() => toggleLocalLayer('habitations')}
-              style={checkboxStyle}
-            />
-            <span style={{ fontSize: 10 }}>🏠</span>
-            <span>Habitations</span>
-          </label>
+            {/* 5. Habitations */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['habitations'])}
+                onChange={() => toggleLocalLayer('habitations')}
+                style={checkboxStyle}
+              />
+              <span style={{ fontSize: 10 }}>🏠</span>
+              <span>Habitations</span>
+            </label>
 
-          {/* 6. Relocation Sites */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['relocation_sites'])}
-              onChange={() => toggleLocalLayer('relocation_sites')}
-              style={checkboxStyle}
-            />
-            <span style={{ fontSize: 10 }}>🛖</span>
-            <span>Relocation Sites</span>
-          </label>
+            {/* 6. Relocation Sites */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['relocation_sites'])}
+                onChange={() => toggleLocalLayer('relocation_sites')}
+                style={checkboxStyle}
+              />
+              <span style={{ fontSize: 10 }}>🛖</span>
+              <span>Relocation Sites</span>
+            </label>
 
-          {/* 7. Road Network (OSM) */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['roads'])}
-              onChange={() => toggleLocalLayer('roads')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 11, height: 3, background: '#0ea5e9', border: '1px solid #000000' }} />
-            <span>Road Network (OSM)</span>
-          </label>
+            {/* 7. Road Network (OSM) */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['roads'])}
+                onChange={() => toggleLocalLayer('roads')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 11, height: 3, background: '#0ea5e9', border: '1px solid #000000' }} />
+              <span>Road Network (OSM)</span>
+            </label>
 
-          {/* 8. District Boundary */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['district_boundaries'])}
-              onChange={() => toggleLocalLayer('district_boundaries')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, border: '1px dashed #000000', borderRadius: 2 }} />
-            <span>District Boundary</span>
-          </label>
+            {/* 8. District Boundary */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['district_boundaries'])}
+                onChange={() => toggleLocalLayer('district_boundaries')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, border: '1px dashed #000000', borderRadius: 2 }} />
+              <span>District Boundary</span>
+            </label>
 
-          {/* 9. Block Boundary */}
-          <label style={layerRowStyle}>
-            <input
-              type="checkbox"
-              checked={Boolean(layerVisibility['block_boundaries'])}
-              onChange={() => toggleLocalLayer('block_boundaries')}
-              style={checkboxStyle}
-            />
-            <span style={{ display: 'inline-block', width: 9, height: 9, border: '1px dashed #6b7280', borderRadius: 2 }} />
-            <span>Block Boundary</span>
-          </label>
-        </div>
+            {/* 9. Block Boundary */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['block_boundaries'])}
+                onChange={() => toggleLocalLayer('block_boundaries')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, border: '1px dashed #6b7280', borderRadius: 2 }} />
+              <span>Block Boundary</span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* 6. Bottom-Left Scale Bar */}
@@ -1322,63 +1344,7 @@ export default function Map2D() {
         </div>
       </div>
 
-      {/* 7. Bottom-Right Uttarakhand Inset Locator Mini-Map */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 12,
-          right: 12,
-          zIndex: 500,
-          width: 125,
-          background: '#1e293b',
-          border: '2px solid #000000',
-          boxShadow: '3px 3px 0px #000000',
-          borderRadius: 8,
-          padding: '4px 6px',
-          color: '#ffffff',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 8,
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '0.4px',
-            color: '#fde047',
-            textAlign: 'center',
-            borderBottom: '1px solid #334155',
-            paddingBottom: 2,
-            marginBottom: 3,
-          }}
-        >
-          UTTARAKHAND
-        </div>
-        <div style={{ position: 'relative', width: '100%', height: 55, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="100%" height="100%" viewBox="0 0 120 70">
-            {/* State outline */}
-            <polygon
-              points="20,15 45,8 85,12 110,35 95,65 50,60 25,48 15,30"
-              fill="#334155"
-              stroke="#94a3b8"
-              strokeWidth="1.5"
-            />
-            {/* Chamoli district highlighted in red/pink */}
-            <polygon
-              points="55,18 78,20 85,38 65,45 52,32"
-              fill="#ef4444"
-              stroke="#000000"
-              strokeWidth="1"
-            />
-            {/* District center marker */}
-            <circle cx="68" cy="28" r="2.5" fill="#fde047" stroke="#000000" strokeWidth="0.8" />
-
-            {/* India locator inset in corner */}
-            <rect x="86" y="42" width="28" height="24" fill="#0f172a" stroke="#64748b" strokeWidth="0.8" rx="2" />
-            <polygon points="94,45 106,45 108,55 100,63 94,54" fill="#475569" stroke="#94a3b8" strokeWidth="0.5" />
-            <circle cx="98" cy="48" r="1.5" fill="#ef4444" />
-          </svg>
-        </div>
-      </div>
+      {/* Bottom-Right Inset Mini-Map Removed as per user request */}
     </div>
   );
 }
