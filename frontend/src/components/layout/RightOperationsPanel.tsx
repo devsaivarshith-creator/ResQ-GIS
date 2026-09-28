@@ -361,13 +361,6 @@ export default function RightOperationsPanel() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <button
-                  onClick={() => setActiveNav('analysis')}
-                  className="btn-action btn-action--primary"
-                  style={{ padding: '3px 8px', fontSize: 10 }}
-                >
-                  TOPSIS &rarr;
-                </button>
-                <button
                   onClick={toggleRightPanel}
                   className="btn-action"
                   style={{ padding: '4px', border: 'none', background: 'transparent', boxShadow: 'none' }}

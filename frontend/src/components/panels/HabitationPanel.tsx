@@ -501,6 +501,7 @@ export default function HabitationPanel() {
 
             <button
               onClick={() => {
+                selectHabitation(null as any);
                 selectSite(nearestSite.id);
                 flyToSite(nearestSite.location.lng, nearestSite.location.lat);
               }}

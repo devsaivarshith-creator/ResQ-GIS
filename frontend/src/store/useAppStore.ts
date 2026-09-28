@@ -358,19 +358,19 @@ export const useAppStore = create<AppState>((set, get) => ({
         // Fetch all operational hierarchy datasets in parallel
         const [habs, sites, alerts, rivers, hazards, weatherRes, status, customLayers, roads, emergency, hierarchy, providerStat, ml] =
           await Promise.all([
-            api.getHabitations().catch(() => DEMO_HABITATIONS),
-            api.getRelocationSites().catch(() => DEMO_RELOCATION_SITES),
-            api.getAlerts().catch(() => DEMO_ALERTS),
-            api.getRivers().catch(() => DEMO_RIVER_STATIONS),
-            api.getHazardLayers().catch(() => DEMO_HAZARDS),
-            api.getWeather('Chamoli').catch(() => ({ forecast: DEMO_WEATHER })),
-            api.getStatus().catch(() => null),
-            api.getLayers().catch(() => DEFAULT_LAYERS),
-            api.getRoads().catch(() => []),
-            api.getEmergencyResources().catch(() => []),
-            api.getAdminHierarchy().catch(() => null),
-            api.getProvidersDetailedStatus().catch(() => null),
-            api.getMLStatus().catch(() => null),
+            api.getHabitations().catch(() => get().habitations.length > 0 ? get().habitations : DEMO_HABITATIONS),
+            api.getRelocationSites().catch(() => get().relocationSites.length > 0 ? get().relocationSites : DEMO_RELOCATION_SITES),
+            api.getAlerts().catch(() => get().alerts.length > 0 ? get().alerts : DEMO_ALERTS),
+            api.getRivers().catch(() => get().riverStations.length > 0 ? get().riverStations : DEMO_RIVER_STATIONS),
+            api.getHazardLayers().catch(() => get().hazardLayers.length > 0 ? get().hazardLayers : DEMO_HAZARDS),
+            api.getWeather('Chamoli').catch(() => ({ forecast: get().weather.length > 0 ? get().weather : DEMO_WEATHER })),
+            api.getStatus().catch(() => get().systemStatus),
+            api.getLayers().catch(() => get().layers.length > 0 ? get().layers : DEFAULT_LAYERS),
+            api.getRoads().catch(() => get().roads),
+            api.getEmergencyResources().catch(() => get().emergencyResources),
+            api.getAdminHierarchy().catch(() => get().adminHierarchy),
+            api.getProvidersDetailedStatus().catch(() => get().providersDetailedStatus),
+            api.getMLStatus().catch(() => get().mlStatus),
           ]);
 
         set({

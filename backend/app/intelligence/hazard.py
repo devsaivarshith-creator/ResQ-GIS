@@ -18,6 +18,7 @@ class HazardInput:
     seismic_zone: int = 0                # 1-5
     glof_exposure: float = 0.0           # 0-1
     population_density: float = 0.0      # people/km²
+    region_type: str = "auto"            # "mountainous", "coastal", "plains", or "auto"
 
 
 @dataclass
@@ -32,16 +33,29 @@ class HazardScore:
 
 def compute_hazard_score(inputs: HazardInput) -> HazardScore:
     """
-    Compute composite hazard score from multiple transparent inputs.
-
-    Weights:
-      - Landslide: 0.30
-      - Flood: 0.25
-      - GLOF: 0.20
-      - Earthquake: 0.15
-      - Historical: 0.10
+    Compute composite hazard score from multiple transparent inputs,
+    using dynamic formulas (weights) based on the location/region type.
     """
     contributors = []
+    
+    # Dynamically determine region_type if auto
+    region = inputs.region_type
+    if region == "auto":
+        if inputs.elevation > 1500 or inputs.slope_degree > 15:
+            region = "mountainous"
+        elif inputs.elevation < 50 and inputs.distance_to_river > 5:
+            region = "coastal"
+        else:
+            region = "plains"
+            
+    # Dynamic disaster weights based on region
+    if region == "mountainous":
+        weights = {"landslide": 0.40, "flood": 0.15, "glof": 0.20, "earthquake": 0.15, "historical": 0.10}
+    elif region == "coastal":
+        weights = {"landslide": 0.05, "flood": 0.50, "glof": 0.0, "earthquake": 0.15, "historical": 0.30}
+    else: # plains
+        weights = {"landslide": 0.05, "flood": 0.50, "glof": 0.0, "earthquake": 0.25, "historical": 0.20}
+
 
     # Landslide score
     landslide = 0.0
@@ -93,14 +107,15 @@ def compute_hazard_score(inputs: HazardInput) -> HazardScore:
     if inputs.historical_disasters >= 2:
         contributors.append(f"{inputs.historical_disasters} historical disasters")
 
-    # Weighted composite
+    # Weighted composite based on region-specific formula
     overall = (
-        0.30 * landslide +
-        0.25 * flood +
-        0.20 * glof +
-        0.15 * earthquake +
-        0.10 * historical
+        weights["landslide"] * landslide +
+        weights["flood"] * flood +
+        weights["glof"] * glof +
+        weights["earthquake"] * earthquake +
+        weights["historical"] * historical
     )
+
 
     return HazardScore(
         overall=round(min(overall, 1.0), 3),

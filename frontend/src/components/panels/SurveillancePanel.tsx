@@ -43,7 +43,7 @@ export default function SurveillancePanel() {
     const dLat = (h.location.lat - centerLat) * 111;
     const dLng = (h.location.lng - centerLng) * 111 * Math.cos((centerLat * Math.PI) / 180);
     const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-    return dist <= radiusKm * 1.5;
+    return dist <= radiusKm;
   });
 
   const totalPop = habitationsInZone.reduce((acc, h) => acc + h.population, 0) || 4213;
@@ -180,8 +180,8 @@ export default function SurveillancePanel() {
             <input
               type="range"
               min="1.0"
-              max="10.0"
-              step="0.5"
+              max="200.0"
+              step="1.0"
               value={radiusKm}
               onChange={(e) => setRadiusKm(parseFloat(e.target.value))}
               style={{ width: '100%', accentColor: 'var(--accent-blue)' }}

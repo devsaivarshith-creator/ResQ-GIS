@@ -1,40 +1,34 @@
-import { useState } from 'react';
-import { Sliders, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Filter, ArrowRight, Trophy } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { flyToHabitation } from '../../cesium/camera';
 
 export default function AnalysisPanel() {
-  const { prioritizationResults, calculatePrioritization, selectHabitation, habitations, relocationSites } =
-    useAppStore();
+  const { prioritizationResults, selectHabitation, habitations, relocationSites } = useAppStore();
 
-  const [weightsOpen, setWeightsOpen] = useState(false);
-  const [weights, setWeights] = useState({
-    hvi: 0.25,
-    hazard: 0.20,
-    population: 0.20,
-    historical: 0.10,
-    structural: 0.15,
-    feasibility: 0.10,
-  });
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [stateFilter, setStateFilter] = useState<string>('');
+  const [riskFilter, setRiskFilter] = useState<string>('');
 
-  const handleWeightChange = (key: keyof typeof weights, val: number) => {
-    const updated = { ...weights, [key]: val };
-    setWeights(updated);
-    calculatePrioritization(updated);
-  };
+  const filteredResults = useMemo(() => {
+    return prioritizationResults.filter(item => {
+      const hab = habitations.find(h => h.id === item.habitationId);
+      if (!hab) return false;
+      
+      if (stateFilter && hab.district !== stateFilter) {
+        // Here we use district as state proxy based on mock data
+        return false;
+      }
+      
+      if (riskFilter && hab.riskLevel !== riskFilter) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [prioritizationResults, habitations, stateFilter, riskFilter]);
 
-  const handleResetWeights = () => {
-    const def = {
-      hvi: 0.25,
-      hazard: 0.20,
-      population: 0.20,
-      historical: 0.10,
-      structural: 0.15,
-      feasibility: 0.10,
-    };
-    setWeights(def);
-    calculatePrioritization(def);
-  };
+  const uniqueDistricts = Array.from(new Set(habitations.map(h => h.district)));
 
   return (
     <div className="panel">
@@ -59,7 +53,7 @@ export default function AnalysisPanel() {
             </div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                TOPSIS Leaderboard
+                Analysis Dashboard
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                 Multi-Criteria Evacuation Staging
@@ -68,24 +62,24 @@ export default function AnalysisPanel() {
           </div>
 
           <button
-            className={`btn-action ${weightsOpen ? 'btn-action--primary' : ''}`}
-            onClick={() => setWeightsOpen(!weightsOpen)}
+            className={`btn-action ${filtersOpen ? 'btn-action--primary' : ''}`}
+            onClick={() => setFiltersOpen(!filtersOpen)}
           >
-            <Sliders size={13} strokeWidth={2} />
-            <span>{weightsOpen ? 'Close' : 'Weights'}</span>
+            <Filter size={13} strokeWidth={2} />
+            <span>{filtersOpen ? 'Close' : 'Filters'}</span>
           </button>
         </div>
       </div>
 
-      {/* Dynamic Weight Sliders Drawer */}
-      {weightsOpen && (
+      {/* Dynamic Filters Drawer */}
+      {filtersOpen && (
         <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
           <div className="panel__row panel__row--between" style={{ marginBottom: 10 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Decision Criteria Weights
+              Dashboard Filters
             </span>
             <button
-              onClick={handleResetWeights}
+              onClick={() => { setStateFilter(''); setRiskFilter(''); }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -93,58 +87,47 @@ export default function AnalysisPanel() {
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
               }}
             >
-              <RotateCcw size={11} />
-              <span>Reset</span>
+              Reset
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[
-              { label: 'Vulnerability (HVI)', key: 'hvi', val: weights.hvi },
-              { label: 'Hazard Exposure', key: 'hazard', val: weights.hazard },
-              { label: 'Population Exposed', key: 'population', val: weights.population },
-              { label: 'Structural Fragility', key: 'structural', val: weights.structural },
-            ].map((slider) => (
-              <div key={slider.key}>
-                <div className="panel__row panel__row--between" style={{ fontSize: 11, marginBottom: 2 }}>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{slider.label}:</span>
-                  <span
-                    style={{
-                      background: 'var(--accent-amber-subtle)',
-                      color: 'var(--accent-amber)',
-                      border: '1px solid var(--border-color)',
-                      padding: '1px 6px',
-                      borderRadius: 'var(--radius-pill)',
-                      fontWeight: 700,
-                      fontSize: 10,
-                    }}
-                  >
-                    {(slider.val * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0.05"
-                  max="0.50"
-                  step="0.05"
-                  value={slider.val}
-                  onChange={(e) => handleWeightChange(slider.key as any, parseFloat(e.target.value))}
-                  style={{ width: '100%', height: 6, marginTop: 4, accentColor: 'var(--accent-blue)' }}
-                />
-              </div>
-            ))}
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>State / District</label>
+              <select 
+                value={stateFilter} 
+                onChange={e => setStateFilter(e.target.value)}
+                style={{ width: '100%', padding: '4px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+              >
+                <option value="">All Regions</option>
+                {uniqueDistricts.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>Risk Factor</label>
+              <select 
+                value={riskFilter} 
+                onChange={e => setRiskFilter(e.target.value)}
+                style={{ width: '100%', padding: '4px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+              >
+                <option value="">All Risk Levels</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MODERATE">Moderate</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
 
       {/* Ranked List */}
       <div className="panel__list" style={{ padding: '12px', gap: 8 }}>
-        {prioritizationResults.map((item) => {
+        {filteredResults.map((item) => {
           const hab = habitations.find((h) => h.id === item.habitationId);
           const site = relocationSites.find((s) => s.id === item.nearestRelocationSite);
 

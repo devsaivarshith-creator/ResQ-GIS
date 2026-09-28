@@ -10,7 +10,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { flyToSite } from '../../cesium/camera';
+import { flyToSite, flyToHabitation } from '../../cesium/camera';
 
 const SUIT_CLASS: Record<string, string> = {
   HIGH: 'risk--low',
@@ -447,7 +447,11 @@ export default function RelocationPanel(_props: Props = {}) {
             {matchedHabitations.map((h) => (
               <button
                 key={h.id}
-                onClick={() => selectHabitation(h.id)}
+                onClick={() => {
+                  selectSite(null as any);
+                  selectHabitation(h.id);
+                  if (h.location) flyToHabitation(h.location.lng, h.location.lat);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

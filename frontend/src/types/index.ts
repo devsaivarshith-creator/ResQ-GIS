@@ -64,6 +64,13 @@ export interface RelocationSite {
   suitability: RiskLevel;
   suitabilityScore: number;
   capacity: number;
+  currentOccupants?: number;
+  maxBeds?: number;
+  medicalBayBeds?: number;
+  dailyWaterLiters?: number;
+  powerBackupHours?: number;
+  sanitationUnits?: number;
+  foodStockDays?: number;
   distanceFromAffected: number; // km
   constraints: SiteConstraint[];
   slopeGrade: string;

@@ -161,12 +161,25 @@ export default function TopBar() {
                 style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: 15,
-                  fontWeight: 800,
-                  color: 'var(--text-primary)',
-                  letterSpacing: '-0.3px',
+                  fontWeight: 900,
+                  background: 'linear-gradient(90deg, var(--text-primary), var(--accent-blue))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '0.5px',
                 }}
               >
-                ResQ-GIS
+                DRISHTI
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                  marginLeft: '4px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                — Disaster Risk Intelligence &amp; Spatial Hazard Tracking Interface
               </span>
               <span
                 style={{
@@ -179,7 +192,7 @@ export default function TopBar() {
                   letterSpacing: '0.2px',
                 }}
               >
-                PRO
+                COMMAND v2.4
               </span>
             </div>
           </div>
