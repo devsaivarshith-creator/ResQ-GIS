@@ -562,25 +562,25 @@ export default function TopBar() {
             alignItems: 'center',
             gap: 4,
             padding: '2px 6px',
-            background: backendConnected ? 'var(--accent-emerald-subtle)' : 'var(--accent-amber-subtle)',
-            border: `1px solid ${backendConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+            background: backendConnected ? 'var(--accent-emerald-subtle)' : 'rgba(14, 165, 233, 0.1)',
+            border: `1px solid ${backendConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(14, 165, 233, 0.3)'}`,
             borderRadius: 'var(--radius-pill)',
             fontSize: 9.5,
             fontWeight: 700,
             height: 26,
-            color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+            color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-blue)',
           }}
-          title={backendConnected ? 'FastAPI & Live Government Ingestion active' : 'Offline simulation'}
+          title={backendConnected ? 'FastAPI & Live Government Ingestion active' : 'Direct GIS Telemetry active'}
         >
           <span
             style={{
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-amber)',
+              background: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-blue)',
             }}
           />
-          <span>{backendConnected ? 'Live Synced' : 'Demo Mode'}</span>
+          <span>{backendConnected ? 'Live Synced' : 'Operational'}</span>
         </div>
 
         {/* Dark/Light Theme Toggle */}

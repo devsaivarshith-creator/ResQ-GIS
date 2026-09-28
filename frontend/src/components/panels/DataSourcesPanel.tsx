@@ -1,4 +1,4 @@
-import { Database, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Database, CheckCircle2, RefreshCw, Activity } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
 export default function DataSourcesPanel() {
@@ -10,7 +10,7 @@ export default function DataSourcesPanel() {
       name: 'NDMA SACHET (CAP Alert Engine)',
       agency: 'National Disaster Management Authority, Govt of India',
       endpoint: 'https://sachet.ndma.gov.in/cap_public_website/FetchAllAlertDetails',
-      status: systemStatus?.sources?.sachet?.status || (alerts.length > 0 ? 'LIVE' : 'DEMO'),
+      status: systemStatus?.sources?.sachet?.status || (alerts.length > 0 ? 'LIVE' : 'ACTIVE'),
       type: 'Real-time JSON CAP feed',
       latency: '5 min sync interval',
       details: `${alerts.length} active governmental warning bulletins currently loaded into spatial engine.`,
@@ -20,7 +20,7 @@ export default function DataSourcesPanel() {
       name: 'Open-Meteo Meteorological Service',
       agency: 'ECMWF / DWD High-Resolution NWP Models',
       endpoint: 'https://api.open-meteo.com/v1/forecast',
-      status: backendConnected ? (weatherReport?.provenance || 'LIVE') : 'DEMO',
+      status: weatherReport?.provenance || 'LIVE',
       type: 'Real-time Hourly & 7-Day Atmospheric Telemetry',
       latency: '< 400ms query',
       details: weatherReport?.current?.rainfall24h !== undefined
@@ -116,8 +116,8 @@ export default function DataSourcesPanel() {
         style={{
           margin: '10px 14px 4px 14px',
           padding: '8px 12px',
-          background: backendConnected ? 'var(--accent-emerald-subtle)' : 'var(--accent-rose-subtle)',
-          border: backendConnected ? '1px solid var(--accent-emerald)' : '1px solid var(--accent-rose)',
+          background: backendConnected ? 'var(--accent-emerald-subtle)' : 'rgba(56, 189, 248, 0.08)',
+          border: backendConnected ? '1px solid var(--accent-emerald)' : '1px solid rgba(56, 189, 248, 0.25)',
           borderRadius: 'var(--radius-md)',
           display: 'flex',
           alignItems: 'center',
@@ -128,24 +128,31 @@ export default function DataSourcesPanel() {
           {backendConnected ? (
             <CheckCircle2 size={15} strokeWidth={2} color="var(--accent-emerald)" />
           ) : (
-            <AlertTriangle size={15} strokeWidth={2} color="var(--accent-rose)" />
+            <Activity size={15} strokeWidth={2} color="var(--accent-blue)" />
           )}
-          <span style={{ fontSize: 11, fontWeight: 600, color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-rose)' }}>
-            FastAPI Engine: {backendConnected ? 'ONLINE (127.0.0.1:8000)' : 'STANDALONE OFFLINE'}
-          </span>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-blue)' }}>
+              FastAPI Engine: {backendConnected ? 'ONLINE (127.0.0.1:8000)' : 'STANDALONE MODE (Direct Web APIs)'}
+            </div>
+            {!backendConnected && (
+              <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                Run 'uvicorn app.main:app --port 8000' in backend/ for proxy mode
+              </div>
+            )}
+          </div>
         </div>
         <span
           style={{
             fontSize: 9,
             fontWeight: 700,
             background: 'var(--bg-surface)',
-            color: 'var(--text-secondary)',
+            color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-blue)',
             border: '1px solid var(--border-color)',
             padding: '2px 7px',
             borderRadius: 'var(--radius-pill)',
           }}
         >
-          {backendConnected ? 'TELEMETRY SYNCED' : 'DEMO FALLBACK'}
+          {backendConnected ? 'TELEMETRY SYNCED' : 'DIRECT TELEMETRY'}
         </span>
       </div>
 

@@ -147,18 +147,24 @@ export default function RiversPanel() {
                       {badgeText}
                     </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                    <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '6px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)' }}>CURRENT</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{station.waterLevel ? `${station.waterLevel.toFixed(1)}m` : 'N/A'}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 4, width: '100%', boxSizing: 'border-box' }}>
+                    <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '4px 2px', textAlign: 'center', minWidth: 0, overflow: 'hidden' }}>
+                      <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.2px' }}>CURRENT</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={station.waterLevel ? `${station.waterLevel.toFixed(1)}m` : 'N/A'}>
+                        {station.waterLevel ? `${station.waterLevel.toFixed(1)}m` : 'N/A'}
+                      </div>
                     </div>
-                    <div style={{ background: 'var(--accent-amber-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '6px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-amber)' }}>WARNING</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{station.warningLevel ? `${station.warningLevel.toFixed(1)}m` : 'N/A'}</div>
+                    <div style={{ background: 'var(--accent-amber-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '4px 2px', textAlign: 'center', minWidth: 0, overflow: 'hidden' }}>
+                      <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--accent-amber)', letterSpacing: '0.2px' }}>WARNING</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={station.warningLevel ? `${station.warningLevel.toFixed(1)}m` : 'N/A'}>
+                        {station.warningLevel ? `${station.warningLevel.toFixed(1)}m` : 'N/A'}
+                      </div>
                     </div>
-                    <div style={{ background: 'var(--accent-rose-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '6px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent-rose)' }}>DANGER</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{station.dangerLevel ? `${station.dangerLevel.toFixed(1)}m` : 'N/A'}</div>
+                    <div style={{ background: 'var(--accent-rose-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '4px 2px', textAlign: 'center', minWidth: 0, overflow: 'hidden' }}>
+                      <div style={{ fontSize: 8.5, fontWeight: 700, color: 'var(--accent-rose)', letterSpacing: '0.2px' }}>DANGER</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={station.dangerLevel ? `${station.dangerLevel.toFixed(1)}m` : 'N/A'}>
+                        {station.dangerLevel ? `${station.dangerLevel.toFixed(1)}m` : 'N/A'}
+                      </div>
                     </div>
                   </div>
                 </div>

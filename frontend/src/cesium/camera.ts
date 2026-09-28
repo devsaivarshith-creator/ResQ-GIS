@@ -50,7 +50,7 @@ export function flyToSite(lng: number, lat: number) {
   flyToLocation(lng, lat, 10000);
 }
 
-const DISTRICT_COORDINATES: Record<string, { lng: number; lat: number; height: number }> = {
+export const DISTRICT_COORDINATES: Record<string, { lng: number; lat: number; height: number }> = {
   // Uttarakhand
   chamoli: { lng: 79.55, lat: 30.55, height: 60000 },
   rudraprayag: { lng: 79.05, lat: 30.45, height: 60000 },
@@ -64,6 +64,12 @@ const DISTRICT_COORDINATES: Record<string, { lng: number; lat: number; height: n
   wayanad: { lng: 76.13, lat: 11.68, height: 70000 },
   idukki: { lng: 77.05, lat: 10.08, height: 75000 },
   alappuzha: { lng: 76.48, lat: 9.42, height: 60000 },
+  malappuram: { lng: 76.07, lat: 11.07, height: 65000 },
+  kottayam: { lng: 76.52, lat: 9.59, height: 60000 },
+  pathanamthitta: { lng: 76.79, lat: 9.26, height: 65000 },
+  thrissur: { lng: 76.21, lat: 10.53, height: 65000 },
+  ernakulam: { lng: 76.30, lat: 9.98, height: 60000 },
+  kozhikode: { lng: 75.78, lat: 11.26, height: 65000 },
   // Andhra Pradesh
   konaseema: { lng: 81.88, lat: 16.48, height: 60000 },
   'dr. b.r. ambedkar konaseema': { lng: 81.88, lat: 16.48, height: 60000 },
@@ -94,7 +100,7 @@ const DISTRICT_COORDINATES: Record<string, { lng: number; lat: number; height: n
   kohima: { lng: 94.11, lat: 25.67, height: 65000 },
 };
 
-const STATE_COORDINATES: Record<string, { lng: number; lat: number; height: number }> = {
+export const STATE_COORDINATES: Record<string, { lng: number; lat: number; height: number }> = {
   uttarakhand: { lng: 79.3, lat: 30.4, height: 120000 },
   'himachal pradesh': { lng: 77.2, lat: 31.8, height: 140000 },
   kerala: { lng: 76.3, lat: 10.5, height: 180000 },

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { WORLD_INVERTED_MASK } from '../../data/indiaBoundary';
+import { DISTRICT_COORDINATES, STATE_COORDINATES } from '../../cesium/camera';
 
 type BasemapType = 'osm' | 'satellite' | 'dark' | 'topo';
 
@@ -871,9 +872,53 @@ export default function Map2D() {
   }, [selectedHabitationId, habitations, relocationSites, getSelectedHabitation]);
 
   const recenterMap = () => {
-    if (mapRef.current) {
-      mapRef.current.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM, { duration: 1.2 });
+    if (!mapRef.current) return;
+
+    // 1. If a habitation is selected, redirect to habitation
+    if (selectedHabitationId) {
+      const hab = habitations.find((h) => h.id === selectedHabitationId);
+      if (hab && hab.location) {
+        mapRef.current.flyTo([hab.location.lat, hab.location.lng], 13, { duration: 1.2 });
+        return;
+      }
     }
+
+    // 2. If a district is selected in top bar, redirect to district coordinates
+    if (selectedDistrict) {
+      const normDist = selectedDistrict.toLowerCase().trim();
+      const distCoord = DISTRICT_COORDINATES[normDist];
+      if (distCoord) {
+        mapRef.current.flyTo([distCoord.lat, distCoord.lng], 11, { duration: 1.2 });
+        return;
+      }
+      const matchingHab = habitations.find(
+        (h) => h.district.toLowerCase() === normDist
+      );
+      if (matchingHab && matchingHab.location) {
+        mapRef.current.flyTo([matchingHab.location.lat, matchingHab.location.lng], 11, { duration: 1.2 });
+        return;
+      }
+    }
+
+    // 3. If a state is selected in top bar, redirect to state coordinates
+    if (selectedState) {
+      const normState = selectedState.toLowerCase().trim();
+      const stateCoord = STATE_COORDINATES[normState];
+      if (stateCoord) {
+        mapRef.current.flyTo([stateCoord.lat, stateCoord.lng], 8, { duration: 1.2 });
+        return;
+      }
+      const matchingHab = habitations.find(
+        (h) => h.state.toLowerCase() === normState
+      );
+      if (matchingHab && matchingHab.location) {
+        mapRef.current.flyTo([matchingHab.location.lat, matchingHab.location.lng], 8, { duration: 1.2 });
+        return;
+      }
+    }
+
+    // 4. Default fallback
+    mapRef.current.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM, { duration: 1.2 });
   };
   const toolBtnStyle: React.CSSProperties = {
     display: 'flex',
@@ -1187,11 +1232,17 @@ export default function Map2D() {
           <Minus size={16} strokeWidth={3} />
         </button>
 
-        {/* Recenter */}
+        {/* Recenter / Redirect to Location in Top Bar */}
         <button
           onClick={recenterMap}
           style={toolBtnStyle}
-          title="Recenter to Chamoli"
+          title={
+            selectedDistrict
+              ? `Redirect map to ${selectedDistrict}`
+              : selectedState
+              ? `Redirect map to ${selectedState}`
+              : 'Redirect map to active location'
+          }
           onMouseEnter={(e) => (e.currentTarget.style.background = '#fde047')}
           onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
         >
