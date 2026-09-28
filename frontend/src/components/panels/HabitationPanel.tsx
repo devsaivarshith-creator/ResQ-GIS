@@ -265,6 +265,48 @@ export default function HabitationPanel() {
           </span>
         </div>
 
+        {/* Prominent Immediate Safe House Redirect Button */}
+        {nearestSite && (
+          <button
+            onClick={() => {
+              selectHabitation(null as any);
+              selectSite(nearestSite.id);
+              setActiveNav('relocation');
+              flyToSite(nearestSite.location.lng, nearestSite.location.lat);
+            }}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 12px',
+              marginBottom: 10,
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.12))',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+              textAlign: 'left',
+              boxShadow: 'var(--shadow-xs)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🏕️</span>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                  Safe House: {nearestSite.name}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                  Dist: {nearestSite.distanceFromAffected} km &bull; Cap: {nearestSite.capacity.toLocaleString()} beds
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color: 'var(--accent-emerald)' }}>
+              <span>View Shelter</span>
+              <ArrowRight size={13} />
+            </div>
+          </button>
+        )}
+
         {/* Clean Risk Score Meter */}
         <div style={{ marginTop: 8 }}>
           <div className="panel__row panel__row--between" style={{ marginBottom: 4 }}>

@@ -311,7 +311,34 @@ export const useAppStore = create<AppState>((set, get) => ({
   riverObservations: [],
   hazardLayers: DEMO_HAZARDS,
   layers: DEFAULT_LAYERS,
-  prioritizationResults: [],
+  prioritizationResults: DEMO_HABITATIONS.slice()
+    .sort((a, b) => {
+      const scoreA = a.riskScore * 0.4 + a.vulnerabilityIndex.overall * 0.3 + (a.population / 5000) * 0.3;
+      const scoreB = b.riskScore * 0.4 + b.vulnerabilityIndex.overall * 0.3 + (b.population / 5000) * 0.3;
+      return scoreB - scoreA;
+    })
+    .map((h, idx) => {
+      const site = DEMO_RELOCATION_SITES.find((s) => s.id === h.nearestRelocationSite);
+      const reasons: string[] = [];
+      if (h.riskScore >= 0.7) reasons.push('Severe hazard exposure');
+      if (h.vulnerabilityIndex.overall >= 0.7) reasons.push('High vulnerability index');
+      if (h.population > 1000) reasons.push(`${h.population.toLocaleString()} exposed`);
+      if (reasons.length === 0) reasons.push('Routine surveillance');
+
+      const score = Math.max(0.2, +(h.riskScore * 0.55 + h.vulnerabilityIndex.overall * 0.45).toFixed(4));
+      return {
+        rank: idx + 1,
+        habitationId: h.id,
+        name: h.name,
+        district: h.district,
+        population: h.population,
+        score,
+        reason: reasons.join('; '),
+        hvi: h.vulnerabilityIndex.overall,
+        hazardScore: h.riskScore,
+        nearestRelocationSite: site?.id,
+      };
+    }),
   districtReport: null,
 
   // Connectivity

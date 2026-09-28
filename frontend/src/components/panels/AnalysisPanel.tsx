@@ -1,16 +1,22 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Filter, ArrowRight, Trophy } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { flyToHabitation } from '../../cesium/camera';
 
 export default function AnalysisPanel() {
-  const { prioritizationResults, selectHabitation, habitations, relocationSites } = useAppStore();
+  const { prioritizationResults, calculatePrioritization, selectHabitation, habitations, relocationSites } = useAppStore();
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [stateFilter, setStateFilter] = useState<string>('');
   const [districtFilter, setDistrictFilter] = useState<string>('');
   const [riskFilter, setRiskFilter] = useState<string>('');
   const [hazardFilter, setHazardFilter] = useState<string>('');
+
+  useEffect(() => {
+    if (prioritizationResults.length === 0) {
+      calculatePrioritization();
+    }
+  }, [prioritizationResults.length, calculatePrioritization]);
 
   const uniqueStates = useMemo(() => {
     return Array.from(new Set(habitations.map(h => h.state).filter(Boolean)));
@@ -24,8 +30,25 @@ export default function AnalysisPanel() {
     ));
   }, [habitations, stateFilter]);
 
+  // Fallback to habitations mapping if prioritizationResults is not ready
+  const activeResults = useMemo(() => {
+    if (prioritizationResults.length > 0) return prioritizationResults;
+    return habitations.map((h, idx) => ({
+      rank: idx + 1,
+      habitationId: h.id,
+      name: h.name,
+      district: h.district,
+      population: h.population,
+      score: h.riskScore,
+      reason: 'Multi-factor high risk exposure',
+      hvi: h.vulnerabilityIndex.overall,
+      hazardScore: h.riskScore,
+      nearestRelocationSite: h.nearestRelocationSite,
+    }));
+  }, [prioritizationResults, habitations]);
+
   const filteredResults = useMemo(() => {
-    return prioritizationResults.filter(item => {
+    return activeResults.filter(item => {
       const hab = habitations.find(h => h.id === item.habitationId);
       if (!hab) return false;
       
@@ -38,7 +61,7 @@ export default function AnalysisPanel() {
       
       return true;
     });
-  }, [prioritizationResults, habitations, stateFilter, districtFilter, riskFilter, hazardFilter]);
+  }, [activeResults, habitations, stateFilter, districtFilter, riskFilter, hazardFilter]);
 
   return (
     <div className="panel">

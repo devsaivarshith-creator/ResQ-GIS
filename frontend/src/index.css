@@ -461,10 +461,10 @@ body {
    Print / PDF Briefing Styles
    ============================================================ */
 @media print {
-  /* Hide interactive chrome and sidebars when printing operational brief */
-  .top-bar,
-  aside,
+  /* Hide interactive chrome except operational report content */
+  header,
   .app__center,
+  .left-nav,
   .btn-action,
   button,
   select,
@@ -472,7 +472,7 @@ body {
     display: none !important;
   }
 
-  body, .app, .app__body, .app__side {
+  body, .app, .app__body {
     background: #ffffff !important;
     color: #0f172a !important;
     width: 100% !important;
@@ -481,6 +481,19 @@ body {
     position: static !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  aside {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: static !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
   }
 
   .report-panel, .panel {
@@ -502,16 +515,19 @@ body {
   table {
     width: 100% !important;
     border-collapse: collapse !important;
+    margin-top: 10px !important;
   }
 
   th, td {
     border: 1px solid #cbd5e1 !important;
-    padding: 8px !important;
+    padding: 6px 8px !important;
     color: #0f172a !important;
+    font-size: 11px !important;
   }
 
   th {
     background: #f1f5f9 !important;
+    font-weight: bold !important;
   }
 }
 

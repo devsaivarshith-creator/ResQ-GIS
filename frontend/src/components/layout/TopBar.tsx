@@ -156,7 +156,7 @@ export default function TopBar() {
             ▲
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'nowrap' }}>
               <span
                 style={{
                   fontFamily: 'var(--font-sans)',
@@ -166,6 +166,7 @@ export default function TopBar() {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   letterSpacing: '0.5px',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 DRISHTI
@@ -177,7 +178,12 @@ export default function TopBar() {
                   color: 'var(--text-secondary)',
                   marginLeft: '4px',
                   whiteSpace: 'nowrap',
+                  maxWidth: 320,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'none',
                 }}
+                className="xl:inline-block"
               >
                 — Disaster Risk Intelligence &amp; Spatial Hazard Tracking Interface
               </span>
@@ -190,6 +196,7 @@ export default function TopBar() {
                   background: 'var(--accent-blue-subtle)',
                   color: 'var(--accent-blue)',
                   letterSpacing: '0.2px',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 COMMAND v2.4

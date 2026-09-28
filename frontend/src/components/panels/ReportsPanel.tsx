@@ -2,15 +2,10 @@ import { useState, useMemo } from 'react';
 import {
   FileText,
   Printer,
-  AlertTriangle,
-  Users,
-  Building,
-  Bus,
-  Ambulance,
   Download,
-  CheckCircle2,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import type { Habitation, RelocationSite } from '../../types';
 
 const STATE_DISTRICT_MAP: Record<string, string[]> = {
   Uttarakhand: ['Chamoli', 'Rudraprayag'],
@@ -25,13 +20,50 @@ const STATE_DISTRICT_MAP: Record<string, string[]> = {
   'Manipur & Nagaland': ['Noney', 'Kohima'],
 };
 
+// Helper: Determine mode of travel & journey time based on distance and hazard exposure
+function getRouteDetails(hab: Habitation, site?: RelocationSite) {
+  const distKm = site?.distanceFromAffected || 12.5;
+  const isFlood = hab.hazardExposure.some((he) => he.type === 'flood' && (he.level === 'HIGH' || he.level === 'CRITICAL'));
+  const isGLOF = hab.hazardExposure.some((he) => he.type === 'glof' && (he.level === 'HIGH' || he.level === 'CRITICAL'));
+  const isHighAltitude = (hab.location.elevation || 1500) > 1800;
+
+  let modeLabel = '🚌 Heavy Evacuation Bus';
+  let modeIcon = '🚌';
+  let speedKmH = 32;
+
+  if (isGLOF || (isHighAltitude && hab.riskLevel === 'CRITICAL')) {
+    modeLabel = '🚁 Air / Helicopter Sortie';
+    modeIcon = '🚁';
+    speedKmH = 75; // Helicopters in mountainous terrain
+  } else if (isFlood && hab.vulnerabilityIndex.overall > 0.6) {
+    modeLabel = '🚤 Motorboat / Flood Vessel';
+    modeIcon = '🚤';
+    speedKmH = 20; // Flood rescue vessels
+  } else if (isHighAltitude) {
+    modeLabel = '🚜 Heavy 4x4 Off-Road Truck';
+    modeIcon = '🚜';
+    speedKmH = 22; // Mountainous offroad rescue trucks
+  }
+
+  const travelMins = Math.round((distKm / speedKmH) * 60);
+  const journeyTimeStr = travelMins >= 60 ? `${Math.floor(travelMins / 60)}h ${travelMins % 60}m` : `${travelMins} mins`;
+
+  return {
+    modeLabel,
+    modeIcon,
+    distKm,
+    journeyTimeStr,
+    corridor: site?.lifelineCorridor || 'NH Lifeline Highway',
+  };
+}
+
 export default function ReportsPanel() {
   const { habitations, relocationSites } = useAppStore();
 
   const [selectedState, setSelectedState] = useState<string>('Uttarakhand');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('Chamoli');
 
-  // When state changes, auto-select first district in that state
+  // Auto select first district when state changes
   const handleStateChange = (st: string) => {
     setSelectedState(st);
     const districts = STATE_DISTRICT_MAP[st] || [];
@@ -56,35 +88,35 @@ export default function ReportsPanel() {
     });
   }, [relocationSites, selectedDistrict, selectedState]);
 
-  const atRiskHabs = distHabs.filter((h) => h.riskScore >= 0.6);
-  const exposedPop = atRiskHabs.reduce((sum, h) => sum + h.population, 0);
+  const atRiskHabs = distHabs.filter((h) => h.riskScore >= 0.5 || h.riskLevel === 'HIGH' || h.riskLevel === 'CRITICAL');
+  const exposedPop = distHabs.reduce((sum, h) => sum + h.population, 0);
   const totalSafeCapacity = distSites.reduce((sum, s) => sum + s.capacity, 0);
-  const capacitySurplus = totalSafeCapacity - exposedPop;
 
   // Logistics calculations
   const busesNeeded = Math.ceil(exposedPop / 50);
-  const ambulancesNeeded = Math.max(2, Math.ceil(exposedPop / 400));
+  const ambulancesNeeded = Math.max(2, Math.ceil(exposedPop / 350));
   const rationsTonnes = ((exposedPop * 0.45 * 14) / 1000).toFixed(1); // 14-day food requirement
 
   const handleExportCSV = () => {
-    const csvHeader = 'Settlement,District,State,Population,RiskScore,PrimaryHazard,AssignedSafeHaven,DistanceKm,Corridor';
+    const csvHeader = 'Settlement,District,State,Population,Households,Elevation_m,RiskScore,PrimaryHazard,AssignedSafeHaven,CapacityBeds,Occupants,RationsDays,WaterLiters,TravelMode,DistanceKm,ExpectedJourneyTime,LifelineCorridor';
     const csvRows = distHabs.map((h) => {
       const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
       const primaryHaz = h.hazardExposure[0]?.type || 'general';
-      return `"${h.name}","${h.district}","${h.state || ''}",${h.population},${h.riskScore.toFixed(2)},"${primaryHaz}","${haven?.name || 'District Safe Enclave'}",${haven?.distanceFromAffected || 10},"${haven?.lifelineCorridor || 'Arterial Highway'}"`;
+      const route = getRouteDetails(h, haven);
+      return `"${h.name}","${h.district}","${h.state || ''}",${h.population},${h.households || 0},${h.location.elevation || 1500},${h.riskScore.toFixed(2)},"${primaryHaz}","${haven?.name || 'Safe Enclave'}",${haven?.capacity || 1000},${haven?.currentOccupants || 0},${haven?.foodStockDays || 14},${haven?.dailyWaterLiters || 10000},"${route.modeLabel}",${route.distKm},"${route.journeyTimeStr}","${route.corridor}"`;
     });
     const csvContent = 'data:text/csv;charset=utf-8,' + [csvHeader].concat(csvRows).join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `resq_gis_relocation_memo_${selectedDistrict.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`);
+    link.setAttribute('download', `drishti_relocation_report_${selectedDistrict.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div className="panel report-panel">
+    <div className="panel report-panel" style={{ padding: '12px' }}>
       {/* Top Banner */}
       <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
         <div className="panel__row panel__row--between">
@@ -106,10 +138,10 @@ export default function ReportsPanel() {
             </div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
-                National Relocation Operations Memo
+                DRISHTI — National Evacuation Memo
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                NDMA &bull; Inter-State Disaster Relocation & Evacuation Protocol
+                Institutional Situation, Safe House Registry & Transit Route Brief
               </div>
             </div>
           </div>
@@ -118,8 +150,8 @@ export default function ReportsPanel() {
             <button
               onClick={handleExportCSV}
               className="btn-action"
-              title="Export Full Relocation Memo as CSV"
-              style={{ padding: '5px 8px', fontSize: 11 }}
+              title="Export Full Relocation Brief as CSV"
+              style={{ padding: '5px 9px', fontSize: 11 }}
             >
               <Download size={13} strokeWidth={2} />
               <span>CSV</span>
@@ -127,7 +159,7 @@ export default function ReportsPanel() {
             <button
               onClick={() => window.print()}
               className="btn-action"
-              title="Print or Save Official Briefing as PDF"
+              title="Print or Save Briefing as PDF"
               style={{ padding: '5px 10px', fontSize: 11, background: 'var(--accent-blue)', color: '#ffffff', border: 'none' }}
             >
               <Printer size={13} strokeWidth={2} />
@@ -137,279 +169,234 @@ export default function ReportsPanel() {
         </div>
       </div>
 
-      {/* Target Geography Selectors (10 States) */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', width: 60 }}>
-              State
-            </span>
+      {/* State & District Selector */}
+      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 8 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
+              Target State
+            </label>
             <select
               value={selectedState}
               onChange={(e) => handleStateChange(e.target.value)}
               style={{
-                flex: 1,
+                width: '100%',
                 padding: '5px 8px',
-                fontFamily: 'var(--font-sans)',
                 fontSize: 11,
-                fontWeight: 700,
-                border: '1px solid var(--border-color)',
+                fontWeight: 600,
                 borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
                 background: 'var(--bg-subtle)',
                 color: 'var(--text-primary)',
-                outline: 'none',
               }}
             >
-              {Object.keys(STATE_DISTRICT_MAP).map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
+              {Object.keys(STATE_DISTRICT_MAP).map((s) => (
+                <option key={s} value={s}>{s}</option>
               ))}
             </select>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', width: 60 }}>
-              District
-            </span>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
+              District Sector
+            </label>
             <select
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
               style={{
-                flex: 1,
+                width: '100%',
                 padding: '5px 8px',
-                fontFamily: 'var(--font-sans)',
                 fontSize: 11,
                 fontWeight: 600,
-                border: '1px solid var(--border-color)',
                 borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
                 background: 'var(--bg-subtle)',
                 color: 'var(--text-primary)',
-                outline: 'none',
               }}
             >
-              {(STATE_DISTRICT_MAP[selectedState] || []).map((dst) => (
-                <option key={dst} value={dst}>
-                  {dst} Sector
-                </option>
+              {(STATE_DISTRICT_MAP[selectedState] || ['Chamoli', 'Rudraprayag']).map((d) => (
+                <option key={d} value={d}>{d}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
 
-      {/* Executive Relocation Balance Sheet */}
-      <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: 8 }}>
-          Sector Relocation Balance Sheet
+      {/* KPI Logistics Overview */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, margin: '10px 0' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>EXPOSED POP</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
+            {exposedPop.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>{atRiskHabs.length} at-risk settlements</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-          <div style={{ background: 'var(--bg-surface)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
-              <Users size={14} color="var(--accent-rose)" />
-              <span>Evacuee Influx Demand</span>
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
-              {exposedPop.toLocaleString()}
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-              From {atRiskHabs.length} high/critical settlements
-            </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>SAFE BEDS</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>
+            {totalSafeCapacity.toLocaleString()}
           </div>
-
-          <div style={{ background: 'var(--bg-surface)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
-              <Building size={14} color="var(--accent-emerald)" />
-              <span>Safe Haven Capacity</span>
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
-              {totalSafeCapacity.toLocaleString()}
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-              Across {distSites.length} institutional safe refuges
-            </div>
-          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>{distSites.length} safe havens</div>
         </div>
 
-        {/* Net Capacity Surplus Banner */}
-        <div
-          style={{
-            marginTop: 8,
-            padding: '8px 12px',
-            borderRadius: 'var(--radius-sm)',
-            background: capacitySurplus >= 0 ? 'var(--accent-emerald-subtle)' : 'var(--accent-rose-subtle)',
-            border: `1px solid ${capacitySurplus >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {capacitySurplus >= 0 ? (
-              <CheckCircle2 size={16} color="var(--accent-emerald)" />
-            ) : (
-              <AlertTriangle size={16} color="var(--accent-rose)" />
-            )}
-            <span style={{ fontSize: 11, fontWeight: 700, color: capacitySurplus >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)' }}>
-              {capacitySurplus >= 0 ? 'Adequate Carrying Capacity' : 'CRITICAL SHELTER DEFICIT'}
-            </span>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>BUSES / AMBULANCES</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-blue)', fontFamily: 'var(--font-mono)' }}>
+            {busesNeeded} / {ambulancesNeeded}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 800, fontFamily: 'var(--font-mono)', color: capacitySurplus >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)' }}>
-            {capacitySurplus >= 0 ? `+${capacitySurplus.toLocaleString()} Beds Surplus` : `${capacitySurplus.toLocaleString()} Deficit`}
-          </span>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Evac &amp; Triage fleet</div>
+        </div>
+
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '8px', textAlign: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>RATIONS (14-DAY)</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
+            {rationsTonnes} T
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Dry grain stocks</div>
         </div>
       </div>
 
-      {/* Evacuation Fleet & Logistics Requirements */}
-      <div className="panel__section" style={{ background: 'var(--bg-surface)' }}>
-        <div className="panel__title" style={{ marginBottom: 8 }}>
-          Evacuation Logistics & Transport Requirements
+      {/* SECTION 1: HABITATION SITUATION DIRECTORY */}
+      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
+          1. Habitation Situation &amp; Population Profile
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-          <div style={{ background: 'var(--bg-subtle)', padding: '8px', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-            <Bus size={15} color="var(--accent-blue)" style={{ margin: '0 auto 4px' }} />
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {busesNeeded}
-            </div>
-            <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Convoy Buses</div>
-          </div>
-
-          <div style={{ background: 'var(--bg-subtle)', padding: '8px', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-            <Ambulance size={15} color="var(--accent-rose)" style={{ margin: '0 auto 4px' }} />
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {ambulancesNeeded}
-            </div>
-            <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Ambulances</div>
-          </div>
-
-          <div style={{ background: 'var(--bg-subtle)', padding: '8px', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-            <FileText size={15} color="var(--accent-amber)" style={{ margin: '0 auto 4px' }} />
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {rationsTonnes} T
-            </div>
-            <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>14-Day Rations</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Matched Relocation Allocation Matrix */}
-      <div className="panel__section">
-        <div className="panel__title" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>Settlement Relocation Allocation Matrix</span>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{distHabs.length} settlements evaluated</span>
-        </div>
-
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
             <thead>
-              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 700 }}>Settlement</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700 }}>Pop</th>
-                <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 700 }}>Risk</th>
-                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 700 }}>Designated Safe Refuge</th>
-                <th style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700 }}>Dist</th>
+              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Settlement</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>State / District</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Pop.</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Households</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Elev (m)</th>
+                <th style={{ padding: '6px 8px', textAlign: 'center' }}>Risk Score</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Primary Threats</th>
               </tr>
             </thead>
             <tbody>
-              {distHabs.map((h, i) => {
-                const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
-                return (
-                  <tr
-                    key={h.id}
-                    style={{
-                      borderBottom: '1px solid var(--border-color)',
-                      background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-subtle)',
-                    }}
-                  >
-                    <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {h.name}
-                    </td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                      {h.population.toLocaleString()}
-                    </td>
-                    <td style={{ padding: '6px 8px', textAlign: 'center' }}>
-                      <span
-                        className={`risk-badge risk-badge--sm ${h.riskScore >= 0.75 ? 'risk--critical' : h.riskScore >= 0.6 ? 'risk--high' : 'risk--moderate'}`}
-                      >
-                        {(h.riskScore * 100).toFixed(0)}%
-                      </span>
-                    </td>
-                    <td style={{ padding: '6px 8px', color: 'var(--accent-blue)', fontWeight: 600 }}>
-                      {haven?.name || 'District Safe Haven'}
-                    </td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-                      {haven?.distanceFromAffected || 10} km
-                    </td>
-                  </tr>
-                );
-              })}
+              {distHabs.map((h) => (
+                <tr key={h.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{h.name}</td>
+                  <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{h.district}, {h.state || 'India'}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{h.population.toLocaleString()}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{h.households || 0}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{h.location.elevation || 1500}m</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                    <span
+                      style={{
+                        padding: '1px 6px',
+                        borderRadius: 'var(--radius-xs)',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        background: h.riskScore >= 0.7 ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
+                        color: h.riskScore >= 0.7 ? 'var(--accent-rose)' : 'var(--accent-amber)',
+                      }}
+                    >
+                      {(h.riskScore * 100).toFixed(0)}% ({h.riskLevel})
+                    </span>
+                  </td>
+                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: 10 }}>
+                    {h.hazardExposure.map(he => he.type).join(', ') || 'Slope instability'}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Recommended Staged Action Plan */}
-      <div className="panel__section" style={{ overflowY: 'auto' }}>
-        <div className="panel__title" style={{ marginBottom: 10 }}>
-          Phased Evacuation Directives &bull; {selectedDistrict} ({selectedState})
+      {/* SECTION 2: SAFE HOUSE SHELTER REGISTRY & FOOD/WATER METRICS */}
+      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
+          2. Safe House Haven Registry &amp; Logistics Readiness
         </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Safe Haven Facility</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Cap (Beds)</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Occupants</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Water (L/day)</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Power (h)</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Med Beds</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Rations</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Managing Agency</th>
+              </tr>
+            </thead>
+            <tbody>
+              {distSites.map((site) => (
+                <tr key={site.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {site.name}
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 500 }}>{site.facilityType}</div>
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                    {site.capacity.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                    {site.currentOccupants || 0}
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                    {(site.dailyWaterLiters || 12000).toLocaleString()}L
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                    {site.powerBackupHours || 48}h
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                    {site.medicalBayBeds || 15}
+                  </td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--accent-amber)', fontWeight: 700 }}>
+                    {site.foodStockDays || 14} Days
+                  </td>
+                  <td style={{ padding: '6px 8px', color: 'var(--text-secondary)', fontSize: 10 }}>
+                    {site.managingAgency || 'District Administration & NDRF'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div
-            style={{
-              background: 'var(--bg-subtle)',
-              padding: '10px 12px',
-              border: '1px solid var(--border-color)',
-              borderLeft: '3px solid var(--accent-rose)',
-              borderRadius: 'var(--radius-md)',
-            }}
-          >
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-rose)', textTransform: 'uppercase' }}>
-              Phase 1 (0–24h Immediate Zero-Hour Evacuation)
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>
-              {atRiskHabs.slice(0, 2).length > 0
-                ? `Immediate zero-hour evacuation of critical settlements ${atRiskHabs.slice(0, 2).map((h) => `${h.name} (${h.population.toLocaleString()} evacuees, ${h.hazardExposure[0]?.type || 'hazard'} threat: ${(h.riskScore * 100).toFixed(0)}%)`).join(' and ')} to ${distSites[0]?.name || 'District Staging Area'} via designated lifeline corridor ${distSites[0]?.lifelineCorridor || 'State Highway'}.`
-                : `No critical 0–24h zero-hour evacuations mandated in ${selectedDistrict}. Pre-emptive flood and landslide alert warnings broadcasted.`}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-subtle)',
-              padding: '10px 12px',
-              border: '1px solid var(--border-color)',
-              borderLeft: '3px solid var(--accent-amber)',
-              borderRadius: 'var(--radius-md)',
-            }}
-          >
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-amber)', textTransform: 'uppercase' }}>
-              Phase 2 (24–72h Staged Mobilization & Logistics)
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>
-              {atRiskHabs.slice(2).length > 0
-                ? `Staged bus convoy mobilization (${busesNeeded} buses) for secondary vulnerable settlements ${atRiskHabs.slice(2).map((h) => `${h.name} (${h.population.toLocaleString()} pop)`).join(', ')} to ${distSites.slice(1).map((s) => s.name).join(' & ') || 'Safe Relocation Hubs'}.`
-                : `Staged logistics support: deploy ${ambulancesNeeded} dedicated ambulances and pre-position ${rationsTonnes} MT dry rations at designated safe havens across ${selectedDistrict}.`}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-subtle)',
-              padding: '10px 12px',
-              border: '1px solid var(--border-color)',
-              borderLeft: '3px solid var(--accent-blue)',
-              borderRadius: 'var(--radius-md)',
-            }}
-          >
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-blue)', textTransform: 'uppercase' }}>
-              Phase 3 (Continuous Telemetry & Inundation Monitoring)
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>
-              Maintain 24/7 automated telemetry monitoring on river gauging telemeters, slope creep sensors, and IMD/SACHET radar alerts across {selectedDistrict}, {selectedState}. Keep heavy road-clearing machinery on 15-minute standby.
-            </div>
-          </div>
+      {/* SECTION 3: EVACUATION ROUTE MATRIX & TRAVEL MODE */}
+      <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 6 }}>
+          3. Evacuation Route Matrix &amp; Mode of Travel Brief
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontSize: 11, borderCollapse: 'collapse', background: 'var(--bg-surface)' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-subtle)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Evacuation Settlement</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Assigned Safe Haven</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Mode of Travel</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Distance</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Journey Time</th>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Lifeline Corridor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {distHabs.map((h) => {
+                const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
+                const route = getRouteDetails(h, haven);
+                return (
+                  <tr key={h.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '6px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>{h.name}</td>
+                    <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>{haven?.name || 'District Safe Haven'}</td>
+                    <td style={{ padding: '6px 8px', fontWeight: 600 }}>{route.modeLabel}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{route.distKm} km</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-blue)' }}>
+                      {route.journeyTimeStr}
+                    </td>
+                    <td style={{ padding: '6px 8px', color: 'var(--text-muted)', fontSize: 10 }}>{route.corridor}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
