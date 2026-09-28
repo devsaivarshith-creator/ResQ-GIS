@@ -276,7 +276,7 @@ export default function RelocationPanel(_props: Props = {}) {
   }
 
   return (
-    <div className="panel">
+    <div className="panel" style={{ height: 'auto', minHeight: '100%', overflowY: 'visible', paddingBottom: 32 }}>
       {/* Return to Registry Header */}
       <div
         style={{
@@ -437,7 +437,7 @@ export default function RelocationPanel(_props: Props = {}) {
       )}
 
       {/* Assigned At-Risk Habitations (Relocation Match) */}
-      <div className="panel__section" style={{ overflowY: 'auto' }}>
+      <div className="panel__section">
         <div className="panel__title" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
           <Users size={15} color="var(--accent-rose)" />
           <span>Matched Influx Settlements ({matchedHabitations.length})</span>

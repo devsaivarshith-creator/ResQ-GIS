@@ -14,7 +14,7 @@ function formatTimeAgo(isoStr: string): string {
 }
 
 export default function AlertsPanel() {
-  const { alerts } = useAppStore();
+  const { alerts, habitations } = useAppStore();
 
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [timeRange, setTimeRange] = useState<string>('72H'); // '6H' | '12H' | '24H' | '48H' | '72H' | 'ALL'
@@ -23,11 +23,12 @@ export default function AlertsPanel() {
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Extract unique states & hazards dynamically
+  // Extract unique states dynamically from both alerts and monitored regions
   const uniqueStates = useMemo(() => {
-    const states = alerts.map(a => a.state).filter(Boolean) as string[];
-    return Array.from(new Set(states)).sort();
-  }, [alerts]);
+    const fromAlerts = alerts.map((a) => a.state).filter(Boolean) as string[];
+    const fromHabs = habitations.map((h) => h.state).filter(Boolean) as string[];
+    return Array.from(new Set([...fromAlerts, ...fromHabs])).sort();
+  }, [alerts, habitations]);
 
   const filteredAlerts = useMemo(() => {
     const now = Date.now();
@@ -40,7 +41,7 @@ export default function AlertsPanel() {
       if (timeRange === '12H' && ageHours > 12) return false;
       if (timeRange === '24H' && ageHours > 24) return false;
       if (timeRange === '48H' && ageHours > 48) return false;
-      if (timeRange === '72H' && ageHours > 72) return false;
+      if (timeRange === '72H' && ageHours > 72 && (!alert.expiresAt || new Date(alert.expiresAt).getTime() < now)) return false;
 
       // 2. State filter
       if (stateFilter !== 'ALL' && alert.state && alert.state.toLowerCase() !== stateFilter.toLowerCase()) {

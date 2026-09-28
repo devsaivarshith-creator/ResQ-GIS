@@ -186,7 +186,7 @@ export default function HabitationPanel() {
     hab.riskScore >= 0.8 ? 'var(--accent-rose)' : hab.riskScore >= 0.6 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
 
   return (
-    <div className="panel">
+    <div className="panel" style={{ height: 'auto', minHeight: '100%', overflowY: 'visible', paddingBottom: 32 }}>
       {/* Return to Directory Header */}
       <div
         style={{

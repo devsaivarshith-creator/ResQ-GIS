@@ -433,7 +433,9 @@ export const useAppStore = create<AppState>((set, get) => ({
           relocationSites: sites.length >= DEMO_RELOCATION_SITES.length
             ? sites
             : [...sites, ...DEMO_RELOCATION_SITES.filter((ds) => !sites.some((s) => s.id === ds.id))],
-          alerts: alerts.length > 0 ? alerts : DEMO_ALERTS,
+          alerts: alerts.length >= DEMO_ALERTS.length
+            ? alerts
+            : [...alerts, ...DEMO_ALERTS.filter((da) => !alerts.some((a) => a.id === da.id))],
           riverStations: rivers.length > 0 ? rivers : DEMO_RIVER_STATIONS,
           hazardLayers: hazards.length > 0 ? hazards : DEMO_HAZARDS,
           weather: weatherRes.forecast.length > 0 ? weatherRes.forecast : DEMO_WEATHER,

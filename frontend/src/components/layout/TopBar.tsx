@@ -48,6 +48,9 @@ export default function TopBar() {
     selectedHazardType,
     setSelectedHazardType,
     setActiveNav,
+    selectHabitation,
+    selectSite,
+    selectRiver,
   } = useAppStore();
 
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
@@ -94,6 +97,9 @@ export default function TopBar() {
     addWorkspace(newWs);
     setActiveWorkspaceId(newWs.id);
     setSelectedDistrict(newWsDistrict);
+    selectHabitation(null);
+    selectSite(null);
+    selectRiver(null);
     flyToDistrict(newWsDistrict);
     setNewWsName('');
     setNewWsDescription('');
@@ -103,17 +109,24 @@ export default function TopBar() {
 
   const handleStateChange = (stateName: string) => {
     setSelectedState(stateName);
+    selectHabitation(null);
+    selectSite(null);
+    selectRiver(null);
     const dists = STATES_AND_DISTRICTS[stateName] || [];
     if (dists.length > 0) {
       setSelectedDistrict(dists[0]);
       flyToDistrict(dists[0]);
     } else {
+      setSelectedDistrict('');
       flyToState(stateName);
     }
   };
 
   const handleDistrictChange = (dist: string) => {
     setSelectedDistrict(dist);
+    selectHabitation(null);
+    selectSite(null);
+    selectRiver(null);
     flyToDistrict(dist);
   };
 

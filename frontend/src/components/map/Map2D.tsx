@@ -371,7 +371,7 @@ export default function Map2D() {
 
   // Center when administrative scope changes (district or state)
   useEffect(() => {
-    if (!mapRef.current || selectedHabitationId || selectedSiteId || selectedRiverId) return;
+    if (!mapRef.current) return;
     const distMap: Record<string, [number, number]> = {
       chamoli: [30.55, 79.55],
       rudraprayag: [30.45, 79.05],
@@ -420,30 +420,8 @@ export default function Map2D() {
       manipur: [24.8, 93.8],
       nagaland: [25.7, 94.1],
     };
-    // 1. Specific entity selection (Highest priority)
-    if (selectedHabitationId) {
-      const hab = habitations.find((h) => h.id === selectedHabitationId);
-      if (hab && hab.location) {
-        mapRef.current.flyTo([hab.location.lat, hab.location.lng], 13, { duration: 1.2 });
-        return;
-      }
-    }
-    if (selectedSiteId) {
-      const site = relocationSites.find((s) => s.id === selectedSiteId);
-      if (site && site.location) {
-        mapRef.current.flyTo([site.location.lat, site.location.lng], 13, { duration: 1.2 });
-        return;
-      }
-    }
-    if (selectedRiverId) {
-      const river = riverStations.find((r) => r.id === selectedRiverId);
-      if (river && river.location) {
-        mapRef.current.flyTo([river.location.lat, river.location.lng], 12, { duration: 1.2 });
-        return;
-      }
-    }
 
-    // 2. District selection
+    // 1. District selection
     if (selectedDistrict && selectedDistrict !== 'ALL') {
       const coords = distMap[selectedDistrict.toLowerCase().trim()];
       if (coords) {
@@ -452,14 +430,14 @@ export default function Map2D() {
       }
     }
 
-    // 3. State selection
+    // 2. State selection
     if (selectedState && selectedState !== 'ALL') {
       const sCoords = stateMap[selectedState.toLowerCase().trim()];
       if (sCoords) {
         mapRef.current.flyTo(sCoords, 8, { duration: 1.2 });
       }
     }
-  }, [selectedDistrict, selectedState, selectedHabitationId, selectedSiteId, selectedRiverId, habitations, relocationSites, riverStations]);
+  }, [selectedDistrict, selectedState]);
 
 
 
@@ -697,28 +675,30 @@ export default function Map2D() {
       habitations.forEach((h) => {
         const isSelected = selectedHabitationId === h.id;
         const color = h.riskScore >= 0.7 ? '#ef4444' : h.riskScore >= 0.5 ? '#fde047' : '#86efac';
-        const circleSize = isSelected ? 28 : 22;
 
         const icon = L.divIcon({
           className: 'retro-marker-habitation',
           html: `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
               <div style="
-                width: ${circleSize}px;
-                height: ${circleSize}px;
                 background: ${color};
                 border: 2px solid #000000;
                 box-shadow: ${isSelected ? '0 0 0 2px #ffffff, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
-                border-radius: 50%;
-                display: flex;
+                border-radius: 12px;
+                padding: 1px 6px;
+                display: inline-flex;
                 align-items: center;
-                justify-content: center;
+                gap: 3px;
                 color: #000000;
-                font-size: ${isSelected ? '12px' : '10px'};
+                font-family: var(--font-mono, monospace);
+                font-weight: 900;
+                font-size: ${isSelected ? '11px' : '10px'};
                 cursor: pointer;
+                line-height: 1.2;
                 transition: transform 0.1s ease;
               ">
-                🏠
+                <span style="font-size: ${isSelected ? '12px' : '11px'};">🏠</span>
+                <span>${h.riskScore.toFixed(2)}</span>
               </div>
               ${
                 showLabels
@@ -744,8 +724,8 @@ export default function Map2D() {
               }
             </div>
           `,
-          iconSize: [140, showLabels ? 42 : circleSize],
-          iconAnchor: [70, circleSize / 2],
+          iconSize: [140, showLabels ? 42 : 22],
+          iconAnchor: [70, 11],
         });
 
         const marker = L.marker([h.location.lat, h.location.lng], { icon, zIndexOffset: 100 });
@@ -874,17 +854,8 @@ export default function Map2D() {
   const recenterMap = () => {
     if (!mapRef.current) return;
 
-    // 1. If a habitation is selected, redirect to habitation
-    if (selectedHabitationId) {
-      const hab = habitations.find((h) => h.id === selectedHabitationId);
-      if (hab && hab.location) {
-        mapRef.current.flyTo([hab.location.lat, hab.location.lng], 13, { duration: 1.2 });
-        return;
-      }
-    }
-
-    // 2. If a district is selected in top bar, redirect to district coordinates
-    if (selectedDistrict) {
+    // 1. Prioritize Top Bar District selection
+    if (selectedDistrict && selectedDistrict !== 'ALL') {
       const normDist = selectedDistrict.toLowerCase().trim();
       const distCoord = DISTRICT_COORDINATES[normDist];
       if (distCoord) {
@@ -900,8 +871,8 @@ export default function Map2D() {
       }
     }
 
-    // 3. If a state is selected in top bar, redirect to state coordinates
-    if (selectedState) {
+    // 2. Prioritize Top Bar State selection
+    if (selectedState && selectedState !== 'ALL') {
       const normState = selectedState.toLowerCase().trim();
       const stateCoord = STATE_COORDINATES[normState];
       if (stateCoord) {
@@ -913,6 +884,15 @@ export default function Map2D() {
       );
       if (matchingHab && matchingHab.location) {
         mapRef.current.flyTo([matchingHab.location.lat, matchingHab.location.lng], 8, { duration: 1.2 });
+        return;
+      }
+    }
+
+    // 3. Fallback to active habitation if any
+    if (selectedHabitationId) {
+      const hab = habitations.find((h) => h.id === selectedHabitationId);
+      if (hab && hab.location) {
+        mapRef.current.flyTo([hab.location.lat, hab.location.lng], 13, { duration: 1.2 });
         return;
       }
     }

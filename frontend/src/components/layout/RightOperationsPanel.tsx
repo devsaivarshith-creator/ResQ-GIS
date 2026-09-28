@@ -325,7 +325,7 @@ export default function RightOperationsPanel() {
                   <X size={12} />
                 </button>
               </div>
-              <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+              <div style={{ maxHeight: 'calc(100vh - 140px)', minHeight: 380, overflowY: 'auto' }}>
                 {selectedHabitationId ? <HabitationPanel /> : <RelocationPanel />}
               </div>
             </div>
