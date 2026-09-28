@@ -179,7 +179,7 @@ export default function RightOperationsPanel() {
 
   const toolTitle =
     activeNav === 'analysis'
-      ? 'TOPSIS Leaderboard'
+      ? 'Risk Priority Leaderboard'
       : activeNav === 'workspaces'
       ? 'Workspaces & Folders'
       : activeNav === 'surveillance'

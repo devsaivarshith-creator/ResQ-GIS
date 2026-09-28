@@ -8,27 +8,37 @@ export default function AnalysisPanel() {
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [stateFilter, setStateFilter] = useState<string>('');
+  const [districtFilter, setDistrictFilter] = useState<string>('');
   const [riskFilter, setRiskFilter] = useState<string>('');
+  const [hazardFilter, setHazardFilter] = useState<string>('');
+
+  const uniqueStates = useMemo(() => {
+    return Array.from(new Set(habitations.map(h => h.state).filter(Boolean)));
+  }, [habitations]);
+
+  const uniqueDistricts = useMemo(() => {
+    return Array.from(new Set(
+      habitations
+        .filter(h => !stateFilter || h.state === stateFilter)
+        .map(h => h.district)
+    ));
+  }, [habitations, stateFilter]);
 
   const filteredResults = useMemo(() => {
     return prioritizationResults.filter(item => {
       const hab = habitations.find(h => h.id === item.habitationId);
       if (!hab) return false;
       
-      if (stateFilter && hab.district !== stateFilter) {
-        // Here we use district as state proxy based on mock data
-        return false;
-      }
-      
-      if (riskFilter && hab.riskLevel !== riskFilter) {
+      if (stateFilter && hab.state !== stateFilter) return false;
+      if (districtFilter && hab.district !== districtFilter) return false;
+      if (riskFilter && hab.riskLevel !== riskFilter) return false;
+      if (hazardFilter && !hab.hazardExposure.some(he => he.type === hazardFilter && (he.level === 'HIGH' || he.level === 'CRITICAL'))) {
         return false;
       }
       
       return true;
     });
-  }, [prioritizationResults, habitations, stateFilter, riskFilter]);
-
-  const uniqueDistricts = Array.from(new Set(habitations.map(h => h.district)));
+  }, [prioritizationResults, habitations, stateFilter, districtFilter, riskFilter, hazardFilter]);
 
   return (
     <div className="panel">
@@ -56,7 +66,7 @@ export default function AnalysisPanel() {
                 Analysis Dashboard
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                Multi-Criteria Evacuation Staging
+                Multi-Criteria Evacuation Staging ({filteredResults.length} Habitations)
               </div>
             </div>
           </div>
@@ -79,7 +89,7 @@ export default function AnalysisPanel() {
               Dashboard Filters
             </span>
             <button
-              onClick={() => { setStateFilter(''); setRiskFilter(''); }}
+              onClick={() => { setStateFilter(''); setDistrictFilter(''); setRiskFilter(''); setHazardFilter(''); }}
               style={{
                 background: 'none',
                 border: 'none',
@@ -89,36 +99,66 @@ export default function AnalysisPanel() {
                 cursor: 'pointer',
               }}
             >
-              Reset
+              Reset All
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>State / District</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>State Filter</label>
               <select 
                 value={stateFilter} 
-                onChange={e => setStateFilter(e.target.value)}
-                style={{ width: '100%', padding: '4px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                onChange={e => { setStateFilter(e.target.value); setDistrictFilter(''); }}
+                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
-                <option value="">All Regions</option>
+                <option value="">All States ({uniqueStates.length})</option>
+                {uniqueStates.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>District Filter</label>
+              <select 
+                value={districtFilter} 
+                onChange={e => setDistrictFilter(e.target.value)}
+                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+              >
+                <option value="">All Districts ({uniqueDistricts.length})</option>
                 {uniqueDistricts.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
             </div>
+
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>Risk Factor</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>Risk Level Filter</label>
               <select 
                 value={riskFilter} 
                 onChange={e => setRiskFilter(e.target.value)}
-                style={{ width: '100%', padding: '4px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All Risk Levels</option>
-                <option value="CRITICAL">Critical</option>
-                <option value="HIGH">High</option>
-                <option value="MODERATE">Moderate</option>
-                <option value="LOW">Low</option>
+                <option value="CRITICAL">Critical Risk</option>
+                <option value="HIGH">High Risk</option>
+                <option value="MODERATE">Moderate Risk</option>
+                <option value="LOW">Low Risk</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>Primary Hazard Filter</label>
+              <select 
+                value={hazardFilter} 
+                onChange={e => setHazardFilter(e.target.value)}
+                style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+              >
+                <option value="">All Hazard Types</option>
+                <option value="landslide">Landslide Susceptibility</option>
+                <option value="flood">Flood Exposure</option>
+                <option value="glof">GLOF Glacial Threat</option>
+                <option value="earthquake">Seismic Risk</option>
               </select>
             </div>
           </div>
@@ -180,14 +220,14 @@ export default function AnalysisPanel() {
                       {item.name}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                      {item.district} &bull; Pop: {item.population.toLocaleString()}
+                      {item.district} ({hab?.state || 'India'}) &bull; Pop: {item.population.toLocaleString()}
                     </div>
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>TOPSIS</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Priority Index</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-rose)', fontFamily: 'var(--font-mono)' }}>
                     {item.score.toFixed(3)}
                   </div>
                 </div>

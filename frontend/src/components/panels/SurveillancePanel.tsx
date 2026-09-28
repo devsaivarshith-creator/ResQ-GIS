@@ -149,23 +149,73 @@ export default function SurveillancePanel() {
               RISK {avgRisk.toFixed(2)}
             </span>
           </div>
+          {/* Select Epicenter from ALL Habitations */}
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 4 }}>
+              Select Habitation Epicenter ({habitations.length} Available)
+            </label>
+            <select
+              style={{
+                width: '100%',
+                padding: '6px 10px',
+                fontSize: 12,
+                fontWeight: 600,
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-subtle)',
+                color: 'var(--text-primary)',
+              }}
+              onChange={(e) => {
+                const targetHab = habitations.find(h => h.id === e.target.value);
+                if (targetHab) {
+                  setZoneName(`${targetHab.name} Sentry Zone`);
+                  const newZone: SurveillanceZone = {
+                    id: `sz-${targetHab.id}`,
+                    name: `${targetHab.name} Sentry Zone`,
+                    district: targetHab.district,
+                    center: { lat: targetHab.location.lat, lng: targetHab.location.lng },
+                    radiusKm,
+                    assignedFolderId: activeWs.id,
+                    riskScore: targetHab.riskScore,
+                    populationExposed: targetHab.population,
+                    activeAlertsCount: 1,
+                    lastScanned: 'Just now',
+                  };
+                  setActiveSurveillanceZone(newZone);
+                  flyToSite(targetHab.location.lng, targetHab.location.lat);
+                }
+              }}
+            >
+              <option value="">-- Choose Any Habitation --</option>
+              {habitations.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} ({h.district}, {h.state || 'India'}) - Pop: {h.population.toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            type="text"
-            value={zoneName}
-            onChange={(e) => setZoneName(e.target.value)}
-            style={{
-              padding: '6px 10px',
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13,
-              fontWeight: 700,
-              background: 'var(--bg-subtle)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-primary)',
-              outline: 'none',
-            }}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
+              Zone Label / Designation
+            </label>
+            <input
+              type="text"
+              value={zoneName}
+              onChange={(e) => setZoneName(e.target.value)}
+              style={{
+                padding: '6px 10px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 13,
+                fontWeight: 700,
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-primary)',
+                outline: 'none',
+              }}
+            />
+          </div>
 
           {/* Coordinates & Radius slider */}
           <div>
