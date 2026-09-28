@@ -123,13 +123,13 @@ export default function TopBar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 52,
-        padding: '0 12px',
+        height: 44,
+        padding: '0 10px',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-sm)',
-        gap: 8,
+        gap: 6,
         flexShrink: 0,
         position: 'relative',
         zIndex: 10000,
@@ -140,37 +140,37 @@ export default function TopBar() {
       }}
     >
       {/* 1. Brand Logo + Version + Workspace Dropdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 'var(--radius-md)',
+              width: 26,
+              height: 26,
+              borderRadius: 'var(--radius-sm)',
               background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
               fontWeight: 800,
-              fontSize: 16,
-              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+              fontSize: 13,
+              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)',
             }}
           >
             ▲
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'nowrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'nowrap' }}>
               <span
                 style={{
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: 900,
                   background: 'linear-gradient(90deg, var(--text-primary), var(--accent-blue))',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  letterSpacing: '0.5px',
+                  letterSpacing: '0.4px',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -332,25 +332,26 @@ export default function TopBar() {
       </div>
 
       {/* 2. Unified Filter Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
         {/* State Select */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>State</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-muted)' }}>State</span>
           <select
             value={selectedState || 'Uttarakhand'}
             onChange={(e) => handleStateChange(e.target.value)}
             style={{
-              padding: '4px 6px',
+              padding: '2px 5px',
               fontFamily: 'var(--font-sans)',
-              fontSize: 11,
+              fontSize: 10.5,
               fontWeight: 600,
               color: 'var(--text-primary)',
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               outline: 'none',
-              maxWidth: 110,
+              maxWidth: 95,
+              height: 26,
             }}
           >
             {Object.keys(STATES_AND_DISTRICTS).map((s) => (
@@ -360,23 +361,24 @@ export default function TopBar() {
         </div>
 
         {/* District Select */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>District</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-muted)' }}>Dist</span>
           <select
             value={selectedDistrict}
             onChange={(e) => handleDistrictChange(e.target.value)}
             style={{
-              padding: '4px 6px',
+              padding: '2px 5px',
               fontFamily: 'var(--font-sans)',
-              fontSize: 11,
+              fontSize: 10.5,
               fontWeight: 600,
               color: 'var(--text-primary)',
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               outline: 'none',
-              maxWidth: 120,
+              maxWidth: 105,
+              height: 26,
             }}
           >
             {(STATES_AND_DISTRICTS[selectedState] || ['Chamoli', 'Rudraprayag', 'Pithoragarh', 'Uttarkashi']).map((d) => (
@@ -386,31 +388,32 @@ export default function TopBar() {
         </div>
 
         {/* Hazard Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Hazard</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+          <span style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-muted)' }}>Hazard</span>
           <select
             value={selectedHazardType ?? 'all'}
             onChange={(e) => setSelectedHazardType(e.target.value === 'all' ? null : (e.target.value as any))}
             style={{
-              padding: '4px 6px',
+              padding: '2px 5px',
               fontFamily: 'var(--font-sans)',
-              fontSize: 11,
+              fontSize: 10.5,
               fontWeight: 600,
               color: 'var(--text-primary)',
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               outline: 'none',
-              maxWidth: 115,
+              maxWidth: 100,
+              height: 26,
             }}
           >
             <option value="all">All Hazards</option>
-            <option value="landslide">Landslide & Slope Slide</option>
-            <option value="flood">Riverine & Flash Flood</option>
-            <option value="glof">GLOF (Lake Outburst)</option>
-            <option value="cyclone">Cyclone & Storm Surge</option>
-            <option value="earthquake">Seismic & Subsidence</option>
+            <option value="landslide">Landslide & Slope</option>
+            <option value="flood">Flood & Flash Flood</option>
+            <option value="glof">GLOF</option>
+            <option value="cyclone">Cyclone</option>
+            <option value="earthquake">Seismic</option>
           </select>
         </div>
 
@@ -420,22 +423,23 @@ export default function TopBar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 5,
+            gap: 4,
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.16))',
             border: '1px solid rgba(16, 185, 129, 0.4)',
-            padding: '3px 8px',
+            padding: '2px 7px',
             borderRadius: 'var(--radius-pill)',
             cursor: 'pointer',
             color: '#10b981',
-            fontSize: 11,
+            fontSize: 10.5,
             fontWeight: 700,
             whiteSpace: 'nowrap',
             flexShrink: 0,
-            boxShadow: '0 1px 4px rgba(16, 185, 129, 0.15)',
+            height: 26,
+            boxShadow: '0 1px 3px rgba(16, 185, 129, 0.15)',
           }}
           title="Open Flagship Relocation & Safe Haven Logistics Hub"
         >
-          <Navigation size={12} color="#10b981" />
+          <Navigation size={11} color="#10b981" />
           <span>Relocation Hub</span>
         </button>
 
@@ -446,32 +450,33 @@ export default function TopBar() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
+              gap: 5,
               background: topAlert.severity === 'red' ? 'var(--accent-rose-subtle)' : 'var(--accent-amber-subtle)',
               border: `1px solid ${topAlert.severity === 'red' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-              padding: '3px 8px',
+              padding: '2px 6px',
               borderRadius: 'var(--radius-pill)',
               cursor: 'pointer',
               marginLeft: 2,
               minWidth: 0,
-              maxWidth: 200,
+              maxWidth: 180,
+              height: 26,
               overflow: 'hidden',
               flexShrink: 1,
             }}
           >
             <span
               style={{
-                width: 6,
-                height: 6,
+                width: 5,
+                height: 5,
                 borderRadius: '50%',
                 flexShrink: 0,
                 background: topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)',
-                boxShadow: `0 0 6px ${topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)'}`,
+                boxShadow: `0 0 5px ${topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)'}`,
               }}
             />
             <span
               style={{
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 700,
                 color: topAlert.severity === 'red' ? 'var(--accent-rose)' : 'var(--accent-amber)',
                 whiteSpace: 'nowrap',
@@ -486,7 +491,7 @@ export default function TopBar() {
       </div>
 
       {/* 3. Action Tools: Surveillance, Map Mode, Telemetry & Theme */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
         {/* Surveillance Mode Toggle Button */}
         <button
           onClick={() => {
@@ -500,12 +505,15 @@ export default function TopBar() {
             background: isSurveillanceActive ? 'var(--accent-rose)' : 'var(--bg-surface)',
             color: isSurveillanceActive ? '#ffffff' : 'var(--text-primary)',
             borderColor: isSurveillanceActive ? 'var(--accent-rose)' : 'var(--border-color)',
-            boxShadow: isSurveillanceActive ? '0 0 10px rgba(244, 63, 94, 0.3)' : 'var(--shadow-xs)',
+            boxShadow: isSurveillanceActive ? '0 0 8px rgba(244, 63, 94, 0.3)' : 'var(--shadow-xs)',
+            height: 26,
+            padding: '2px 7px',
+            fontSize: 10.5,
           }}
           title="Toggle Surveillance AOI Tool"
         >
-          <Radio size={13} className={isSurveillanceActive ? 'pulse' : ''} />
-          <span>{isSurveillanceActive ? 'Monitoring Zone Active' : 'Mark Surveillance'}</span>
+          <Radio size={12} className={isSurveillanceActive ? 'pulse' : ''} />
+          <span>{isSurveillanceActive ? 'AOI Active' : 'Mark AOI'}</span>
         </button>
 
         {/* 2D / 3D Map Switcher */}
@@ -514,49 +522,51 @@ export default function TopBar() {
             display: 'flex',
             background: 'var(--bg-subtle)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            padding: 2,
+            borderRadius: 'var(--radius-sm)',
+            padding: 1.5,
+            height: 26,
+            alignItems: 'center',
           }}
         >
           <button
             onClick={() => setMapMode('2d')}
             style={{
-              padding: '3px 8px',
-              fontSize: 11,
+              padding: '2px 6px',
+              fontSize: 10.5,
               fontWeight: 700,
               background: mapMode === '2d' ? 'var(--bg-surface)' : 'transparent',
               color: mapMode === '2d' ? 'var(--accent-blue)' : 'var(--text-muted)',
               border: 'none',
-              borderRadius: 'var(--radius-sm)',
+              borderRadius: 'var(--radius-xs)',
               boxShadow: mapMode === '2d' ? 'var(--shadow-xs)' : 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 3,
             }}
           >
-            <Layers size={12} />
-            <span>2D GIS</span>
+            <Layers size={11} />
+            <span>2D</span>
           </button>
           <button
             onClick={() => setMapMode('3d')}
             style={{
-              padding: '3px 8px',
-              fontSize: 11,
+              padding: '2px 6px',
+              fontSize: 10.5,
               fontWeight: 700,
               background: mapMode === '3d' ? 'var(--bg-surface)' : 'transparent',
               color: mapMode === '3d' ? 'var(--accent-blue)' : 'var(--text-muted)',
               border: 'none',
-              borderRadius: 'var(--radius-sm)',
+              borderRadius: 'var(--radius-xs)',
               boxShadow: mapMode === '3d' ? 'var(--shadow-xs)' : 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 3,
             }}
           >
-            <Globe size={12} />
-            <span>3D Cesium</span>
+            <Globe size={11} />
+            <span>3D</span>
           </button>
         </div>
 
@@ -565,13 +575,14 @@ export default function TopBar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 5,
-            padding: '4px 8px',
+            gap: 4,
+            padding: '2px 6px',
             background: backendConnected ? 'var(--accent-emerald-subtle)' : 'var(--accent-amber-subtle)',
             border: `1px solid ${backendConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
             borderRadius: 'var(--radius-pill)',
-            fontSize: 10,
+            fontSize: 9.5,
             fontWeight: 700,
+            height: 26,
             color: backendConnected ? 'var(--accent-emerald)' : 'var(--accent-amber)',
           }}
           title={backendConnected ? 'FastAPI & Live Government Ingestion active' : 'Offline simulation'}

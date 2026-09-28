@@ -112,7 +112,7 @@ export default function BottomDataTable() {
   };
 
   const panelHeight =
-    bottomTableState === 'collapsed' ? 38 : bottomTableState === 'expanded' ? 360 : 190;
+    bottomTableState === 'collapsed' ? 34 : bottomTableState === 'expanded' ? 380 : 215;
 
   return (
     <div
@@ -138,7 +138,7 @@ export default function BottomDataTable() {
           background: 'var(--bg-subtle)',
           borderBottom: bottomTableState === 'collapsed' ? 'none' : '1px solid var(--border-color)',
           padding: '0 8px',
-          height: 38,
+          height: 34,
         }}
       >
         <div style={{ display: 'flex', gap: 4, height: '100%', alignItems: 'center' }}>
@@ -227,24 +227,24 @@ export default function BottomDataTable() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '6px 12px',
+              padding: '3px 10px',
               background: 'var(--bg-surface)',
               borderBottom: '1px solid var(--border-color)',
-              gap: 12,
+              gap: 8,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
               {/* Search Box */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 5,
                   background: 'var(--bg-subtle)',
                   border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '4px 8px',
-                  maxWidth: 280,
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '2px 6px',
+                  maxWidth: 240,
                   width: '100%',
                 }}
               >

@@ -205,8 +205,8 @@ export default function RightOperationsPanel() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: 380,
-        gap: 8,
+        width: 295,
+        gap: 6,
         overflowY: 'auto',
         flexShrink: 0,
         height: '100%',
@@ -373,13 +373,13 @@ export default function RightOperationsPanel() {
               </div>
             </div>
 
-            {/* 4 KPI Metric Cards */}
+            {/* 4 KPI Metric Cards in clean 2x2 grid */}
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 6,
-                padding: '8px',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 5,
+                padding: '6px 8px',
               }}
             >
               {/* Card 1: Habitations At Risk */}
@@ -388,20 +388,22 @@ export default function RightOperationsPanel() {
                 className="btn-action"
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '8px 4px',
+                  gap: 8,
+                  padding: '6px 8px',
                   background: 'var(--bg-surface)',
                   borderRadius: 'var(--radius-md)',
-                  textAlign: 'center',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 15 }}>🏠</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1.2 }}>
-                  {atRiskCount}
-                </div>
-                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  At Risk
+                <div style={{ fontSize: 16 }}>🏠</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-rose)', lineHeight: 1.1 }}>
+                    {atRiskCount}
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    At Risk
+                  </div>
                 </div>
               </button>
 
@@ -411,20 +413,22 @@ export default function RightOperationsPanel() {
                 className="btn-action"
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '8px 4px',
+                  gap: 8,
+                  padding: '6px 8px',
                   background: 'var(--bg-surface)',
                   borderRadius: 'var(--radius-md)',
-                  textAlign: 'center',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 15 }}>🏕️</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-emerald)', lineHeight: 1.2 }}>
-                  {readySitesCount}
-                </div>
-                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Safe Sites
+                <div style={{ fontSize: 16 }}>🏕️</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-emerald)', lineHeight: 1.1 }}>
+                    {readySitesCount}
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    Safe Sites
+                  </div>
                 </div>
               </button>
 
@@ -434,20 +438,22 @@ export default function RightOperationsPanel() {
                 className="btn-action"
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '8px 4px',
+                  gap: 8,
+                  padding: '6px 8px',
                   background: 'var(--bg-surface)',
                   borderRadius: 'var(--radius-md)',
-                  textAlign: 'center',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 15 }}>🚧</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-amber)', lineHeight: 1.2 }}>
-                  {blockedRoadsCount}
-                </div>
-                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Cutoffs
+                <div style={{ fontSize: 16 }}>🚧</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-amber)', lineHeight: 1.1 }}>
+                    {blockedRoadsCount}
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    Cutoffs
+                  </div>
                 </div>
               </button>
 
@@ -457,20 +463,22 @@ export default function RightOperationsPanel() {
                 className="btn-action"
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  padding: '8px 4px',
+                  gap: 8,
+                  padding: '6px 8px',
                   background: 'var(--bg-surface)',
                   borderRadius: 'var(--radius-md)',
-                  textAlign: 'center',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{ fontSize: 15 }}>🌊</div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-cyan)', lineHeight: 1.2 }}>
-                  {warningRiversCount}
-                </div>
-                <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  High Stage
+                <div style={{ fontSize: 16 }}>🌊</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--accent-cyan)', lineHeight: 1.1 }}>
+                    {warningRiversCount}
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    High Stage
+                  </div>
                 </div>
               </button>
             </div>
