@@ -196,6 +196,8 @@ export default function RightOperationsPanel() {
       ? 'Habitations Directory'
       : activeNav === 'relocation'
       ? 'Safe Haven Registry'
+      : activeNav === 'reports'
+      ? 'Evacuation & Travel Logistics Report'
       : activeNav.toUpperCase();
 
   return (
@@ -214,7 +216,7 @@ export default function RightOperationsPanel() {
     >
       {/* If a contextual tool is active, render the tool view with a quick back button */}
       {isContextualTool ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%', minHeight: 0 }}>
           <div
             style={{
               display: 'flex',
@@ -264,7 +266,7 @@ export default function RightOperationsPanel() {
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {activeNav === 'analysis' && <AnalysisPanel />}
             {activeNav === 'workspaces' && <WorkspacesPanel />}
             {activeNav === 'surveillance' && <SurveillancePanel />}

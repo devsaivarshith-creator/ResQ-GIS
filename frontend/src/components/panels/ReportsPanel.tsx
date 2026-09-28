@@ -7,18 +7,7 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import type { Habitation, RelocationSite } from '../../types';
 
-const STATE_DISTRICT_MAP: Record<string, string[]> = {
-  Uttarakhand: ['Chamoli', 'Rudraprayag'],
-  'Himachal Pradesh': ['Kullu', 'Mandi'],
-  Kerala: ['Wayanad', 'Idukki', 'Alappuzha'],
-  'Andhra Pradesh': ['Dr. B.R. Ambedkar Konaseema', 'Visakhapatnam'],
-  Assam: ['Majuli', 'Cachar'],
-  Sikkim: ['Mangan', 'Pakyong'],
-  Odisha: ['Jagatsinghpur', 'Puri'],
-  'Jammu & Kashmir': ['Anantnag'],
-  Meghalaya: ['East Khasi Hills'],
-  'Manipur & Nagaland': ['Noney', 'Kohima'],
-};
+
 
 // Helper: Determine mode of travel & journey time based on distance and hazard exposure
 function getRouteDetails(hab: Habitation, site?: RelocationSite) {
@@ -60,33 +49,43 @@ function getRouteDetails(hab: Habitation, site?: RelocationSite) {
 export default function ReportsPanel() {
   const { habitations, relocationSites } = useAppStore();
 
-  const [selectedState, setSelectedState] = useState<string>('Uttarakhand');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('Chamoli');
+  const [selectedState, setSelectedState] = useState<string>('ALL');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('ALL');
 
-  // Auto select first district when state changes
+  // Dynamically extract unique states from all habitations
+  const availableStates = useMemo(() => {
+    const states = habitations.map(h => h.state).filter(Boolean);
+    return Array.from(new Set(states)).sort();
+  }, [habitations]);
+
+  // Dynamically extract districts for selected state
+  const availableDistricts = useMemo(() => {
+    const filtered = habitations.filter(h => selectedState === 'ALL' || h.state === selectedState);
+    const dists = filtered.map(h => h.district).filter(Boolean);
+    return Array.from(new Set(dists)).sort();
+  }, [habitations, selectedState]);
+
+  // Auto select ALL or first district when state changes
   const handleStateChange = (st: string) => {
     setSelectedState(st);
-    const districts = STATE_DISTRICT_MAP[st] || [];
-    if (districts.length > 0) {
-      setSelectedDistrict(districts[0]);
-    }
+    setSelectedDistrict('ALL');
   };
 
   const distHabs = useMemo(() => {
     return habitations.filter((h) => {
-      const matchDist = h.district.toLowerCase() === selectedDistrict.toLowerCase();
-      const matchState = !selectedState || h.state?.toLowerCase().includes(selectedState.toLowerCase().split(' ')[0]);
-      return matchDist || matchState;
+      const matchState = selectedState === 'ALL' || (h.state && h.state.toLowerCase() === selectedState.toLowerCase());
+      const matchDist = selectedDistrict === 'ALL' || (h.district && h.district.toLowerCase() === selectedDistrict.toLowerCase());
+      return matchState && matchDist;
     });
-  }, [habitations, selectedDistrict, selectedState]);
+  }, [habitations, selectedState, selectedDistrict]);
 
   const distSites = useMemo(() => {
     return relocationSites.filter((s) => {
-      const matchDist = s.district.toLowerCase() === selectedDistrict.toLowerCase();
-      const matchState = !selectedState || s.state?.toLowerCase().includes(selectedState.toLowerCase().split(' ')[0]);
-      return matchDist || matchState;
+      const matchState = selectedState === 'ALL' || (s.state && s.state.toLowerCase() === selectedState.toLowerCase());
+      const matchDist = selectedDistrict === 'ALL' || (s.district && s.district.toLowerCase() === selectedDistrict.toLowerCase());
+      return matchState && matchDist;
     });
-  }, [relocationSites, selectedDistrict, selectedState]);
+  }, [relocationSites, selectedState, selectedDistrict]);
 
   const atRiskHabs = distHabs.filter((h) => h.riskScore >= 0.5 || h.riskLevel === 'HIGH' || h.riskLevel === 'CRITICAL');
   const exposedPop = distHabs.reduce((sum, h) => sum + h.population, 0);
@@ -174,7 +173,7 @@ export default function ReportsPanel() {
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
-              Target State
+              Target State Filter
             </label>
             <select
               value={selectedState}
@@ -190,7 +189,8 @@ export default function ReportsPanel() {
                 color: 'var(--text-primary)',
               }}
             >
-              {Object.keys(STATE_DISTRICT_MAP).map((s) => (
+              <option value="ALL">All States (Pan-India Relocation Matrix)</option>
+              {availableStates.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -198,7 +198,7 @@ export default function ReportsPanel() {
 
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
-              District Sector
+              District Sector Filter
             </label>
             <select
               value={selectedDistrict}
@@ -214,7 +214,8 @@ export default function ReportsPanel() {
                 color: 'var(--text-primary)',
               }}
             >
-              {(STATE_DISTRICT_MAP[selectedState] || ['Chamoli', 'Rudraprayag']).map((d) => (
+              <option value="ALL">All Districts ({availableDistricts.length})</option>
+              {availableDistricts.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>

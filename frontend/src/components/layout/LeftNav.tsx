@@ -39,7 +39,7 @@ const NAV_ITEMS: NavItemDef[] = [
   { id: 'infrastructure', label: 'Infrastructure', icon: Building, targetPanel: 'rivers' },
   { id: 'hazard_layers', label: 'Hazard Layers', icon: Layers, targetPanel: 'layers' },
   { id: 'alerts', label: 'Alerts Feed', icon: AlertTriangle, targetPanel: 'alerts' },
-  { id: 'reports', label: 'Reports', icon: FileText, targetPanel: 'reports' },
+  { id: 'reports', label: 'Travel & Evacuation Report', icon: FileText, targetPanel: 'reports' },
   { id: 'datasources', label: 'Data Sources', icon: Database, targetPanel: 'datasources' },
   { id: 'settings', label: 'Settings', icon: Settings, targetPanel: 'settings' },
 ];
