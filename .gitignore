@@ -48,6 +48,8 @@ coverage.xml
 .env.local
 .env.*.local
 *.pem
+deploy_netlify.py
+
 *.key
 
 # IDE & OS
