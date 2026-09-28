@@ -105,6 +105,16 @@ export default function AnalysisPanel() {
         </div>
       </div>
 
+      {/* Risk Score Mathematical Formula Indicator */}
+      <div style={{ background: 'rgba(56, 189, 248, 0.08)', borderBottom: '1px solid rgba(56, 189, 248, 0.2)', padding: '4px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9.5 }}>
+        <span style={{ color: 'var(--accent-blue)', fontWeight: 700, fontFamily: 'monospace' }}>
+          Rᵢ = [Σ(wₖ × Hᵢₖ)] × Eᵢ × Vᵢ
+        </span>
+        <span style={{ color: 'var(--text-muted)', fontSize: 9 }}>
+          Normalized (0–1) • Σwₖ = 1
+        </span>
+      </div>
+
       {/* Dynamic Filters Drawer */}
       {filtersOpen && (
         <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '6px 8px' }}>

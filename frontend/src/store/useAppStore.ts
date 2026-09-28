@@ -247,6 +247,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
     if (hab && hab.location) {
       flyToHabitation(hab.location.lng, hab.location.lat);
+      if (hab.district) {
+        get().loadWeather(hab.district);
+      }
     }
     if (id && get().backendConnected) {
       get().loadHabitationHazardAssessment(id);
@@ -303,10 +306,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   setSelectedState: (state) => {
     set({ selectedState: state, selectedDistrict: '', selectedBlock: null });
     flyToState(state);
+    get().loadWeather(state);
   },
   setSelectedDistrict: (district) => {
     set({ selectedDistrict: district, selectedBlock: null });
     flyToDistrict(district);
+    get().loadWeather(district);
     get().loadDistrictReport(district);
   },
   setSelectedBlock: (block) => set({ selectedBlock: block }),
@@ -422,8 +427,12 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({
           backendConnected: true,
           isDemoMode: health.demo_mode,
-          habitations: habs.length > 0 ? habs : DEMO_HABITATIONS,
-          relocationSites: sites.length > 0 ? sites : DEMO_RELOCATION_SITES,
+          habitations: habs.length >= DEMO_HABITATIONS.length
+            ? habs
+            : [...habs, ...DEMO_HABITATIONS.filter((dh) => !habs.some((h) => h.id === dh.id))],
+          relocationSites: sites.length >= DEMO_RELOCATION_SITES.length
+            ? sites
+            : [...sites, ...DEMO_RELOCATION_SITES.filter((ds) => !sites.some((s) => s.id === ds.id))],
           alerts: alerts.length > 0 ? alerts : DEMO_ALERTS,
           riverStations: rivers.length > 0 ? rivers : DEMO_RIVER_STATIONS,
           hazardLayers: hazards.length > 0 ? hazards : DEMO_HAZARDS,

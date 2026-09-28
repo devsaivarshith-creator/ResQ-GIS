@@ -51,6 +51,7 @@ export default function Map2D() {
   const layersGroupRef = useRef<L.FeatureGroup | null>(null);
   const pathwayGroupRef = useRef<L.FeatureGroup | null>(null);
   const indiaMaskRef = useRef<L.Polygon | null>(null);
+  const indiaStatesLayerRef = useRef<L.GeoJSON | null>(null);
 
   const [activeBasemap, setActiveBasemap] = useState<BasemapType>('satellite');
   const [showLabels] = useState<boolean>(true);
@@ -68,6 +69,7 @@ export default function Map2D() {
     habitations: true,
     relocation_sites: true,
     roads: true,
+    state_borders: true,
     district_boundaries: false,
     block_boundaries: false,
     india_focus: true,
@@ -95,6 +97,8 @@ export default function Map2D() {
     setMapMode,
     selectedDistrict,
     selectedState,
+    setSelectedState,
+    loadWeather,
     toggleLayer,
   } = useAppStore();
 
@@ -244,6 +248,95 @@ export default function Map2D() {
       }
     }
   }, [layerVisibility.india_focus]);
+
+  // Load and manage Indian State Boundaries layer
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    fetch('/data/india_states.geojson')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load state borders');
+        return res.json();
+      })
+      .then((geoData) => {
+        if (!mapRef.current) return;
+        if (indiaStatesLayerRef.current) {
+          indiaStatesLayerRef.current.remove();
+        }
+
+        const geoLayer = L.geoJSON(geoData, {
+          style: () => ({
+            color: '#38bdf8',
+            weight: 1.3,
+            dashArray: '4, 4',
+            opacity: 0.85,
+            fillColor: '#0284c7',
+            fillOpacity: 0.03,
+          }),
+          onEachFeature: (feature, layer) => {
+            const stateName = feature.properties?.name || feature.properties?.state || 'State';
+            layer.bindTooltip(
+              `<div style="font-family: inherit; font-size: 11px; padding: 2px 4px; line-height: 1.3;">
+                <b style="color: #38bdf8; font-size: 11.5px;">${stateName}</b>
+                <div style="font-size: 9.5px; color: #94a3b8;">State Administrative Boundary</div>
+              </div>`,
+              { sticky: true, className: 'retro-leaflet-tooltip' }
+            );
+
+            layer.on({
+              mouseover: (e) => {
+                const target = e.target;
+                target.setStyle({
+                  weight: 2.2,
+                  color: '#fbbf24',
+                  fillOpacity: 0.12,
+                  dashArray: '',
+                });
+                target.bringToFront();
+              },
+              mouseout: (e) => {
+                geoLayer.resetStyle(e.target);
+              },
+              click: (e) => {
+                const map = mapRef.current;
+                if (map) {
+                  map.fitBounds(e.target.getBounds(), { padding: [30, 30], maxZoom: 8 });
+                }
+                setSelectedState(stateName);
+                loadWeather(stateName);
+              },
+            });
+          },
+        });
+
+        indiaStatesLayerRef.current = geoLayer;
+        if (layerVisibility['state_borders']) {
+          geoLayer.addTo(mapRef.current);
+        }
+      })
+      .catch((err) => console.warn('Could not load india_states.geojson:', err));
+
+    return () => {
+      if (indiaStatesLayerRef.current) {
+        indiaStatesLayerRef.current.remove();
+        indiaStatesLayerRef.current = null;
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Toggle State Boundaries layer visibility
+  useEffect(() => {
+    if (!indiaStatesLayerRef.current || !mapRef.current) return;
+    if (layerVisibility['state_borders']) {
+      if (!mapRef.current.hasLayer(indiaStatesLayerRef.current)) {
+        indiaStatesLayerRef.current.addTo(mapRef.current);
+      }
+    } else {
+      if (mapRef.current.hasLayer(indiaStatesLayerRef.current)) {
+        mapRef.current.removeLayer(indiaStatesLayerRef.current);
+      }
+    }
+  }, [layerVisibility.state_borders]);
 
   // When mapMode is '2d', invalidate size to ensure tiles render immediately
   useEffect(() => {
@@ -1333,7 +1426,19 @@ export default function Map2D() {
               <span>Road Network (OSM)</span>
             </label>
 
-            {/* 8. District Boundary */}
+            {/* 8. State Boundaries (All 36 States/UTs) */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['state_borders'])}
+                onChange={() => toggleLocalLayer('state_borders')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, border: '1.5px solid #38bdf8', borderRadius: 2, background: 'rgba(56, 189, 248, 0.25)' }} />
+              <span>State Boundaries (All 36 States)</span>
+            </label>
+
+            {/* 9. District Boundary */}
             <label style={layerRowStyle}>
               <input
                 type="checkbox"

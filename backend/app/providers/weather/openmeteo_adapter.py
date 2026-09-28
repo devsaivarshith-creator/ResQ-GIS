@@ -50,6 +50,13 @@ DISTRICT_COORDINATES: dict[str, tuple[float, float]] = {
     "malappuram": (11.073, 76.074),
     "alappuzha": (9.498, 76.338),
     "kottayam": (9.591, 76.522),
+    "pathanamthitta": (9.264, 76.787),
+    "thrissur": (10.527, 76.214),
+    "ernakulam": (9.981, 76.299),
+    "kozhikode": (11.258, 75.780),
+    "kerala": (10.8505, 76.2711),
+    "uttarakhand": (30.0668, 79.0193),
+    "mangan": (27.505, 88.528),
     # Andhra Pradesh
     "east godavari": (16.989, 81.783),
     "visakhapatnam": (17.686, 83.218),
