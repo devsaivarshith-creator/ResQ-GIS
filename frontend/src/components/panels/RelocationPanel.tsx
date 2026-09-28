@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function RelocationPanel(_props: Props = {}) {
-  const { relocationSites, habitations, getSelectedSite, selectedSiteId, selectSite, selectHabitation } = useAppStore();
+  const { relocationSites, habitations, getSelectedSite, selectedSiteId, selectSite, selectHabitation, setActiveNav } = useAppStore();
   const site = getSelectedSite();
   const [selectedStateFilter, setSelectedStateFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -450,6 +450,7 @@ export default function RelocationPanel(_props: Props = {}) {
                 onClick={() => {
                   selectSite(null as any);
                   selectHabitation(h.id);
+                  setActiveNav('habitations');
                   if (h.location) flyToHabitation(h.location.lng, h.location.lat);
                 }}
                 style={{
@@ -476,11 +477,11 @@ export default function RelocationPanel(_props: Props = {}) {
                     fontWeight: 700,
                     color: 'var(--accent-blue)',
                     background: 'var(--accent-blue-subtle)',
-                    padding: '2px 6px',
+                    padding: '3px 7px',
                     borderRadius: 'var(--radius-xs)',
                   }}
                 >
-                  View Route
+                  View Habitation Info &rarr;
                 </span>
               </button>
             ))}

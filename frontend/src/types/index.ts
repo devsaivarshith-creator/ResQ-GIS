@@ -119,6 +119,9 @@ export interface DisasterAlert {
   headline?: string;
   severity: Severity;
   area: string;
+  state?: string;
+  district?: string;
+  hazardType?: string;
   description: string;
   issuedAt: string;
   expiresAt?: string;

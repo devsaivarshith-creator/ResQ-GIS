@@ -23,7 +23,7 @@ const HAZARD_LABEL: Record<string, string> = {
 };
 
 export default function HabitationPanel() {
-  const { getSelectedHabitation, habitations, selectHabitation, relocationSites, selectSite, activeHazardAssessment, selectedDistrict } = useAppStore();
+  const { getSelectedHabitation, habitations, selectHabitation, relocationSites, selectSite, activeHazardAssessment, selectedDistrict, setActiveNav } = useAppStore();
   const hab = getSelectedHabitation();
   const [searchTerm, setSearchTerm] = useState('');
   const [riskFilter, setRiskFilter] = useState('ALL');
@@ -471,19 +471,19 @@ export default function HabitationPanel() {
         </div>
       </div>
 
-      {/* Nearest Safe Haven Corridor Card */}
+      {/* Designated Safe House Info Redirect Card */}
       {nearestSite && (
         <div className="panel__section" style={{ background: 'var(--bg-subtle)' }}>
           <div className="panel__title" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
             <Compass size={15} color="var(--accent-emerald)" />
-            <span>Designated Relocation Haven</span>
+            <span>Designated Safe House Haven</span>
           </div>
 
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              flexDirection: 'column',
+              gap: 8,
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
               borderRadius: 'var(--radius-md)',
@@ -495,7 +495,7 @@ export default function HabitationPanel() {
                 {nearestSite.name}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                Dist: {nearestSite.distanceFromAffected} km &bull; Cap: {nearestSite.capacity.toLocaleString()} beds
+                Dist: {nearestSite.distanceFromAffected} km &bull; Capacity: {nearestSite.capacity.toLocaleString()} beds ({nearestSite.currentOccupants || 0} occupied)
               </div>
             </div>
 
@@ -503,12 +503,14 @@ export default function HabitationPanel() {
               onClick={() => {
                 selectHabitation(null as any);
                 selectSite(nearestSite.id);
+                setActiveNav('relocation');
                 flyToSite(nearestSite.location.lng, nearestSite.location.lat);
               }}
               className="btn-action btn-action--primary"
+              style={{ padding: '6px 12px', fontSize: 11, justifyContent: 'center', gap: 6 }}
             >
-              <span>Inspect</span>
-              <ArrowRight size={12} />
+              <span>View Safe House Info &amp; Facilities</span>
+              <ArrowRight size={13} />
             </button>
           </div>
         </div>
