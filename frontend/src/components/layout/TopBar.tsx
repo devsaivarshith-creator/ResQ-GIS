@@ -188,20 +188,6 @@ export default function TopBar() {
               >
                 — Disaster Risk Intelligence &amp; Spatial Hazard Tracking Interface
               </span>
-              <span
-                style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                  padding: '1px 5px',
-                  borderRadius: 'var(--radius-pill)',
-                  background: 'var(--accent-blue-subtle)',
-                  color: 'var(--accent-blue)',
-                  letterSpacing: '0.2px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                COMMAND v2.4
-              </span>
             </div>
           </div>
         </div>

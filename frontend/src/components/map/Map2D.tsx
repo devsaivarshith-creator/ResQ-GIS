@@ -12,6 +12,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { WORLD_INVERTED_MASK } from '../../data/indiaBoundary';
 
 type BasemapType = 'osm' | 'satellite' | 'dark' | 'topo';
 
@@ -49,6 +50,7 @@ export default function Map2D() {
   const labelLayerRef = useRef<L.TileLayer | null>(null);
   const layersGroupRef = useRef<L.FeatureGroup | null>(null);
   const pathwayGroupRef = useRef<L.FeatureGroup | null>(null);
+  const indiaMaskRef = useRef<L.Polygon | null>(null);
 
   const [activeBasemap, setActiveBasemap] = useState<BasemapType>('satellite');
   const [showLabels] = useState<boolean>(true);
@@ -68,6 +70,7 @@ export default function Map2D() {
     roads: true,
     district_boundaries: false,
     block_boundaries: false,
+    india_focus: true,
   });
 
   const {
@@ -203,15 +206,44 @@ export default function Map2D() {
     layersGroupRef.current = L.featureGroup().addTo(map);
     pathwayGroupRef.current = L.featureGroup().addTo(map);
 
+    // Inverted Mask: Darkens world outside India, illuminates and highlights sovereign India
+    const mask = L.polygon(WORLD_INVERTED_MASK as any, {
+      fillColor: '#030712',
+      fillOpacity: 0.65,
+      color: '#38bdf8',
+      weight: 1.8,
+      opacity: 0.95,
+      interactive: false,
+    }).addTo(map);
+    indiaMaskRef.current = mask;
+
     mapRef.current = map;
 
     return () => {
+      if (indiaMaskRef.current) {
+        indiaMaskRef.current.remove();
+        indiaMaskRef.current = null;
+      }
       map.remove();
       mapRef.current = null;
       labelLayerRef.current = null;
       tileLayerRef.current = null;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Toggle India Focus Mask layer visibility
+  useEffect(() => {
+    if (!indiaMaskRef.current || !mapRef.current) return;
+    if (layerVisibility.india_focus) {
+      if (!mapRef.current.hasLayer(indiaMaskRef.current)) {
+        indiaMaskRef.current.addTo(mapRef.current);
+      }
+    } else {
+      if (mapRef.current.hasLayer(indiaMaskRef.current)) {
+        mapRef.current.removeLayer(indiaMaskRef.current);
+      }
+    }
+  }, [layerVisibility.india_focus]);
 
   // When mapMode is '2d', invalidate size to ensure tiles render immediately
   useEffect(() => {
@@ -1323,6 +1355,18 @@ export default function Map2D() {
               />
               <span style={{ display: 'inline-block', width: 9, height: 9, border: '1px dashed #6b7280', borderRadius: 2 }} />
               <span>Block Boundary</span>
+            </label>
+
+            {/* 10. India Focus Mask */}
+            <label style={layerRowStyle}>
+              <input
+                type="checkbox"
+                checked={Boolean(layerVisibility['india_focus'])}
+                onChange={() => toggleLocalLayer('india_focus')}
+                style={checkboxStyle}
+              />
+              <span style={{ display: 'inline-block', width: 9, height: 9, background: '#0284c7', border: '1px solid #38bdf8', borderRadius: 2 }} />
+              <span>India Focus (Dim Foreign Land)</span>
             </label>
           </div>
         )}

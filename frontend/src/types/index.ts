@@ -175,6 +175,7 @@ export interface RiverStation {
   name: string;
   river: string;
   district: string;
+  state?: string;
   latitude: number;
   longitude: number;
   elevation?: number;

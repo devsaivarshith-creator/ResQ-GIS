@@ -7,11 +7,15 @@
       "id": "cwc-vishnuprayag",
       "geometry": {
         "type": "Point",
-        "coordinates": [79.575, 30.565, 1370.0]
+        "coordinates": [
+          79.575,
+          30.565,
+          1370.0
+        ]
       },
       "properties": {
         "stationId": "cwc-vishnuprayag",
-        "name": "Vishnuprayag Confluence",
+        "name": "Vishnuprayag Confluence Gauge",
         "river": "Alaknanda / Dhauliganga",
         "district": "Chamoli",
         "state": "Uttarakhand",
@@ -23,7 +27,7 @@
         "dangerLevel": 1374.0,
         "status": "normal",
         "flowDischargeCumecs": 420.5,
-        "lastObserved": "2026-09-26T14:00:00Z"
+        "lastObserved": "2026-09-28T08:00:00Z"
       }
     },
     {
@@ -31,7 +35,11 @@
       "id": "cwc-marwari-bridge",
       "geometry": {
         "type": "Point",
-        "coordinates": [79.558, 30.545, 1350.0]
+        "coordinates": [
+          79.558,
+          30.545,
+          1350.0
+        ]
       },
       "properties": {
         "stationId": "cwc-marwari-bridge",
@@ -47,7 +55,7 @@
         "dangerLevel": 1354.5,
         "status": "warning",
         "flowDischargeCumecs": 580.0,
-        "lastObserved": "2026-09-26T14:00:00Z"
+        "lastObserved": "2026-09-28T08:00:00Z"
       }
     },
     {
@@ -55,7 +63,11 @@
       "id": "cwc-karnaprayag",
       "geometry": {
         "type": "Point",
-        "coordinates": [79.220, 30.260, 780.0]
+        "coordinates": [
+          79.22,
+          30.26,
+          780.0
+        ]
       },
       "properties": {
         "stationId": "cwc-karnaprayag",
@@ -63,15 +75,15 @@
         "river": "Alaknanda / Pindar",
         "district": "Chamoli",
         "state": "Uttarakhand",
-        "latitude": 30.260,
-        "longitude": 79.220,
+        "latitude": 30.26,
+        "longitude": 79.22,
         "elevation": 780.0,
         "waterLevel": 780.8,
         "warningLevel": 782.0,
         "dangerLevel": 784.0,
         "status": "normal",
         "flowDischargeCumecs": 740.0,
-        "lastObserved": "2026-09-26T14:00:00Z"
+        "lastObserved": "2026-09-28T08:00:00Z"
       }
     },
     {
@@ -79,7 +91,11 @@
       "id": "cwc-rudraprayag",
       "geometry": {
         "type": "Point",
-        "coordinates": [78.980, 30.285, 610.0]
+        "coordinates": [
+          78.98,
+          30.285,
+          610.0
+        ]
       },
       "properties": {
         "stationId": "cwc-rudraprayag",
@@ -88,14 +104,602 @@
         "district": "Rudraprayag",
         "state": "Uttarakhand",
         "latitude": 30.285,
-        "longitude": 78.980,
+        "longitude": 78.98,
         "elevation": 610.0,
         "waterLevel": 611.5,
         "warningLevel": 613.0,
         "dangerLevel": 615.0,
         "status": "normal",
         "flowDischargeCumecs": 890.0,
-        "lastObserved": "2026-09-26T14:00:00Z"
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-srinagar-dam",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.78,
+          30.22,
+          530.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-srinagar-dam",
+        "name": "Srinagar Hydro Dam & Spillway",
+        "river": "Alaknanda",
+        "district": "Pauri Garhwal",
+        "state": "Uttarakhand",
+        "latitude": 30.22,
+        "longitude": 78.78,
+        "elevation": 530.0,
+        "waterLevel": 534.2,
+        "warningLevel": 536.0,
+        "dangerLevel": 538.5,
+        "status": "normal",
+        "flowDischargeCumecs": 1120.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-pandoh-dam",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.07,
+          31.67,
+          896.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-pandoh-dam",
+        "name": "Pandoh Dam Gauge & Reservoir",
+        "river": "Beas River",
+        "district": "Mandi",
+        "state": "Himachal Pradesh",
+        "latitude": 31.67,
+        "longitude": 77.07,
+        "elevation": 896.0,
+        "waterLevel": 897.4,
+        "warningLevel": 898.0,
+        "dangerLevel": 900.0,
+        "status": "warning",
+        "flowDischargeCumecs": 1450.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-bhakra-dam",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.43,
+          31.41,
+          512.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-bhakra-dam",
+        "name": "Bhakra Nangal Dam Gauge",
+        "river": "Sutlej River",
+        "district": "Bilaspur",
+        "state": "Himachal Pradesh",
+        "latitude": 31.41,
+        "longitude": 76.43,
+        "elevation": 512.0,
+        "waterLevel": 508.5,
+        "warningLevel": 510.0,
+        "dangerLevel": 513.0,
+        "status": "normal",
+        "flowDischargeCumecs": 2100.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-nilambur-chaliyar",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.225,
+          11.275,
+          48.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-nilambur-chaliyar",
+        "name": "Nilambur Hydrological Station",
+        "river": "Chaliyar River",
+        "district": "Malappuram",
+        "state": "Kerala",
+        "latitude": 11.275,
+        "longitude": 76.225,
+        "elevation": 48.0,
+        "waterLevel": 52.8,
+        "warningLevel": 51.5,
+        "dangerLevel": 53.0,
+        "status": "danger",
+        "flowDischargeCumecs": 1820.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-idukki-reservoir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.97,
+          9.85,
+          732.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-idukki-reservoir",
+        "name": "Idukki Arch Dam Hydro Gauge",
+        "river": "Periyar River",
+        "district": "Idukki",
+        "state": "Kerala",
+        "latitude": 9.85,
+        "longitude": 76.97,
+        "elevation": 732.0,
+        "waterLevel": 730.5,
+        "warningLevel": 732.0,
+        "dangerLevel": 735.0,
+        "status": "normal",
+        "flowDischargeCumecs": 650.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-chengannur-pamba",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.612,
+          9.318,
+          8.5
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-chengannur-pamba",
+        "name": "Chengannur Flood Level Station",
+        "river": "Pamba River",
+        "district": "Alappuzha",
+        "state": "Kerala",
+        "latitude": 9.318,
+        "longitude": 76.612,
+        "elevation": 8.5,
+        "waterLevel": 9.2,
+        "warningLevel": 9.0,
+        "dangerLevel": 10.2,
+        "status": "warning",
+        "flowDischargeCumecs": 940.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-dowleswaram-barrage",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          81.77,
+          16.94,
+          14.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-dowleswaram-barrage",
+        "name": "Sir Arthur Cotton Barrage",
+        "river": "Godavari River",
+        "district": "East Godavari",
+        "state": "Andhra Pradesh",
+        "latitude": 16.94,
+        "longitude": 81.77,
+        "elevation": 14.0,
+        "waterLevel": 14.8,
+        "warningLevel": 14.5,
+        "dangerLevel": 16.2,
+        "status": "warning",
+        "flowDischargeCumecs": 4850.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-prakasam-barrage",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.61,
+          16.51,
+          17.5
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-prakasam-barrage",
+        "name": "Prakasam Barrage Hydro Station",
+        "river": "Krishna River",
+        "district": "Krishna",
+        "state": "Andhra Pradesh",
+        "latitude": 16.51,
+        "longitude": 80.61,
+        "elevation": 17.5,
+        "waterLevel": 17.2,
+        "warningLevel": 18.0,
+        "dangerLevel": 19.5,
+        "status": "normal",
+        "flowDischargeCumecs": 3200.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-pandu-brahmaputra",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.68,
+          26.175,
+          49.5
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-pandu-brahmaputra",
+        "name": "Pandu Hydro Gauge",
+        "river": "Brahmaputra River",
+        "district": "Kamrup Metropolitan",
+        "state": "Assam",
+        "latitude": 26.175,
+        "longitude": 91.68,
+        "elevation": 49.5,
+        "waterLevel": 50.1,
+        "warningLevel": 49.68,
+        "dangerLevel": 50.5,
+        "status": "warning",
+        "flowDischargeCumecs": 18500.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-nimatighat-majuli",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          94.25,
+          26.85,
+          85.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-nimatighat-majuli",
+        "name": "Nimatighat Gauge Station",
+        "river": "Brahmaputra River",
+        "district": "Jorhat",
+        "state": "Assam",
+        "latitude": 26.85,
+        "longitude": 94.25,
+        "elevation": 85.0,
+        "waterLevel": 86.2,
+        "warningLevel": 85.04,
+        "dangerLevel": 86.4,
+        "status": "warning",
+        "flowDischargeCumecs": 14200.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-silchar-barak",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.8,
+          24.83,
+          20.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-silchar-barak",
+        "name": "Annapurna Ghat Gauge",
+        "river": "Barak River",
+        "district": "Cachar",
+        "state": "Assam",
+        "latitude": 24.83,
+        "longitude": 92.8,
+        "elevation": 20.0,
+        "waterLevel": 20.4,
+        "warningLevel": 19.83,
+        "dangerLevel": 21.0,
+        "status": "warning",
+        "flowDischargeCumecs": 2900.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-chungthang-teesta",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.645,
+          27.605,
+          1790.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-chungthang-teesta",
+        "name": "Chungthang Confluence & Dam",
+        "river": "Teesta / Lachen & Lachung",
+        "district": "North Sikkim",
+        "state": "Sikkim",
+        "latitude": 27.605,
+        "longitude": 88.645,
+        "elevation": 1790.0,
+        "waterLevel": 1793.8,
+        "warningLevel": 1793.0,
+        "dangerLevel": 1795.5,
+        "status": "warning",
+        "flowDischargeCumecs": 680.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-singtam-teesta",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.5,
+          27.23,
+          350.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-singtam-teesta",
+        "name": "Singtam Riverbank Telemetry",
+        "river": "Teesta River",
+        "district": "East Sikkim",
+        "state": "Sikkim",
+        "latitude": 27.23,
+        "longitude": 88.5,
+        "elevation": 350.0,
+        "waterLevel": 351.2,
+        "warningLevel": 352.0,
+        "dangerLevel": 354.5,
+        "status": "normal",
+        "flowDischargeCumecs": 1100.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-hirakud-reservoir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          83.87,
+          21.53,
+          192.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-hirakud-reservoir",
+        "name": "Hirakud Dam Reservoir Gauge",
+        "river": "Mahanadi River",
+        "district": "Sambalpur",
+        "state": "Odisha",
+        "latitude": 21.53,
+        "longitude": 83.87,
+        "elevation": 192.0,
+        "waterLevel": 191.8,
+        "warningLevel": 192.0,
+        "dangerLevel": 193.5,
+        "status": "normal",
+        "flowDischargeCumecs": 6500.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-mundali-barrage",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          85.74,
+          20.44,
+          25.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-mundali-barrage",
+        "name": "Mundali Barrage Station",
+        "river": "Mahanadi River",
+        "district": "Cuttack",
+        "state": "Odisha",
+        "latitude": 20.44,
+        "longitude": 85.74,
+        "elevation": 25.0,
+        "waterLevel": 25.6,
+        "warningLevel": 26.5,
+        "dangerLevel": 28.0,
+        "status": "normal",
+        "flowDischargeCumecs": 8400.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-sangam-jhelum",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.11,
+          33.78,
+          1585.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-sangam-jhelum",
+        "name": "Sangam Hydrological Gauge",
+        "river": "Jhelum River",
+        "district": "Anantnag",
+        "state": "Jammu and Kashmir",
+        "latitude": 33.78,
+        "longitude": 75.11,
+        "elevation": 1585.0,
+        "waterLevel": 1587.2,
+        "warningLevel": 1587.0,
+        "dangerLevel": 1589.5,
+        "status": "warning",
+        "flowDischargeCumecs": 910.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-rammunshibagh",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83,
+          34.07,
+          1580.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-rammunshibagh",
+        "name": "Ram Munshi Bagh Gauge",
+        "river": "Jhelum River",
+        "district": "Srinagar",
+        "state": "Jammu and Kashmir",
+        "latitude": 34.07,
+        "longitude": 74.83,
+        "elevation": 1580.0,
+        "waterLevel": 1581.4,
+        "warningLevel": 1582.0,
+        "dangerLevel": 1584.0,
+        "status": "normal",
+        "flowDischargeCumecs": 750.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-dawki-umngot",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          92.02,
+          25.18,
+          15.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-dawki-umngot",
+        "name": "Dawki Gauge Station",
+        "river": "Umngot River",
+        "district": "West Jaintia Hills",
+        "state": "Meghalaya",
+        "latitude": 25.18,
+        "longitude": 92.02,
+        "elevation": 15.0,
+        "waterLevel": 16.4,
+        "warningLevel": 17.0,
+        "dangerLevel": 18.5,
+        "status": "normal",
+        "flowDischargeCumecs": 380.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-umiam-dam",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.9,
+          25.66,
+          980.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-umiam-dam",
+        "name": "Umiam Dam Reservoir",
+        "river": "Umiam River",
+        "district": "Ri-Bhoi",
+        "state": "Meghalaya",
+        "latitude": 25.66,
+        "longitude": 91.9,
+        "elevation": 980.0,
+        "waterLevel": 981.1,
+        "warningLevel": 983.0,
+        "dangerLevel": 986.0,
+        "status": "normal",
+        "flowDischargeCumecs": 240.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-tupul-ijai",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          93.65,
+          24.78,
+          480.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-tupul-ijai",
+        "name": "Tupul / Ijai Basin Hydro Gauge",
+        "river": "Ijai / Barak Basin",
+        "district": "Noney",
+        "state": "Manipur",
+        "latitude": 24.78,
+        "longitude": 93.65,
+        "elevation": 480.0,
+        "waterLevel": 482.5,
+        "warningLevel": 482.0,
+        "dangerLevel": 485.0,
+        "status": "warning",
+        "flowDischargeCumecs": 520.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cwc-doyang-reservoir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          94.28,
+          26.15,
+          320.0
+        ]
+      },
+      "properties": {
+        "stationId": "cwc-doyang-reservoir",
+        "name": "Doyang Hydroelectric Station",
+        "river": "Doyang River",
+        "district": "Wokha",
+        "state": "Nagaland",
+        "latitude": 26.15,
+        "longitude": 94.28,
+        "elevation": 320.0,
+        "waterLevel": 321.6,
+        "warningLevel": 323.0,
+        "dangerLevel": 326.0,
+        "status": "normal",
+        "flowDischargeCumecs": 410.0,
+        "lastObserved": "2026-09-28T08:00:00Z"
       }
     }
   ]

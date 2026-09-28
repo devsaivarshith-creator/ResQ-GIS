@@ -1,6 +1,7 @@
+import { useState, useMemo } from 'react';
 import { Droplets, Gauge, CloudRain, Wind, Thermometer, Truck, Map as MapIcon, Activity } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { flyToSite } from '../../cesium/camera';
+import { flyToSite, flyToState } from '../../cesium/camera';
 
 export default function RiversPanel() {
   const {
@@ -12,6 +13,28 @@ export default function RiversPanel() {
     emergencyResources,
     roads,
   } = useAppStore();
+
+  const [selectedState, setSelectedState] = useState<string>('ALL');
+
+  const availableStates = useMemo(() => {
+    const states = new Set<string>();
+    riverStations.forEach((s) => {
+      if (s.state) states.add(s.state);
+    });
+    return Array.from(states).sort();
+  }, [riverStations]);
+
+  const filteredStations = useMemo(() => {
+    if (selectedState === 'ALL') return riverStations;
+    return riverStations.filter((s) => s.state?.toLowerCase() === selectedState.toLowerCase());
+  }, [riverStations, selectedState]);
+
+  const handleStateChange = (st: string) => {
+    setSelectedState(st);
+    if (st !== 'ALL') {
+      flyToState(st);
+    }
+  };
 
   const imdProvenance = systemStatus?.sources?.imd?.status || 'LIVE';
 
@@ -50,13 +73,41 @@ export default function RiversPanel() {
 
       <div className="panel__list" style={{ padding: '12px', gap: 12 }}>
         
+        {/* State Infrastructure Filter */}
+        <div style={{ background: 'var(--bg-surface)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+            State Telemetry Filter ({availableStates.length} States Monitored)
+          </label>
+          <select
+            value={selectedState}
+            onChange={(e) => handleStateChange(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-subtle)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="ALL">All States (Pan-India Gauges — {riverStations.length} Stations)</option>
+            {availableStates.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+
         {/* River Gauge Cards */}
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase' }}>
-            Hydrological Gauges (CWC)
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Hydrological Gauges &amp; Dams (CWC)</span>
+            <span style={{ fontSize: 10, color: 'var(--accent-blue)', fontWeight: 600 }}>Showing {filteredStations.length}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {riverStations.map((station) => {
+            {filteredStations.map((station) => {
               const isSelected = selectedRiverId === station.id;
               const isDanger = station.status === 'danger' || (station.waterLevel && station.dangerLevel && station.waterLevel >= station.dangerLevel);
               const isWarning = station.status === 'warning' || (station.waterLevel && station.warningLevel && station.waterLevel >= station.warningLevel);
@@ -88,7 +139,9 @@ export default function RiversPanel() {
                   <div className="panel__row panel__row--between">
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{station.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{station.river} &bull; {station.district}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                        {station.river} &bull; {station.district}{station.state ? `, ${station.state}` : ''}
+                      </div>
                     </div>
                     <span style={{ fontSize: 9, fontWeight: 700, background: badgeBg, color: badgeColor, border: '1px solid var(--border-color)', padding: '2px 7px', borderRadius: 'var(--radius-pill)', textTransform: 'uppercase' }}>
                       {badgeText}

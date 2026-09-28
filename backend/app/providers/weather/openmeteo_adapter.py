@@ -24,8 +24,9 @@ from app.services.cache_service import get_cache
 
 logger = logging.getLogger(__name__)
 
-# Known district anchor coordinates for Uttarakhand
+# Known district anchor coordinates for all 10 monitored disaster states
 DISTRICT_COORDINATES: dict[str, tuple[float, float]] = {
+    # Uttarakhand
     "chamoli": (30.555, 79.566),
     "joshimath": (30.555, 79.566),
     "rudraprayag": (30.284, 78.981),
@@ -34,6 +35,58 @@ DISTRICT_COORDINATES: dict[str, tuple[float, float]] = {
     "pithoragarh": (29.583, 80.217),
     "bageshwar": (29.840, 79.770),
     "dehradun": (30.316, 78.032),
+    "pauri garhwal": (30.147, 78.780),
+    "tehri": (30.380, 78.480),
+    # Himachal Pradesh
+    "kullu": (31.957, 77.109),
+    "manali": (32.239, 77.188),
+    "mandi": (31.708, 76.932),
+    "bilaspur": (31.330, 76.760),
+    "kangra": (32.100, 76.270),
+    "shimla": (31.104, 77.173),
+    # Kerala
+    "wayanad": (11.685, 76.132),
+    "idukki": (9.849, 76.971),
+    "malappuram": (11.073, 76.074),
+    "alappuzha": (9.498, 76.338),
+    "kottayam": (9.591, 76.522),
+    # Andhra Pradesh
+    "east godavari": (16.989, 81.783),
+    "visakhapatnam": (17.686, 83.218),
+    "krishna": (16.506, 80.648),
+    "eluru": (16.710, 81.095),
+    # Assam
+    "jorhat": (26.750, 94.216),
+    "kamrup": (26.185, 91.747),
+    "cachar": (24.833, 92.778),
+    "silchar": (24.833, 92.778),
+    "majuli": (26.950, 94.210),
+    # Sikkim
+    "north sikkim": (27.605, 88.645),
+    "east sikkim": (27.331, 88.613),
+    "gangtok": (27.331, 88.613),
+    "chungthang": (27.605, 88.645),
+    # Odisha
+    "jagatsinghpur": (20.258, 86.168),
+    "puri": (19.813, 85.831),
+    "cuttack": (20.462, 85.882),
+    "sambalpur": (21.466, 83.981),
+    "bhadrak": (21.057, 86.495),
+    # Jammu and Kashmir
+    "anantnag": (33.731, 75.148),
+    "srinagar": (34.083, 74.797),
+    "baramulla": (34.200, 74.350),
+    "jammu": (32.726, 74.857),
+    # Meghalaya
+    "east khasi hills": (25.578, 91.893),
+    "shillong": (25.578, 91.893),
+    "west jaintia hills": (25.450, 92.200),
+    "ri-bhoi": (25.900, 91.880),
+    # Manipur and Nagaland
+    "noney": (24.780, 93.650),
+    "imphal": (24.817, 93.936),
+    "kohima": (25.674, 94.108),
+    "wokha": (26.100, 94.260),
 }
 
 WMO_CODE_MAP: dict[int, tuple[str, Optional[Severity]]] = {

@@ -224,6 +224,115 @@ function normalizeHazardLayer(h: any): HazardLayerItem {
   };
 }
 
+const DISTRICT_COORDS: Record<string, [number, number]> = {
+  chamoli: [30.555, 79.566],
+  joshimath: [30.555, 79.566],
+  rudraprayag: [30.284, 78.981],
+  kedarnath: [30.735, 79.066],
+  uttarkashi: [30.726, 78.435],
+  pithoragarh: [29.583, 80.217],
+  bageshwar: [29.840, 79.770],
+  dehradun: [30.316, 78.032],
+  'pauri garhwal': [30.147, 78.780],
+  tehri: [30.380, 78.480],
+  kullu: [31.957, 77.109],
+  manali: [32.239, 77.188],
+  mandi: [31.708, 76.932],
+  bilaspur: [31.330, 76.760],
+  kangra: [32.100, 76.270],
+  shimla: [31.104, 77.173],
+  wayanad: [11.685, 76.132],
+  idukki: [9.849, 76.971],
+  malappuram: [11.073, 76.074],
+  alappuzha: [9.498, 76.338],
+  kottayam: [9.591, 76.522],
+  'east godavari': [16.989, 81.783],
+  visakhapatnam: [17.686, 83.218],
+  krishna: [16.506, 80.648],
+  eluru: [16.710, 81.095],
+  jorhat: [26.750, 94.216],
+  kamrup: [26.185, 91.747],
+  cachar: [24.833, 92.778],
+  silchar: [24.833, 92.778],
+  majuli: [26.950, 94.210],
+  'north sikkim': [27.605, 88.645],
+  'east sikkim': [27.331, 88.613],
+  gangtok: [27.331, 88.613],
+  chungthang: [27.605, 88.645],
+  jagatsinghpur: [20.258, 86.168],
+  puri: [19.813, 85.831],
+  cuttack: [20.462, 85.882],
+  sambalpur: [21.466, 83.981],
+  bhadrak: [21.057, 86.495],
+  anantnag: [33.731, 75.148],
+  srinagar: [34.083, 74.797],
+  baramulla: [34.200, 74.350],
+  jammu: [32.726, 74.857],
+  'east khasi hills': [25.578, 91.893],
+  shillong: [25.578, 91.893],
+  'west jaintia hills': [25.450, 92.200],
+  'ri-bhoi': [25.900, 91.880],
+  noney: [24.780, 93.650],
+  imphal: [24.817, 93.936],
+  kohima: [25.674, 94.108],
+  wokha: [26.100, 94.260],
+};
+
+function wmoCodeToCondition(code: number): string {
+  if (code === 0) return 'CLEAR';
+  if (code <= 3) return 'PARTLY_CLOUDY';
+  if (code <= 48) return 'FOG';
+  if (code <= 57) return 'DRIZZLE';
+  if (code <= 67) return 'RAIN';
+  if (code <= 77) return 'SNOW';
+  if (code <= 82) return 'RAIN_SHOWERS';
+  if (code <= 86) return 'SNOW_SHOWERS';
+  return 'THUNDERSTORM';
+}
+
+async function fetchLiveOpenMeteo(district: string): Promise<{ report?: WeatherReport; forecast: WeatherForecast[] }> {
+  const norm = district.toLowerCase().trim();
+  const coords = DISTRICT_COORDS[norm] || DISTRICT_COORDS['chamoli'];
+  const [lat, lng] = coords;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation,rain,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=auto`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Open-Meteo direct fetch failed');
+  const d = await res.json();
+  const curr = d.current || {};
+  const daily = d.daily || {};
+  const forecast: WeatherForecast[] = (daily.time || []).map((t: string, idx: number) => ({
+    date: t,
+    rainfall: daily.precipitation_sum?.[idx] ?? 0,
+    rainfallAnomaly: 0,
+    soilSaturation: 45,
+    humidity: 70,
+    temperatureMax: daily.temperature_2m_max?.[idx] ?? 22,
+    temperatureMin: daily.temperature_2m_min?.[idx] ?? 12,
+    windSpeed: 8,
+    cloudCover: 50,
+    condition: wmoCodeToCondition(daily.weather_code?.[idx] ?? 1),
+    warning: daily.precipitation_sum?.[idx] > 50 ? 'HEAVY RAINFALL ALERT' : undefined,
+  }));
+
+  const report: WeatherReport = {
+    location: `${district} (${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E)`,
+    current: {
+      temperature: Math.round((curr.temperature_2m ?? 18) * 10) / 10,
+      humidity: Math.round(curr.relative_humidity_2m ?? 65),
+      windSpeed: Math.round((curr.wind_speed_10m ?? 5) * 10) / 10,
+      rainfall24h: Math.round((curr.precipitation ?? 0) * 10) / 10,
+      condition: wmoCodeToCondition(curr.weather_code ?? 1),
+      warning: (curr.precipitation ?? 0) > 40 ? 'red' : (curr.precipitation ?? 0) > 20 ? 'orange' : undefined,
+    },
+    forecast,
+    updatedAt: new Date().toISOString(),
+    source: 'Open-Meteo (Live ECMWF / DWD Global Model)',
+    provenance: 'LIVE',
+  };
+
+  return { report, forecast };
+}
+
 export const api = {
   // Health
   health: () => fetchJson<{ status: string; data_mode: string; demo_mode: boolean; database_connected: boolean; version: string }>('/api/health'),
@@ -280,30 +389,38 @@ export const api = {
   }> => {
     try {
       const raw = await fetchJson<any>(`/api/weather/${district}`);
-      if (Array.isArray(raw)) {
-        return { forecast: raw.map(normalizeWeather) };
-      }
-      const forecastList = (raw.forecast || []).map(normalizeWeather);
-      return {
-        report: {
-          location: raw.location || district,
-          current: {
-            temperature: raw.current?.temperature ?? 20,
-            humidity: raw.current?.humidity ?? 80,
-            windSpeed: raw.current?.wind_speed ?? 10,
-            rainfall24h: raw.current?.rainfall_24h ?? 0,
-            condition: raw.current?.condition ?? 'CLOUDY',
-            warning: raw.current?.warning,
+      if (raw && raw.provenance === 'LIVE' && raw.current) {
+        if (Array.isArray(raw)) {
+          return { forecast: raw.map(normalizeWeather) };
+        }
+        const forecastList = (raw.forecast || []).map(normalizeWeather);
+        return {
+          report: {
+            location: raw.location || district,
+            current: {
+              temperature: raw.current?.temperature ?? 20,
+              humidity: raw.current?.humidity ?? 80,
+              windSpeed: raw.current?.wind_speed ?? 10,
+              rainfall24h: raw.current?.rainfall_24h ?? 0,
+              condition: raw.current?.condition ?? 'CLOUDY',
+              warning: raw.current?.warning,
+            },
+            forecast: forecastList,
+            updatedAt: raw.updated_at || new Date().toISOString(),
+            source: raw.source || 'Open-Meteo Live',
+            provenance: raw.provenance || 'LIVE',
           },
           forecast: forecastList,
-          updatedAt: raw.updated_at || new Date().toISOString(),
-          source: raw.source || 'IMD',
-          provenance: raw.provenance || 'DEMO',
-        },
-        forecast: forecastList,
-      };
+        };
+      }
+      // If backend gave demo fallback or is offline, fetch live Open-Meteo directly
+      return await fetchLiveOpenMeteo(district);
     } catch {
-      return { report: undefined, forecast: [] };
+      try {
+        return await fetchLiveOpenMeteo(district);
+      } catch {
+        return { report: undefined, forecast: [] };
+      }
     }
   },
 

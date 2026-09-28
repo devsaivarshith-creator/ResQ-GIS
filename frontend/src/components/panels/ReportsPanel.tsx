@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FileText,
   Printer,
@@ -53,7 +54,7 @@ function getRouteDetails(hab: Habitation, site?: RelocationSite) {
 }
 
 export default function ReportsPanel() {
-  const { habitations, relocationSites, selectHabitation } = useAppStore();
+  const { habitations, relocationSites } = useAppStore();
 
   const [selectedState, setSelectedState] = useState<string>('ALL');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('ALL');
@@ -136,8 +137,34 @@ export default function ReportsPanel() {
     document.body.removeChild(link);
   };
 
+  const fallbackSite: RelocationSite = {
+    id: 'site-fallback',
+    name: 'District Multi-Purpose Safe Haven',
+    district: activeReportHab?.district || 'Chamoli',
+    state: activeReportHab?.state || 'Uttarakhand',
+    location: {
+      lat: (activeReportHab?.location.lat || 30.5) + 0.05,
+      lng: (activeReportHab?.location.lng || 79.5) + 0.05,
+      elevation: Math.max(300, (activeReportHab?.location.elevation || 1500) - 400),
+    },
+    suitability: 'LOW',
+    suitabilityScore: 0.95,
+    capacity: 5000,
+    currentOccupants: 0,
+    operationalStatus: 'READY',
+    hasRoadAccess: true,
+    hasWaterAccess: true,
+    nearInfrastructure: true,
+    constraints: [],
+    distanceFromAffected: 14.5,
+    foodStockDays: 15,
+    dailyWaterLiters: 15000,
+    managingAgency: 'District Disaster Management Authority',
+    slopeGrade: 'Gentle (4-8°)',
+  };
+
   const activeSite = activeReportHab 
-    ? (relocationSites.find(s => s.id === activeReportHab.nearestRelocationSite) || relocationSites[0])
+    ? (relocationSites.find(s => s.id === activeReportHab.nearestRelocationSite) || relocationSites[0] || fallbackSite)
     : null;
   const activeRoute = activeReportHab && activeSite ? getRouteDetails(activeReportHab, activeSite) : null;
 
@@ -366,7 +393,7 @@ export default function ReportsPanel() {
                   <button
                     onClick={() => {
                       if (h.location) flyToHabitation(h.location.lng, h.location.lat);
-                      selectHabitation(h.id);
+                      useAppStore.setState({ selectedHabitationId: h.id });
                       setActiveReportHab(h);
                     }}
                     style={{
@@ -390,54 +417,69 @@ export default function ReportsPanel() {
                   </button>
                 </div>
 
-                {/* 2. Three Metric Pill Blocks: Population, Assigned Safe Haven, Transit Mode */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {/* 2. Structured 2-Column Metrics Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
                   {/* Metric 1: Demographics & Threats */}
-                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                       POPULATION &amp; THREATS
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
                       {h.population.toLocaleString()} <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>({h.households || 0} HH)</span>
                     </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div
+                      title={h.hazardExposure.map(he => he.type).join(', ')}
+                      style={{ fontSize: 9, color: 'var(--text-secondary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    >
                       ⚠️ {h.hazardExposure.map(he => he.type).join(', ') || 'Slope subsidence'}
                     </div>
                   </div>
 
                   {/* Metric 2: Safe Haven Destination */}
-                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                       ASSIGNED SAFE HAVEN
                     </div>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div
+                      title={haven?.name || 'District Safe Haven'}
+                      style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-emerald)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    >
                       🏰 {haven?.name || 'District Safe Haven'}
                     </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
-                      Capacity: {haven?.capacity?.toLocaleString() || 5000} Beds • Water: {(haven?.dailyWaterLiters || 12000).toLocaleString()}L
-                    </div>
-                  </div>
-
-                  {/* Metric 3: Mode of Travel & Duration */}
-                  <div style={{ background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                      MODE &amp; TRANSIT DURATION
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent-blue)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span>{route.modeIcon}</span>
-                      <span>{route.modeLabel}</span>
-                    </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {route.distKm} km • Est: <strong style={{ color: 'var(--text-primary)' }}>{route.journeyTimeStr}</strong>
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Cap: <strong>{haven?.capacity?.toLocaleString() || 5000}</strong> beds • {(haven?.dailyWaterLiters || 12000).toLocaleString()}L H₂O
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Bottom Route Corridor Strip */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-color)', paddingTop: 6 }}>
-                  <span>🛣️ <strong>Corridor:</strong> {route.corridor}</span>
-                  <span style={{ color: 'var(--accent-indigo)', fontWeight: 600 }}>
-                    Managed by {haven?.managingAgency || 'District Administration & NDRF'}
+                {/* 3. Transit Logistics Strip */}
+                <div style={{ background: 'var(--bg-subtle)', padding: '7px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
+                    <span style={{ fontSize: 13, flexShrink: 0 }}>{route.modeIcon}</span>
+                    <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-blue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {route.modeLabel}
+                      </div>
+                      <div style={{ fontSize: 9, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        🛣️ {route.corridor}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
+                      {route.journeyTimeStr}
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                      {route.distKm} km
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Bottom Agency Strip */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 9, color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-color)', paddingTop: 5, marginTop: -2 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Security Corridor</span>
+                  <span style={{ color: 'var(--accent-indigo)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
+                    {haven?.managingAgency || 'District Admin & NDRF'}
                   </span>
                 </div>
               </div>
@@ -447,7 +489,7 @@ export default function ReportsPanel() {
       </div>
 
       {/* EXECUTIVE EVACUATION REPORT MODAL WITH VECTOR ROUTE MAP */}
-      {activeReportHab && activeSite && activeRoute && (
+      {activeReportHab && activeSite && activeRoute && createPortal(
         <div
           style={{
             position: 'fixed',
@@ -725,7 +767,8 @@ export default function ReportsPanel() {
               <div>System Timestamp: {new Date().toLocaleString()}</div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
