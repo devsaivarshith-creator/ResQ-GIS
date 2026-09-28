@@ -1,4 +1,4 @@
-import { flyToDistrict, flyToState } from '../cesium/camera';
+import { flyToDistrict, flyToState, flyToHabitation, flyToSite } from '../cesium/camera';
 import { create } from 'zustand';
 import type {
   Habitation,
@@ -236,6 +236,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   // Selection
   selectedHabitationId: null,
   selectHabitation: (id) => {
+    const hab = id ? get().habitations.find((h) => h.id === id) : null;
     set({
       selectedHabitationId: id,
       selectedSiteId: null,
@@ -244,30 +245,43 @@ export const useAppStore = create<AppState>((set, get) => ({
       activeHazardAssessment: null,
       activeNav: id ? 'habitations' : get().activeNav,
     });
+    if (hab && hab.location) {
+      flyToHabitation(hab.location.lng, hab.location.lat);
+    }
     if (id && get().backendConnected) {
       get().loadHabitationHazardAssessment(id);
     }
   },
 
   selectedSiteId: null,
-  selectSite: (id) =>
+  selectSite: (id) => {
+    const site = id ? get().relocationSites.find((s) => s.id === id) : null;
     set({
       selectedSiteId: id,
       selectedHabitationId: null,
       selectedRiverId: null,
       selectedHazardId: null,
       activeNav: id ? 'relocation' : get().activeNav,
-    }),
+    });
+    if (site && site.location) {
+      flyToSite(site.location.lng, site.location.lat);
+    }
+  },
 
   selectedRiverId: null,
-  selectRiver: (id) =>
+  selectRiver: (id) => {
+    const river = id ? get().riverStations.find((r) => r.id === id) : null;
     set({
       selectedRiverId: id,
       selectedHabitationId: null,
       selectedSiteId: null,
       selectedHazardId: null,
       activeNav: id ? 'rivers' : get().activeNav,
-    }),
+    });
+    if (river && river.location) {
+      flyToDistrict(river.district);
+    }
+  },
 
   selectedHazardId: null,
   selectHazard: (id) =>

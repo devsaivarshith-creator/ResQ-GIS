@@ -184,6 +184,7 @@ body {
   overflow: hidden;
   min-height: 0;
   position: relative;
+  z-index: 1;
 }
 
 .app__center {

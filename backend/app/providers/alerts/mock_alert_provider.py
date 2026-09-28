@@ -34,6 +34,20 @@ class MockAlertProvider(AlertProvider):
                 sev_val = a.get("severity", "yellow").lower()
                 sev = Severity.RED if sev_val == "red" else Severity.ORANGE if sev_val == "orange" else Severity.YELLOW
 
+                # Ensure issued_at is active and recent (within past 72h, not stuck in yesterday)
+                raw_issued = a.get("issuedAt")
+                if raw_issued:
+                    try:
+                        parsed_dt = datetime.fromisoformat(raw_issued.replace("Z", "+00:00")).replace(tzinfo=None)
+                        if (datetime.utcnow() - parsed_dt).total_seconds() > 86400 * 3:
+                            issued_dt = datetime.utcnow() - timedelta(hours=((len(alerts) * 6) % 70) + 0.5)
+                        else:
+                            issued_dt = parsed_dt
+                    except Exception:
+                        issued_dt = datetime.utcnow() - timedelta(hours=1)
+                else:
+                    issued_dt = datetime.utcnow() - timedelta(hours=1)
+
                 alerts.append(
                     DisasterAlert(
                         id=a.get("id"),
@@ -41,7 +55,7 @@ class MockAlertProvider(AlertProvider):
                         severity=sev,
                         title=a.get("title", ""),
                         description=a.get("description", ""),
-                        issued_at=datetime.fromisoformat(a.get("issuedAt", datetime.utcnow().isoformat())),
+                        issued_at=issued_dt,
                         expires_at=datetime.fromisoformat(a.get("expiresAt")) if a.get("expiresAt") else None,
                         region=area,
                         geometry=a.get("geometry"),

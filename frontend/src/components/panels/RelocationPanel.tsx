@@ -10,7 +10,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { flyToSite, flyToHabitation } from '../../cesium/camera';
+import { flyToSite, flyToHabitation, flyToState } from '../../cesium/camera';
 
 const SUIT_CLASS: Record<string, string> = {
   HIGH: 'risk--low',
@@ -114,7 +114,12 @@ export default function RelocationPanel(_props: Props = {}) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <select
                 value={selectedStateFilter}
-                onChange={(e) => setSelectedStateFilter(e.target.value)}
+                onChange={(e) => {
+                  setSelectedStateFilter(e.target.value);
+                  if (e.target.value !== 'all') {
+                    flyToState(e.target.value);
+                  }
+                }}
                 style={{
                   flex: 1,
                   padding: '5px 8px',

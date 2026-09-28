@@ -1,3 +1,4 @@
+import { flyToDistrict, flyToState } from '../../cesium/camera';
 import { useState, useMemo } from 'react';
 import { Clock, Siren, Filter, MapPin } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
@@ -309,6 +310,14 @@ export default function AlertsPanel() {
             return (
               <div
                 key={alert.id}
+                onClick={() => {
+                  if (alert.district) {
+                    flyToDistrict(alert.district);
+                  } else if (alert.state) {
+                    flyToState(alert.state);
+                  }
+                }}
+                title="Click to view alert sector on map"
                 style={{
                   background: cardBg,
                   border: '1px solid var(--border-color)',
@@ -319,7 +328,11 @@ export default function AlertsPanel() {
                   flexDirection: 'column',
                   gap: 6,
                   boxShadow: 'var(--shadow-xs)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.1s ease',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-1px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span

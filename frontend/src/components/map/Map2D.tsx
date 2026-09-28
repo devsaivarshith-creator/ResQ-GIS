@@ -294,20 +294,46 @@ export default function Map2D() {
       manipur: [24.8, 93.8],
       nagaland: [25.7, 94.1],
     };
-    if (selectedDistrict) {
+    // 1. Specific entity selection (Highest priority)
+    if (selectedHabitationId) {
+      const hab = habitations.find((h) => h.id === selectedHabitationId);
+      if (hab && hab.location) {
+        mapRef.current.flyTo([hab.location.lat, hab.location.lng], 13, { duration: 1.2 });
+        return;
+      }
+    }
+    if (selectedSiteId) {
+      const site = relocationSites.find((s) => s.id === selectedSiteId);
+      if (site && site.location) {
+        mapRef.current.flyTo([site.location.lat, site.location.lng], 13, { duration: 1.2 });
+        return;
+      }
+    }
+    if (selectedRiverId) {
+      const river = riverStations.find((r) => r.id === selectedRiverId);
+      if (river && river.location) {
+        mapRef.current.flyTo([river.location.lat, river.location.lng], 12, { duration: 1.2 });
+        return;
+      }
+    }
+
+    // 2. District selection
+    if (selectedDistrict && selectedDistrict !== 'ALL') {
       const coords = distMap[selectedDistrict.toLowerCase().trim()];
       if (coords) {
         mapRef.current.flyTo(coords, 10, { duration: 1.2 });
         return;
       }
     }
-    if (selectedState) {
+
+    // 3. State selection
+    if (selectedState && selectedState !== 'ALL') {
       const sCoords = stateMap[selectedState.toLowerCase().trim()];
       if (sCoords) {
         mapRef.current.flyTo(sCoords, 8, { duration: 1.2 });
       }
     }
-  }, [selectedDistrict, selectedState, selectedHabitationId, selectedSiteId, selectedRiverId]);
+  }, [selectedDistrict, selectedState, selectedHabitationId, selectedSiteId, selectedRiverId, habitations, relocationSites, riverStations]);
 
 
 

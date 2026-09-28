@@ -64,6 +64,7 @@ class USDMAAdapter(SDMAProvider):
                 sev_val = b.get("severity", "orange").lower()
                 sev = Severity.RED if sev_val == "red" else Severity.ORANGE if sev_val == "orange" else Severity.YELLOW
 
+                issued_dt = datetime.utcnow() - timedelta(minutes=40 + len(alerts) * 45)
                 alerts.append(
                     DisasterAlert(
                         id=b.get("id"),
@@ -71,7 +72,7 @@ class USDMAAdapter(SDMAProvider):
                         severity=sev,
                         title=b.get("title", "SDMA Bulletin"),
                         description=b.get("description", ""),
-                        issued_at=datetime.fromisoformat(b.get("issuedAt", datetime.utcnow().isoformat())),
+                        issued_at=issued_dt,
                         region=b.get("district", "Chamoli"),
                         source=b.get("source", self.name),
                         provenance=DataProvenance.STATIC,

@@ -4,7 +4,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { flyToHabitation } from '../../cesium/camera';
 
 export default function AnalysisPanel() {
-  const { prioritizationResults, calculatePrioritization, selectHabitation, habitations, relocationSites } = useAppStore();
+  const { prioritizationResults, calculatePrioritization, selectHabitation, habitations, relocationSites, setSelectedState, setSelectedDistrict } = useAppStore();
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [stateFilter, setStateFilter] = useState<string>('');
@@ -131,7 +131,13 @@ export default function AnalysisPanel() {
               <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>State Filter</label>
               <select 
                 value={stateFilter} 
-                onChange={e => { setStateFilter(e.target.value); setDistrictFilter(''); }}
+                onChange={e => {
+                  setStateFilter(e.target.value);
+                  setDistrictFilter('');
+                  if (e.target.value) {
+                    setSelectedState(e.target.value);
+                  }
+                }}
                 style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All States ({uniqueStates.length})</option>
@@ -145,7 +151,12 @@ export default function AnalysisPanel() {
               <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: 3 }}>District Filter</label>
               <select 
                 value={districtFilter} 
-                onChange={e => setDistrictFilter(e.target.value)}
+                onChange={e => {
+                  setDistrictFilter(e.target.value);
+                  if (e.target.value) {
+                    setSelectedDistrict(e.target.value);
+                  }
+                }}
                 style={{ width: '100%', padding: '5px', fontSize: 11, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="">All Districts ({uniqueDistricts.length})</option>

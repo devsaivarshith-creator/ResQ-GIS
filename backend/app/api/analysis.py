@@ -99,7 +99,7 @@ async def get_prioritization(
                 name=r.name,
                 district=hab.district if hab else "Chamoli",
                 population=hab.population if hab else 0,
-                score=r.score,
+                score=round(max(0.20, float(meta.get('hazard_score', 0.7)) * 0.55 + float(meta.get('hvi', 0.6)) * 0.45), 4),
                 reason=driver_str,
                 hvi=meta.get("hvi", 0.0),
                 hazard_score=meta.get("hazard_score", 0.0),
