@@ -3,6 +3,12 @@ import { Users, ArrowRight, ShieldAlert, HeartHandshake, Compass, Gauge, Search,
 import { useAppStore } from '../../store/useAppStore';
 import { flyToSite, flyToHabitation } from '../../cesium/camera';
 import type { RiskLevel } from '../../types';
+import {
+  toRiskPercentage,
+  getRiskColor,
+  getRiskBandInfo,
+  calculateWeightageBreakdown,
+} from '../../utils/riskClassification';
 
 const RISK_CLASS: Record<RiskLevel, string> = {
   CRITICAL: 'risk--critical',
@@ -158,9 +164,20 @@ export default function HabitationPanel() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span className={`risk-badge risk-badge--sm ${RISK_CLASS[h.riskLevel]}`}>
-                  {h.riskLevel}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span
+                  style={{
+                    background: getRiskColor(toRiskPercentage(h.riskScore)),
+                    color: getRiskBandInfo(toRiskPercentage(h.riskScore)).textColor,
+                    fontSize: 9.5,
+                    fontWeight: 900,
+                    fontFamily: 'monospace',
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    border: '1px solid #000000',
+                  }}
+                >
+                  {toRiskPercentage(h.riskScore)}% &bull; {getRiskBandInfo(toRiskPercentage(h.riskScore)).label}
                 </span>
                 <ArrowRight size={13} color="var(--text-muted)" />
               </div>
@@ -181,9 +198,10 @@ export default function HabitationPanel() {
   const mlConf = activeHazardAssessment?.ml_prediction?.confidence ? `${(activeHazardAssessment.ml_prediction.confidence * 100).toFixed(0)}%` : '92%';
   const provenance = activeHazardAssessment?.provenance || 'LIVE';
 
-  const riskPct = Math.round(hab.riskScore * 100);
-  const barColor =
-    hab.riskScore >= 0.8 ? 'var(--accent-rose)' : hab.riskScore >= 0.6 ? 'var(--accent-amber)' : 'var(--accent-emerald)';
+  const riskPct = toRiskPercentage(hab.riskScore);
+  const band = getRiskBandInfo(riskPct);
+  const dynamicColor = getRiskColor(riskPct);
+  const breakdown = calculateWeightageBreakdown(hab.riskScore, hab.vulnerabilityIndex?.overall);
 
   return (
     <div className="panel" style={{ height: 'auto', minHeight: '100%', overflowY: 'visible', paddingBottom: 32 }}>
@@ -307,19 +325,30 @@ export default function HabitationPanel() {
           </button>
         )}
 
-        {/* Clean Risk Score Meter */}
+        {/* Collective Risk Score Meter & Feature Weightage Breakdown */}
         <div style={{ marginTop: 8 }}>
           <div className="panel__row panel__row--between" style={{ marginBottom: 4 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Hazard Score</span>
-            <span className={`risk-badge risk-badge--sm ${RISK_CLASS[hab.riskLevel]}`}>
-              SCORE {hab.riskScore.toFixed(2)}
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Collective Risk Score</span>
+            <span
+              style={{
+                background: dynamicColor,
+                color: band.textColor,
+                fontWeight: 900,
+                fontSize: 10.5,
+                fontFamily: 'var(--font-mono, monospace)',
+                padding: '2px 7px',
+                borderRadius: 4,
+                border: '1px solid #000000',
+              }}
+            >
+              {riskPct}% &bull; {band.label}
             </span>
           </div>
 
           <div
             style={{
               width: '100%',
-              height: 6,
+              height: 7,
               background: 'var(--bg-subtle)',
               border: '1px solid var(--border-color)',
               borderRadius: 'var(--radius-pill)',
@@ -331,10 +360,30 @@ export default function HabitationPanel() {
               style={{
                 width: `${riskPct}%`,
                 height: '100%',
-                background: barColor,
+                background: dynamicColor,
                 transition: 'width 0.3s ease',
               }}
             />
+          </div>
+
+          {/* Feature Weightage Breakdown out of 100 */}
+          <div style={{ marginTop: 8, background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 5, padding: '6px 8px', fontSize: 9.5, lineHeight: 1.4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 3 }}>
+              <span>FEATURE WEIGHTAGES (OUT OF 100)</span>
+              <span style={{ color: dynamicColor, fontFamily: 'monospace' }}>{breakdown.collectiveScore}% Total</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>• Hazard Severity (40% weight):</span>
+              <b style={{ color: '#dc2626' }}>+{breakdown.hazardContribution}%</b>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>• Exposure Assets (35% weight):</span>
+              <b style={{ color: '#ea580c' }}>+{breakdown.exposureContribution}%</b>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+              <span>• Community Vulnerability (25% weight):</span>
+              <b style={{ color: '#d97706' }}>+{breakdown.vulnerabilityContribution}%</b>
+            </div>
           </div>
         </div>
       </div>

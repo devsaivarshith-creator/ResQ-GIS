@@ -542,3 +542,30 @@ body {
   }
 }
 
+/* Custom GIS Leaflet Tooltips */
+.leaflet-tooltip.retro-leaflet-tooltip {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 2px solid #000000 !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  padding: 8px 10px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  max-width: 280px !important;
+  white-space: normal !important;
+  pointer-events: none !important;
+}
+
+.leaflet-tooltip.retro-leaflet-tooltip::before {
+  border-top-color: #000000 !important;
+}
+
+[data-theme='dark'] .leaflet-tooltip.retro-leaflet-tooltip {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 3px 3px 0px #0284c7 !important;
+}
+

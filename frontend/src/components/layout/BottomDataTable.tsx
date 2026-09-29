@@ -2,17 +2,14 @@ import { useState, useMemo } from 'react';
 import { Search, Download, Eye, ChevronUp, ChevronDown, Maximize2, Minimize2 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { flyToHabitation, flyToSite } from '../../cesium/camera';
-import type { RiskLevel } from '../../types';
 
 type TabType = 'habitations' | 'sites' | 'infrastructure' | 'rivers' | 'weather';
 
-const RISK_BADGES: Record<RiskLevel, { bg: string; color: string; label: string }> = {
-  CRITICAL: { bg: 'var(--accent-rose-subtle)', color: 'var(--accent-rose)', label: 'Critical' },
-  HIGH: { bg: '#fff7ed', color: '#ea580c', label: 'High' },
-  MODERATE: { bg: 'var(--accent-amber-subtle)', color: 'var(--accent-amber)', label: 'Moderate' },
-  LOW: { bg: 'var(--accent-emerald-subtle)', color: 'var(--accent-emerald)', label: 'Low' },
-  MINIMAL: { bg: 'var(--bg-subtle)', color: 'var(--text-muted)', label: 'Minimal' },
-};
+import {
+  toRiskPercentage,
+  getRiskColor,
+  getRiskBandInfo,
+} from '../../utils/riskClassification';
 
 export default function BottomDataTable() {
   const {
@@ -43,11 +40,13 @@ export default function BottomDataTable() {
         h.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
         h.district.toLowerCase().includes(tableSearch.toLowerCase()) ||
         (h.state && h.state.toLowerCase().includes(tableSearch.toLowerCase()));
+      const pct = toRiskPercentage(h.riskScore);
       const matchesRisk =
         selectedRiskFilter === 'all' ||
-        (selectedRiskFilter === 'high' && (h.riskLevel === 'HIGH' || h.riskLevel === 'CRITICAL')) ||
-        (selectedRiskFilter === 'moderate' && h.riskLevel === 'MODERATE') ||
-        (selectedRiskFilter === 'low' && (h.riskLevel === 'LOW' || h.riskLevel === 'MINIMAL'));
+        (selectedRiskFilter === 'red_zone' && pct >= 80) ||
+        (selectedRiskFilter === 'high' && pct >= 60 && pct < 80) ||
+        (selectedRiskFilter === 'moderate' && pct >= 30 && pct < 60) ||
+        (selectedRiskFilter === 'low' && pct < 30);
       const matchesBlock =
         selectedBlockFilter === 'all' ||
         (h.block && h.block.toLowerCase() === selectedBlockFilter.toLowerCase());
@@ -75,9 +74,9 @@ export default function BottomDataTable() {
     let csvRows: string[] = [];
 
     if (activeTab === 'habitations') {
-      csvHeader = 'Name,District,Block,Population,RiskScore,RiskLevel,RecommendedAction';
+      csvHeader = 'Name,District,Block,Population,RiskPercentage,RiskBand,RecommendedAction';
       csvRows = filteredHabs.map(
-        (h) => `"${h.name}","${h.district}","${h.block || ''}",${h.population},${h.riskScore.toFixed(2)},"${h.riskLevel}","${h.recommendedAction}"`
+        (h) => `"${h.name}","${h.district}","${h.block || ''}",${h.population},"${toRiskPercentage(h.riskScore)}%","${getRiskBandInfo(toRiskPercentage(h.riskScore)).label}","${h.recommendedAction}"`
       );
     } else if (activeTab === 'sites') {
       csvHeader = 'Name,District,CapacityBeds,Suitability,SlopeGrade,Latitude,Longitude';
@@ -288,9 +287,10 @@ export default function BottomDataTable() {
                     }}
                   >
                     <option value="all">All Levels</option>
-                    <option value="high">High & Critical</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="low">Low</option>
+                    <option value="red_zone">80–100% Red Zone</option>
+                    <option value="high">60–80% High</option>
+                    <option value="moderate">30–60% Moderate</option>
+                    <option value="low">0–30% Low</option>
                   </select>
                 </div>
               )}
@@ -318,7 +318,7 @@ export default function BottomDataTable() {
                     <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Block</th>
                     <th style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 700 }}>Population</th>
                     <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Threat</th>
-                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Severity</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'center', fontWeight: 700 }}>Risk Score (%)</th>
                     <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 700 }}>Directive</th>
                     <th style={{ padding: '4px 6px', textAlign: 'center', width: 35, fontWeight: 700 }}>View</th>
                   </tr>
@@ -326,7 +326,9 @@ export default function BottomDataTable() {
                 <tbody>
                   {filteredHabs.map((hab, idx) => {
                     const primaryHazard = hab.hazardExposure && hab.hazardExposure[0] ? hab.hazardExposure[0].type.toUpperCase() : 'LANDSLIDE';
-                    const badge = RISK_BADGES[hab.riskLevel] || RISK_BADGES.MODERATE;
+                    const riskPct = toRiskPercentage(hab.riskScore);
+                    const band = getRiskBandInfo(riskPct);
+                    const dynamicColor = getRiskColor(riskPct);
                     return (
                       <tr
                         key={hab.id}
@@ -351,15 +353,21 @@ export default function BottomDataTable() {
                         </td>
                         <td style={{ padding: '3px 8px', textAlign: 'center' }}>
                           <span
-                            className="risk-badge risk-badge--sm"
                             style={{
-                              background: badge.bg,
-                              color: badge.color,
-                              padding: '1px 4px',
-                              fontSize: 9,
+                              background: dynamicColor,
+                              color: band.textColor,
+                              padding: '1px 6px',
+                              fontSize: 9.5,
+                              fontWeight: 900,
+                              borderRadius: 4,
+                              border: '1px solid #000000',
+                              fontFamily: 'monospace',
+                              whiteSpace: 'nowrap',
+                              display: 'inline-block',
                             }}
+                            title={`Score: ${riskPct}% (${band.label})`}
                           >
-                            {badge.label}
+                            {riskPct}% &bull; {band.label}
                           </span>
                         </td>
                         <td style={{ padding: '3px 8px', fontWeight: 500, color: 'var(--text-secondary)' }}>

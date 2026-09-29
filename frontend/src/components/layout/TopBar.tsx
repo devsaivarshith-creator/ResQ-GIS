@@ -155,39 +155,57 @@ export default function TopBar() {
       {/* 1. Brand Logo + Version + Workspace Dropdown */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
         {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div
             style={{
-              width: 22,
-              height: 22,
-              borderRadius: 4,
-              background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+              width: 24,
+              height: 24,
+              borderRadius: 6,
+              background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              fontWeight: 800,
-              fontSize: 11,
-              boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)',
+              boxShadow: '0 0 12px rgba(6, 182, 212, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
+            title="DRISHTI Geospatial Disaster Surveillance System"
           >
-            ▲
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+              <circle cx="12" cy="12" r="3.5" fill="#ffffff" />
+              <circle cx="12" cy="12" r="1.3" fill="#3b82f6" />
+            </svg>
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'nowrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'nowrap' }}>
               <span
                 style={{
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 13,
+                  fontSize: 13.5,
                   fontWeight: 900,
-                  background: 'linear-gradient(90deg, var(--text-primary), var(--accent-blue))',
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 55%, #ec4899 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  letterSpacing: '0.3px',
+                  letterSpacing: '0.5px',
                   whiteSpace: 'nowrap',
                 }}
               >
                 DRISHTI
+              </span>
+              <span
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 800,
+                  padding: '1px 4px',
+                  borderRadius: 3,
+                  background: 'rgba(6, 182, 212, 0.12)',
+                  color: '#0284c7',
+                  border: '1px solid rgba(6, 182, 212, 0.3)',
+                  letterSpacing: '0.2px',
+                }}
+              >
+                GIS
               </span>
             </div>
           </div>

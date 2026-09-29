@@ -10,6 +10,12 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { flyToDistrict, flyToState, flyToHabitation } from '../../cesium/camera';
 import type { Habitation, RelocationSite } from '../../types';
+import {
+  toRiskPercentage,
+  getRiskColor,
+  getRiskBandInfo,
+  calculateWeightageBreakdown,
+} from '../../utils/riskClassification';
 
 // Helper: Determine mode of travel & journey time based on distance and hazard exposure
 function getRouteDetails(hab: Habitation, site?: RelocationSite) {
@@ -120,12 +126,14 @@ export default function ReportsPanel() {
   const rationsTonnes = ((exposedPop * 0.45 * 14) / 1000).toFixed(1);
 
   const handleExportCSV = () => {
-    const csvHeader = 'Settlement,District,State,Population,Households,Elevation_m,RiskScore,PrimaryHazard,AssignedSafeHaven,CapacityBeds,Occupants,RationsDays,WaterLiters,TravelMode,DistanceKm,ExpectedJourneyTime,LifelineCorridor';
+    const csvHeader = 'Settlement,District,State,Population,Households,Elevation_m,RiskPercentage,RiskBand,PrimaryHazard,AssignedSafeHaven,CapacityBeds,Occupants,RationsDays,WaterLiters,TravelMode,DistanceKm,ExpectedJourneyTime,LifelineCorridor';
     const csvRows = distHabs.map((h) => {
       const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
       const primaryHaz = h.hazardExposure[0]?.type || 'general';
       const route = getRouteDetails(h, haven);
-      return `"${h.name}","${h.district}","${h.state || ''}",${h.population},${h.households || 0},${h.location.elevation || 1500},${h.riskScore.toFixed(2)},"${primaryHaz}","${haven?.name || 'Safe Enclave'}",${haven?.capacity || 1000},${haven?.currentOccupants || 0},${haven?.foodStockDays || 14},${haven?.dailyWaterLiters || 10000},"${route.modeLabel}",${route.distKm},"${route.journeyTimeStr}","${route.corridor}"`;
+      const riskPct = toRiskPercentage(h.riskScore);
+      const band = getRiskBandInfo(riskPct);
+      return `"${h.name}","${h.district}","${h.state || ''}",${h.population},${h.households || 0},${h.location.elevation || 1500},"${riskPct}%","${band.label}","${primaryHaz}","${haven?.name || 'Safe Enclave'}",${haven?.capacity || 1000},${haven?.currentOccupants || 0},${haven?.foodStockDays || 14},${haven?.dailyWaterLiters || 10000},"${route.modeLabel}",${route.distKm},"${route.journeyTimeStr}","${route.corridor}"`;
     });
     const csvContent = 'data:text/csv;charset=utf-8,' + [csvHeader].concat(csvRows).join('\n');
     const encodedUri = encodeURI(csvContent);
@@ -528,8 +536,25 @@ export default function ReportsPanel() {
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '2px solid #0f172a', paddingBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: 20, fontWeight: 900 }}>
-                  ▲
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 12px rgba(6, 182, 212, 0.35)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3.5" fill="#ffffff" />
+                    <circle cx="12" cy="12" r="1.3" fill="#3b82f6" />
+                  </svg>
                 </div>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#dc2626' }}>
@@ -599,9 +624,17 @@ export default function ReportsPanel() {
                 </div>
                 <div style={{ marginTop: 8, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
                   <div>👥 <strong>Exposed Population:</strong> {activeReportHab.population.toLocaleString()} ({activeReportHab.households || 0} households)</div>
-                  <div>⚡ <strong>Hazard Risk Score:</strong> {(activeReportHab.riskScore * 100).toFixed(0)}% ({activeReportHab.riskLevel})</div>
+                  <div>
+                    ⚡ <strong>Collective Risk Score:</strong>{' '}
+                    <span style={{ color: getRiskColor(toRiskPercentage(activeReportHab.riskScore)), fontWeight: 900 }}>
+                      {toRiskPercentage(activeReportHab.riskScore)}% ({getRiskBandInfo(toRiskPercentage(activeReportHab.riskScore)).label})
+                    </span>
+                  </div>
                   <div>⚠️ <strong>Primary Threats:</strong> {activeReportHab.hazardExposure.map(he => he.type).join(', ') || 'Landslide subsidence'}</div>
-                  <div>🛡️ <strong>Vulnerability Index:</strong> Overall {activeReportHab.vulnerabilityIndex.overall.toFixed(2)} (Adaptive: {activeReportHab.vulnerabilityIndex.adaptiveCapacity.toFixed(2)})</div>
+                  <div>🛡️ <strong>Vulnerability Index:</strong> Overall {Math.round(activeReportHab.vulnerabilityIndex.overall * 100)}% (Adaptive: {Math.round(activeReportHab.vulnerabilityIndex.adaptiveCapacity * 100)}%)</div>
+                  <div style={{ fontSize: 10, color: '#64748b', marginTop: 2, background: 'rgba(0,0,0,0.03)', padding: '2px 5px', borderRadius: 3 }}>
+                    Weightages: {calculateWeightageBreakdown(activeReportHab.riskScore, activeReportHab.vulnerabilityIndex.overall).formulaString}
+                  </div>
                 </div>
               </div>
 

@@ -14,6 +14,7 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { WORLD_INVERTED_MASK } from '../../data/indiaBoundary';
 import { DISTRICT_COORDINATES, STATE_COORDINATES } from '../../cesium/camera';
+import { toRiskPercentage, getRiskColor, getRiskBandInfo, calculateWeightageBreakdown } from '../../utils/riskClassification';
 
 type BasemapType = 'osm' | 'satellite' | 'dark' | 'topo';
 
@@ -546,61 +547,45 @@ export default function Map2D() {
         const isSelected = selectedRiverId === river.id;
         const statusColor =
           river.status === 'danger' ? '#ff2a85' : river.status === 'warning' ? '#fb923c' : '#38bdf8';
-        const circleSize = isSelected ? 26 : 20;
+        const circleSize = isSelected ? 24 : 18;
 
         const icon = L.divIcon({
           className: 'retro-marker-station',
           html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
-              <div style="
-                width: ${circleSize}px;
-                height: ${circleSize}px;
-                background: ${statusColor};
-                border: 2px solid #000000;
-                box-shadow: ${isSelected ? '0 0 0 2px #fde047, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #000000;
-                font-size: ${isSelected ? '11px' : '9px'};
-                font-weight: 900;
-                cursor: pointer;
-              ">
-                💧
-              </div>
-              ${
-                showLabels
-                  ? `<div style="
-                      margin-top: 2px;
-                      background: #ffffff;
-                      color: #000000;
-                      font-size: 10px;
-                      font-weight: 800;
-                      font-family: var(--font-sans);
-                      padding: 1px 7px;
-                      border-radius: 6px;
-                      border: 1.5px solid #000000;
-                      box-shadow: 2px 2px 0px #000000;
-                      white-space: nowrap;
-                      letter-spacing: -0.01em;
-                      line-height: 1.35;
-                      pointer-events: none;
-                    ">
-                      ${river.name}
-                    </div>`
-                  : ''
-              }
+            <div style="
+              width: ${circleSize}px;
+              height: ${circleSize}px;
+              background: ${statusColor};
+              border: 2px solid #000000;
+              box-shadow: ${isSelected ? '0 0 0 2px #fde047, 2px 2px 0px #000000' : '2px 2px 0px #000000'};
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #000000;
+              font-size: ${isSelected ? '11px' : '9px'};
+              font-weight: 900;
+              cursor: pointer;
+            ">
+              💧
             </div>
           `,
-          iconSize: [140, showLabels ? 42 : circleSize],
-          iconAnchor: [70, circleSize / 2],
+          iconSize: [circleSize, circleSize],
+          iconAnchor: [circleSize / 2, circleSize / 2],
         });
 
         const marker = L.marker([river.location.lat, river.location.lng], { icon });
-        marker.bindTooltip(`<b>${river.name}</b><br>Stage: ${river.waterLevel ?? '—'}m (Warn: ${river.warningLevel}m)`, {
-          className: 'retro-leaflet-tooltip',
-        });
+        marker.bindTooltip(
+          `<div style="font-family: inherit; min-width: 190px;">
+            <div style="font-weight: 800; font-size: 11.5px; color: #0f172a; margin-bottom: 2px;">🌊 ${river.name.toUpperCase()}</div>
+            <div style="font-size: 9.5px; color: #64748b; margin-bottom: 6px;">CWC Hydrological Monitoring Station &bull; River: ${river.river}</div>
+            <div style="background: rgba(0,0,0,0.04); border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 6px; font-size: 10px; display: flex; justify-content: space-between;">
+              <span>Water Stage: <b style="color: #0284c7;">${river.waterLevel ?? '—'}m</b></span>
+              <span>Warning: <b style="color: #ea580c;">${river.warningLevel}m</b></span>
+            </div>
+          </div>`,
+          { className: 'retro-leaflet-tooltip' }
+        );
         marker.on('click', () => selectRiver(river.id));
         group.addLayer(marker);
       });
@@ -610,59 +595,42 @@ export default function Map2D() {
     if (layerVisibility['relocation_sites']) {
       relocationSites.forEach((site) => {
         const isSelected = selectedSiteId === site.id;
-        const boxSize = isSelected ? 30 : 24;
+        const boxSize = isSelected ? 26 : 20;
         const icon = L.divIcon({
           className: 'retro-marker-site',
           html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
-              <div style="
-                width: ${boxSize}px;
-                height: ${boxSize}px;
-                background: #6ee7b7;
-                border: 2px solid #000000;
-                box-shadow: ${isSelected ? '0 0 0 2px #fde047, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
-                border-radius: 6px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #000000;
-                font-size: ${isSelected ? '13px' : '11px'};
-                cursor: pointer;
-                transition: transform 0.1s ease;
-              ">
-                🏰
-              </div>
-              ${
-                showLabels
-                  ? `<div style="
-                      margin-top: 3px;
-                      background: #6ee7b7;
-                      color: #000000;
-                      font-size: 10px;
-                      font-weight: 800;
-                      font-family: var(--font-sans);
-                      padding: 1px 7px;
-                      border-radius: 6px;
-                      border: 1.5px solid #000000;
-                      box-shadow: 2px 2px 0px #000000;
-                      white-space: nowrap;
-                      letter-spacing: -0.01em;
-                      line-height: 1.35;
-                      pointer-events: none;
-                    ">
-                      ${site.name}
-                    </div>`
-                  : ''
-              }
+            <div style="
+              width: ${boxSize}px;
+              height: ${boxSize}px;
+              background: #6ee7b7;
+              border: 2px solid #000000;
+              box-shadow: ${isSelected ? '0 0 0 2px #fde047, 2px 2px 0px #000000' : '2px 2px 0px #000000'};
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #000000;
+              font-size: ${isSelected ? '13px' : '10px'};
+              cursor: pointer;
+              transition: transform 0.1s ease;
+            ">
+              🏰
             </div>
           `,
-          iconSize: [140, showLabels ? 48 : boxSize],
-          iconAnchor: [70, boxSize / 2],
+          iconSize: [boxSize, boxSize],
+          iconAnchor: [boxSize / 2, boxSize / 2],
         });
 
         const marker = L.marker([site.location.lat, site.location.lng], { icon, zIndexOffset: 200 });
         marker.bindTooltip(
-          `<b>SAFE HAVEN: ${site.name.toUpperCase()}</b><br>Capacity: ${site.capacity.toLocaleString()} | Suitability: ${site.suitabilityScore.toFixed(2)}`,
+          `<div style="font-family: inherit; min-width: 210px;">
+            <div style="font-weight: 800; font-size: 11.5px; color: #047857; margin-bottom: 2px;">🏰 SAFE HAVEN: ${site.name.toUpperCase()}</div>
+            <div style="font-size: 9.5px; color: #64748b; margin-bottom: 5px;">${site.district} &bull; Elevation: ${site.location?.elevation || 850}m MSL</div>
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px; padding: 4px 6px; font-size: 10px; line-height: 1.4;">
+              <div>Capacity: <b style="color: #047857;">${site.capacity.toLocaleString()} evacuee beds</b> (${site.suitability || 'Certified'})</div>
+              <div>Suitability Score: <b>${Math.round(site.suitabilityScore * 100)}%</b></div>
+            </div>
+          </div>`,
           { className: 'retro-leaflet-tooltip' }
         );
         marker.on('click', () => selectSite(site.id));
@@ -674,63 +642,91 @@ export default function Map2D() {
     if (layerVisibility['habitations']) {
       habitations.forEach((h) => {
         const isSelected = selectedHabitationId === h.id;
-        const color = h.riskScore >= 0.7 ? '#ef4444' : h.riskScore >= 0.5 ? '#fde047' : '#86efac';
+        const riskPct = toRiskPercentage(h.riskScore);
+        const dynamicColor = getRiskColor(riskPct);
+        const band = getRiskBandInfo(riskPct);
+        const breakdown = calculateWeightageBreakdown(h.riskScore, h.vulnerabilityIndex?.overall);
+        const badgeSize = isSelected ? 24 : 18;
 
         const icon = L.divIcon({
           className: 'retro-marker-habitation',
           html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 140px; pointer-events: auto; user-select: none;">
-              <div style="
-                background: ${color};
-                border: 2px solid #000000;
-                box-shadow: ${isSelected ? '0 0 0 2px #ffffff, 3px 3px 0px #000000' : '2px 2px 0px #000000'};
-                border-radius: 12px;
-                padding: 1px 6px;
-                display: inline-flex;
-                align-items: center;
-                gap: 3px;
-                color: #000000;
-                font-family: var(--font-mono, monospace);
-                font-weight: 900;
-                font-size: ${isSelected ? '11px' : '10px'};
-                cursor: pointer;
-                line-height: 1.2;
-                transition: transform 0.1s ease;
-              ">
-                <span style="font-size: ${isSelected ? '12px' : '11px'};">🏠</span>
-                <span>${h.riskScore.toFixed(2)}</span>
-              </div>
-              ${
-                showLabels
-                  ? `<div style="
-                      margin-top: 2px;
-                      background: #ffffff;
-                      color: #000000;
-                      font-size: 10px;
-                      font-weight: 800;
-                      font-family: var(--font-sans);
-                      padding: 1px 7px;
-                      border-radius: 6px;
-                      border: 1.5px solid #000000;
-                      box-shadow: 2px 2px 0px #000000;
-                      white-space: nowrap;
-                      letter-spacing: -0.01em;
-                      line-height: 1.35;
-                      pointer-events: none;
-                    ">
-                      ${h.name}
-                    </div>`
-                  : ''
-              }
+            <div style="
+              width: ${badgeSize}px;
+              height: ${badgeSize}px;
+              background: ${dynamicColor};
+              border: 2px solid #000000;
+              box-shadow: ${isSelected ? '0 0 0 2px #ffffff, 2px 2px 0px #000000' : '2px 2px 0px #000000'};
+              border-radius: 5px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #000000;
+              font-size: ${isSelected ? '12px' : '9.5px'};
+              cursor: pointer;
+              transition: transform 0.1s ease;
+            ">
+              🏠
             </div>
           `,
-          iconSize: [140, showLabels ? 42 : 22],
-          iconAnchor: [70, 11],
+          iconSize: [badgeSize, badgeSize],
+          iconAnchor: [badgeSize / 2, badgeSize / 2],
         });
+
+        const assignedHaven = relocationSites.find((s) => s.id === h.nearestRelocationSite);
 
         const marker = L.marker([h.location.lat, h.location.lng], { icon, zIndexOffset: 100 });
         marker.bindTooltip(
-          `<b>${h.name.toUpperCase()}</b><br>Risk: ${(h.riskScore * 100).toFixed(0)}% (${h.riskLevel})<br>Pop: ${h.population.toLocaleString()}`,
+          `<div style="font-family: inherit; min-width: 235px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 3px;">
+              <span style="font-weight: 800; font-size: 11.5px; color: #0f172a;">🏠 ${h.name.toUpperCase()}</span>
+              <span style="
+                background: ${dynamicColor};
+                color: ${band.textColor};
+                font-family: monospace;
+                font-weight: 900;
+                font-size: 10px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                border: 1px solid #000000;
+                white-space: nowrap;
+              ">
+                ${riskPct}% &bull; ${band.label}
+              </span>
+            </div>
+            <div style="font-size: 9.5px; color: #64748b; margin-bottom: 6px;">
+              ${h.district}, ${h.state} &bull; Population: <b>${h.population.toLocaleString()}</b>
+            </div>
+
+            <!-- Weightage Breakdown out of 100 -->
+            <div style="background: rgba(0,0,0,0.04); border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 6px; margin-bottom: 5px; font-size: 9px; line-height: 1.35;">
+              <div style="font-weight: 800; color: #0f172a; margin-bottom: 3px; display: flex; justify-content: space-between;">
+                <span>FEATURE WEIGHTAGES</span>
+                <span style="font-family: monospace; color: ${dynamicColor}; font-weight: 900;">${breakdown.collectiveScore}% / 100%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; color: #334155;">
+                <span>• Hazard Severity (40% weight):</span>
+                <b>+${breakdown.hazardContribution}%</b>
+              </div>
+              <div style="display: flex; justify-content: space-between; color: #334155;">
+                <span>• Exposure Density (35% weight):</span>
+                <b>+${breakdown.exposureContribution}%</b>
+              </div>
+              <div style="display: flex; justify-content: space-between; color: #334155;">
+                <span>• Community Vulnerability (25% weight):</span>
+                <b>+${breakdown.vulnerabilityContribution}%</b>
+              </div>
+              <div style="margin-top: 3px; padding-top: 2px; border-top: 1px dashed #cbd5e1; font-weight: 700; color: #0f172a; display: flex; justify-content: space-between;">
+                <span>Collective Risk Score:</span>
+                <span style="color: ${dynamicColor};">${breakdown.collectiveScore}%</span>
+              </div>
+            </div>
+
+            <div style="font-size: 9px; color: #475569; display: flex; justify-content: space-between;">
+              <span>Assigned Haven:</span>
+              <b style="color: #059669;">${assignedHaven?.name || 'Designated Shelter'}</b>
+            </div>
+          </div>`,
           { className: 'retro-leaflet-tooltip' }
         );
         marker.on('click', () => selectHabitation(h.id));
