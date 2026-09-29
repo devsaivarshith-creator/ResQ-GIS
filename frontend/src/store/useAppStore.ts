@@ -62,6 +62,8 @@ interface AppState {
   addSurveillanceZone: (zone: SurveillanceZone) => void;
 
   // Relocation Comparison & Priority Decision
+  compareStateFilter: string;
+  setCompareStateFilter: (state: string) => void;
   compareLocationAId: string | null;
   compareLocationBId: string | null;
   setCompareLocationAId: (id: string | null) => void;
@@ -218,6 +220,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     })),
 
   // Relocation Comparison & Priority Decision
+  compareStateFilter: 'Kerala',
+  setCompareStateFilter: (state) => set({ compareStateFilter: state }),
   compareLocationAId: null,
   compareLocationBId: null,
   setCompareLocationAId: (id) => set({ compareLocationAId: id }),

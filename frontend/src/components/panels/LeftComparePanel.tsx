@@ -5,9 +5,10 @@ import {
   Maximize2,
   X,
   Sparkles,
+  MapPin,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { flyToHabitation } from '../../cesium/camera';
+import { flyToHabitation, flyToState } from '../../cesium/camera';
 import {
   toRiskPercentage,
   getRiskColor,
@@ -19,6 +20,8 @@ export default function LeftComparePanel() {
   const {
     habitations,
     relocationSites,
+    compareStateFilter,
+    setCompareStateFilter,
     compareLocationAId,
     compareLocationBId,
     setCompareLocationAId,
@@ -30,24 +33,59 @@ export default function LeftComparePanel() {
     setActiveNav,
   } = useAppStore();
 
-  // Default selection if not set
+  // Dynamically extract unique states from all habitations
+  const availableStates = useMemo(() => {
+    const states = habitations.map((h) => h.state).filter(Boolean) as string[];
+    return Array.from(new Set(states)).sort();
+  }, [habitations]);
+
+  // Filter habitations strictly by the selected state
+  const stateHabs = useMemo(() => {
+    if (compareStateFilter === 'ALL') return habitations;
+    return habitations.filter(
+      (h) => h.state && h.state.toLowerCase() === compareStateFilter.toLowerCase()
+    );
+  }, [habitations, compareStateFilter]);
+
+  // Default selection synchronized strictly with the filtered state
   useEffect(() => {
-    if (habitations.length >= 2) {
-      if (!compareLocationAId) setCompareLocationAId(habitations[0].id);
-      if (!compareLocationBId) setCompareLocationBId(habitations[1].id);
-    } else if (habitations.length === 1) {
-      if (!compareLocationAId) setCompareLocationAId(habitations[0].id);
+    if (stateHabs.length >= 2) {
+      const isAInState = stateHabs.some((h) => h.id === compareLocationAId);
+      const isBInState = stateHabs.some((h) => h.id === compareLocationBId);
+      if (!isAInState) setCompareLocationAId(stateHabs[0].id);
+      if (!isBInState) setCompareLocationBId(stateHabs[1]?.id || stateHabs[0].id);
+    } else if (stateHabs.length === 1) {
+      setCompareLocationAId(stateHabs[0].id);
+      setCompareLocationBId(stateHabs[0].id);
     }
-  }, [habitations, compareLocationAId, compareLocationBId, setCompareLocationAId, setCompareLocationBId]);
+  }, [stateHabs, compareLocationAId, compareLocationBId, setCompareLocationAId, setCompareLocationBId]);
+
+  const handleStateChange = (newSt: string) => {
+    setCompareStateFilter(newSt);
+    if (newSt !== 'ALL') {
+      flyToState(newSt);
+    }
+    const filtered =
+      newSt === 'ALL'
+        ? habitations
+        : habitations.filter((h) => h.state?.toLowerCase() === newSt.toLowerCase());
+    if (filtered.length >= 2) {
+      setCompareLocationAId(filtered[0].id);
+      setCompareLocationBId(filtered[1].id);
+    } else if (filtered.length === 1) {
+      setCompareLocationAId(filtered[0].id);
+      setCompareLocationBId(filtered[0].id);
+    }
+  };
 
   const habA = useMemo(
-    () => habitations.find((h) => h.id === compareLocationAId) || habitations[0] || null,
-    [habitations, compareLocationAId]
+    () => stateHabs.find((h) => h.id === compareLocationAId) || stateHabs[0] || null,
+    [stateHabs, compareLocationAId]
   );
 
   const habB = useMemo(
-    () => habitations.find((h) => h.id === compareLocationBId) || habitations[1] || habitations[0] || null,
-    [habitations, compareLocationBId]
+    () => stateHabs.find((h) => h.id === compareLocationBId) || stateHabs[1] || stateHabs[0] || null,
+    [stateHabs, compareLocationBId]
   );
 
   const siteA = useMemo(
@@ -194,10 +232,64 @@ export default function LeftComparePanel() {
           </div>
         )}
 
+        {/* State Scope Filter */}
+        <div
+          style={{
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '6px 8px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+            <label style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <MapPin size={11} color="var(--accent-blue)" />
+              <span>Target State Scope</span>
+            </label>
+            <span
+              style={{
+                fontSize: 8.5,
+                fontWeight: 800,
+                color: '#059669',
+                background: 'rgba(5, 150, 105, 0.1)',
+                padding: '1px 5px',
+                borderRadius: 3,
+              }}
+            >
+              {stateHabs.length} Places in {compareStateFilter === 'ALL' ? 'All States' : compareStateFilter}
+            </span>
+          </div>
+          <select
+            value={compareStateFilter}
+            onChange={(e) => handleStateChange(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '4px 6px',
+              fontSize: 10.5,
+              fontWeight: 800,
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-surface)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="ALL">🌐 All States ({habitations.length} habitations)</option>
+            {availableStates.map((st) => {
+              const count = habitations.filter((h) => h.state === st).length;
+              return (
+                <option key={st} value={st}>
+                  📍 {st} ({count} habitations)
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
         {/* Swap Controls Bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 4px' }}>
           <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Select 2 Settlements
+            Select 2 Settlements ({compareStateFilter === 'ALL' ? 'Nationwide' : compareStateFilter})
           </span>
           <button
             onClick={handleSwap}
@@ -278,7 +370,7 @@ export default function LeftComparePanel() {
               marginBottom: 5,
             }}
           >
-            {habitations.map((h) => (
+            {stateHabs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name} ({h.district}, {toRiskPercentage(h.riskScore)}% Risk)
               </option>
@@ -403,7 +495,7 @@ export default function LeftComparePanel() {
               marginBottom: 5,
             }}
           >
-            {habitations.map((h) => (
+            {stateHabs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name} ({h.district}, {toRiskPercentage(h.riskScore)}% Risk)
               </option>

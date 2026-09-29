@@ -104,12 +104,14 @@ export function evaluateEvacuationPriority(
   const loser = isA ? habB : habA;
 
   let primaryRationale = '';
-  if (Math.abs(deltaRisk) >= 5) {
+  if (winner.riskScore > loser.riskScore && Math.abs(deltaRisk) >= 5) {
     primaryRationale = `${winner.name} exhibits a higher composite risk severity (${Math.round(winner.riskScore * 100)}% vs ${Math.round(loser.riskScore * 100)}%).`;
-  } else if (Math.abs(deltaPop) >= 200) {
-    primaryRationale = `${winner.name} has a substantially larger civilian population exposed (${winner.population.toLocaleString()} vs ${loser.population.toLocaleString()}).`;
+  } else if (winner.population > loser.population && Math.abs(deltaPop) >= 150) {
+    primaryRationale = `${winner.name} has a substantially larger civilian population exposed (${winner.population.toLocaleString()} vs ${loser.population.toLocaleString()} souls).`;
+  } else if (winner.vulnerabilityIndex.overall > loser.vulnerabilityIndex.overall) {
+    primaryRationale = `${winner.name} has higher community vulnerability (${Math.round(winner.vulnerabilityIndex.overall * 100)}% vs ${Math.round(loser.vulnerabilityIndex.overall * 100)}% HVI).`;
   } else {
-    primaryRationale = `${winner.name} has higher community vulnerability (${Math.round(winner.vulnerabilityIndex.overall * 100)}% HVI) requiring prioritized immediate evacuation.`;
+    primaryRationale = `${winner.name} requires priority Stage 1 evacuation based on composite exposure and access constraints.`;
   }
 
   const site = isA ? siteA : siteB;

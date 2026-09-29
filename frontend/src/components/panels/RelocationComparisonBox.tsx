@@ -7,9 +7,10 @@ import {
   Compass,
   ArrowLeftRight,
   CheckCircle2,
+  MapPin,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { flyToHabitation } from '../../cesium/camera';
+import { flyToHabitation, flyToState } from '../../cesium/camera';
 import {
   toRiskPercentage,
   getRiskColor,
@@ -22,22 +23,58 @@ export default function RelocationComparisonBox() {
   const {
     habitations,
     relocationSites,
+    compareStateFilter,
+    setCompareStateFilter,
     compareLocationAId,
     compareLocationBId,
+    setCompareLocationAId,
+    setCompareLocationBId,
     prioritizedLocationId,
     setPrioritizedLocationId,
     isComparisonBoxOpen,
     setIsComparisonBoxOpen,
   } = useAppStore();
 
+  // Dynamically extract unique states from all habitations
+  const availableStates = useMemo(() => {
+    const states = habitations.map((h) => h.state).filter(Boolean) as string[];
+    return Array.from(new Set(states)).sort();
+  }, [habitations]);
+
+  // Filter habitations strictly by the selected state
+  const stateHabs = useMemo(() => {
+    if (compareStateFilter === 'ALL') return habitations;
+    return habitations.filter(
+      (h) => h.state && h.state.toLowerCase() === compareStateFilter.toLowerCase()
+    );
+  }, [habitations, compareStateFilter]);
+
+  const handleStateChange = (newSt: string) => {
+    setCompareStateFilter(newSt);
+    if (newSt !== 'ALL') {
+      flyToState(newSt);
+    }
+    const filtered =
+      newSt === 'ALL'
+        ? habitations
+        : habitations.filter((h) => h.state?.toLowerCase() === newSt.toLowerCase());
+    if (filtered.length >= 2) {
+      setCompareLocationAId(filtered[0].id);
+      setCompareLocationBId(filtered[1].id);
+    } else if (filtered.length === 1) {
+      setCompareLocationAId(filtered[0].id);
+      setCompareLocationBId(filtered[0].id);
+    }
+  };
+
   const habA = useMemo(
-    () => habitations.find((h) => h.id === compareLocationAId) || habitations[0] || null,
-    [habitations, compareLocationAId]
+    () => stateHabs.find((h) => h.id === compareLocationAId) || stateHabs[0] || null,
+    [stateHabs, compareLocationAId]
   );
 
   const habB = useMemo(
-    () => habitations.find((h) => h.id === compareLocationBId) || habitations[1] || habitations[0] || null,
-    [habitations, compareLocationBId]
+    () => stateHabs.find((h) => h.id === compareLocationBId) || stateHabs[1] || stateHabs[0] || null,
+    [stateHabs, compareLocationBId]
   );
 
   const siteA = useMemo(
@@ -184,7 +221,34 @@ export default function RelocationComparisonBox() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {/* State Filter Dropdown in Modal */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, border: '1px solid #cbd5e1' }}>
+              <MapPin size={11} color="#2563eb" />
+              <span style={{ fontSize: 9.5, fontWeight: 800, color: '#334155' }}>State:</span>
+              <select
+                value={compareStateFilter}
+                onChange={(e) => handleStateChange(e.target.value)}
+                style={{
+                  padding: '2px 5px',
+                  fontSize: 10,
+                  fontWeight: 800,
+                  borderRadius: 4,
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="ALL">All States</option>
+                {availableStates.map((st) => (
+                  <option key={st} value={st}>
+                    {st} ({habitations.filter((h) => h.state === st).length})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={handleExportCSV}
               style={{
@@ -357,6 +421,29 @@ export default function RelocationComparisonBox() {
               </button>
             </div>
 
+            {/* Location A Settlement Selector */}
+            <select
+              value={habA.id}
+              onChange={(e) => setCompareLocationAId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '4px 6px',
+                fontSize: 10.5,
+                fontWeight: 800,
+                borderRadius: 4,
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                cursor: 'pointer',
+              }}
+            >
+              {stateHabs.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} ({h.district}, {toRiskPercentage(h.riskScore)}% Risk)
+                </option>
+              ))}
+            </select>
+
             {/* 1. Origin Habitation Demographics */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 6, padding: 8 }}>
               <div style={{ fontSize: 9, fontWeight: 800, color: '#dc2626', textTransform: 'uppercase', marginBottom: 4 }}>
@@ -503,6 +590,29 @@ export default function RelocationComparisonBox() {
                 <span>Fly</span>
               </button>
             </div>
+
+            {/* Location B Settlement Selector */}
+            <select
+              value={habB.id}
+              onChange={(e) => setCompareLocationBId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '4px 6px',
+                fontSize: 10.5,
+                fontWeight: 800,
+                borderRadius: 4,
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                cursor: 'pointer',
+              }}
+            >
+              {stateHabs.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} ({h.district}, {toRiskPercentage(h.riskScore)}% Risk)
+                </option>
+              ))}
+            </select>
 
             {/* 1. Origin Habitation Demographics */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 6, padding: 8 }}>
