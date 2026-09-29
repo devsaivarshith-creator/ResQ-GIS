@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import {
   FileText,
   Printer,
-  Download,
   Search,
   X,
 } from 'lucide-react';
@@ -125,25 +124,7 @@ export default function ReportsPanel() {
   const ambulancesNeeded = Math.max(2, Math.ceil(exposedPop / 350));
   const rationsTonnes = ((exposedPop * 0.45 * 14) / 1000).toFixed(1);
 
-  const handleExportCSV = () => {
-    const csvHeader = 'Settlement,District,State,Population,Households,Elevation_m,RiskPercentage,RiskBand,PrimaryHazard,AssignedSafeHaven,CapacityBeds,Occupants,RationsDays,WaterLiters,TravelMode,DistanceKm,ExpectedJourneyTime,LifelineCorridor';
-    const csvRows = distHabs.map((h) => {
-      const haven = distSites.find((s) => s.id === h.nearestRelocationSite) || distSites[0];
-      const primaryHaz = h.hazardExposure[0]?.type || 'general';
-      const route = getRouteDetails(h, haven);
-      const riskPct = toRiskPercentage(h.riskScore);
-      const band = getRiskBandInfo(riskPct);
-      return `"${h.name}","${h.district}","${h.state || ''}",${h.population},${h.households || 0},${h.location.elevation || 1500},"${riskPct}%","${band.label}","${primaryHaz}","${haven?.name || 'Safe Enclave'}",${haven?.capacity || 1000},${haven?.currentOccupants || 0},${haven?.foodStockDays || 14},${haven?.dailyWaterLiters || 10000},"${route.modeLabel}",${route.distKm},"${route.journeyTimeStr}","${route.corridor}"`;
-    });
-    const csvContent = 'data:text/csv;charset=utf-8,' + [csvHeader].concat(csvRows).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `drishti_evacuation_manifest_${selectedDistrict.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   const fallbackSite: RelocationSite = {
     id: 'site-fallback',
@@ -178,57 +159,6 @@ export default function ReportsPanel() {
 
   return (
     <div className="panel report-panel" style={{ padding: '6px' }}>
-      {/* Top Banner */}
-      <div className="panel__section" style={{ background: 'var(--bg-subtle)', padding: '5px 8px' }}>
-        <div className="panel__row panel__row--between">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                background: 'var(--accent-indigo-subtle)',
-                border: '1px solid var(--accent-indigo)',
-                borderRadius: 'var(--radius-sm)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--accent-indigo)',
-              }}
-            >
-              <FileText size={14} strokeWidth={2.5} />
-            </div>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>
-                Evacuation &amp; Transit Memo
-              </div>
-              <div style={{ fontSize: 9.5, color: 'var(--text-muted)' }}>
-                Safe Haven Logistics &amp; Route Brief
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button
-              onClick={handleExportCSV}
-              className="btn-action"
-              title="Export Evacuation Data as CSV"
-              style={{ padding: '3px 6px', fontSize: 10 }}
-            >
-              <Download size={11} strokeWidth={2} />
-              <span>CSV</span>
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="btn-action"
-              title="Print Full District Evacuation Memo"
-              style={{ padding: '3px 8px', fontSize: 10, background: 'var(--accent-blue)', color: '#ffffff', border: 'none' }}
-            >
-              <Printer size={11} strokeWidth={2} />
-              <span>Print PDF</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* State & District Selector and Search */}
       <div className="panel__section" style={{ background: 'var(--bg-surface)', marginTop: 4, padding: '5px 8px' }}>

@@ -228,7 +228,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setCompareLocationBId: (id) => set({ compareLocationBId: id }),
   prioritizedLocationId: null,
   setPrioritizedLocationId: (id) => set({ prioritizedLocationId: id }),
-  isComparisonBoxOpen: true,
+  isComparisonBoxOpen: false,
   setIsComparisonBoxOpen: (open) => set({ isComparisonBoxOpen: open }),
 
   // Navigation & Spatial Engine Mode

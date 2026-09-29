@@ -512,43 +512,61 @@ export default function RightOperationsPanel() {
                   key={feed.name}
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '3px 7px',
+                    flexDirection: 'column',
+                    gap: 3,
+                    padding: '6px 8px',
                     borderBottom: idx < liveFeeds.length - 1 ? '1px solid var(--border-color)' : 'none',
-                    fontSize: 10,
+                    background: 'var(--bg-surface)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0 }}>
-                    <span style={{ fontSize: 11 }}>{feed.icon}</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-                      {feed.name}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: 12, lineHeight: 1, flexShrink: 0 }}>{feed.icon}</span>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 11,
+                          color: 'var(--text-primary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {feed.name}
+                      </span>
+                    </div>
                     <span
                       style={{
-                        fontSize: 8,
-                        fontWeight: 700,
-                        background: feed.status === 'LIVE' ? 'var(--accent-emerald-subtle)' : 'var(--bg-subtle)',
+                        fontSize: 8.5,
+                        fontWeight: 800,
+                        letterSpacing: '0.4px',
+                        background: feed.status === 'LIVE' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-subtle)',
                         color: feed.status === 'LIVE' ? 'var(--accent-emerald)' : 'var(--text-muted)',
-                        padding: '0.5px 4px',
+                        padding: '1px 6px',
                         borderRadius: 'var(--radius-pill)',
-                        border: '1px solid var(--border-color)',
+                        border: '1px solid',
+                        borderColor: feed.status === 'LIVE' ? 'rgba(16, 185, 129, 0.35)' : 'var(--border-color)',
+                        flexShrink: 0,
                       }}
                     >
                       {feed.status}
                     </span>
                   </div>
-                  <span
+                  <div
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      fontSize: 9.5,
+                      fontSize: 10,
                       fontWeight: 500,
                       color: 'var(--text-secondary)',
+                      paddingLeft: 18,
                       whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
+                    title={feed.val}
                   >
                     {feed.val}
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
