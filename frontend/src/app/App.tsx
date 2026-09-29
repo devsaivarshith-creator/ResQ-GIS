@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import TopBar from '../components/layout/TopBar';
 import LeftNav from '../components/layout/LeftNav';
+import LeftComparePanel from '../components/panels/LeftComparePanel';
+import RelocationComparisonBox from '../components/panels/RelocationComparisonBox';
 import BottomDataTable from '../components/layout/BottomDataTable';
 import RightOperationsPanel from '../components/layout/RightOperationsPanel';
 import CesiumGlobe from '../components/map/CesiumGlobe';
@@ -8,7 +10,7 @@ import Map2D from '../components/map/Map2D';
 import { useAppStore } from '../store/useAppStore';
 
 export default function App() {
-  const { loadData, mapMode, theme, autoRefreshInterval } = useAppStore();
+  const { loadData, mapMode, theme, autoRefreshInterval, activeNav } = useAppStore();
 
   useEffect(() => {
     loadData();
@@ -38,6 +40,12 @@ export default function App() {
       <div className="app__body">
         {/* Bendable Left Navigation Sidebar */}
         <LeftNav />
+
+        {/* Dedicated Left Relocation Comparison & Priority Decision Panel */}
+        {activeNav === 'relocation_compare' && <LeftComparePanel />}
+
+        {/* Floating Evacuation Comparison Box with full side-by-side directive */}
+        <RelocationComparisonBox />
 
         {/* Center Column: Interactive GIS Map & Foldable Bottom Data Table */}
         <main className="app__center">

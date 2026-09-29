@@ -8,7 +8,6 @@ import RiversPanel from '../panels/RiversPanel';
 import LayerPanel from '../panels/LayerPanel';
 import DataSourcesPanel from '../panels/DataSourcesPanel';
 import SettingsPanel from '../panels/SettingsPanel';
-import WorkspacesPanel from '../panels/WorkspacesPanel';
 import SurveillancePanel from '../panels/SurveillancePanel';
 import { ChevronRight, ChevronLeft, X } from 'lucide-react';
 
@@ -173,14 +172,11 @@ export default function RightOperationsPanel() {
     activeNav === 'relocation' ||
     activeNav === 'datasources' ||
     activeNav === 'settings' ||
-    activeNav === 'workspaces' ||
     activeNav === 'surveillance';
 
   const toolTitle =
     activeNav === 'analysis'
       ? 'Risk Priority Leaderboard'
-      : activeNav === 'workspaces'
-      ? 'Workspaces & Folders'
       : activeNav === 'surveillance'
       ? 'Surveillance & AOI Marking'
       : activeNav === 'datasources'
@@ -267,7 +263,6 @@ export default function RightOperationsPanel() {
 
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {activeNav === 'analysis' && <AnalysisPanel />}
-            {activeNav === 'workspaces' && <WorkspacesPanel />}
             {activeNav === 'surveillance' && <SurveillancePanel />}
             {activeNav === 'reports' && <ReportsPanel />}
             {activeNav === 'alerts' && <AlertsPanel />}

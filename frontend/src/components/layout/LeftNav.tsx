@@ -9,7 +9,7 @@ import {
   FileText,
   Database,
   Settings,
-  FolderKanban,
+  ArrowLeftRight,
   Scan,
   ChevronLeft,
   ChevronRight,
@@ -27,7 +27,7 @@ interface NavItemDef {
 const NAV_ITEMS: NavItemDef[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, targetPanel: 'analysis' },
   { id: 'map', label: 'Live Situation', icon: Radio, targetPanel: 'map' },
-  { id: 'workspaces', label: 'Workspaces', icon: FolderKanban, targetPanel: 'workspaces' },
+  { id: 'compare', label: 'Priority Compare', icon: ArrowLeftRight, targetPanel: 'relocation_compare' },
   { id: 'surveillance', label: 'Surveillance & AOI', icon: Scan, targetPanel: 'surveillance' },
   { id: 'habitations', label: 'Habitations', icon: Home, targetPanel: 'habitations' },
   { id: 'relocation', label: 'Relocation & Havens', icon: Navigation, targetPanel: 'relocation' },
@@ -114,7 +114,7 @@ export default function LeftNav() {
             const isActive =
               (item.id === 'dashboard' && activeNav === 'analysis') ||
               (item.id === 'map' && activeNav === 'map') ||
-              (item.id === 'workspaces' && activeNav === 'workspaces') ||
+              (item.id === 'compare' && activeNav === 'relocation_compare') ||
               (item.id === 'surveillance' && activeNav === 'surveillance') ||
               (item.id === 'hazard_layers' && activeNav === 'layers') ||
               (item.id === 'habitations' && activeNav === 'habitations') ||

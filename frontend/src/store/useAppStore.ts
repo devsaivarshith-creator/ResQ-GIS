@@ -61,6 +61,16 @@ interface AppState {
   setActiveSurveillanceZone: (zone: SurveillanceZone | null) => void;
   addSurveillanceZone: (zone: SurveillanceZone) => void;
 
+  // Relocation Comparison & Priority Decision
+  compareLocationAId: string | null;
+  compareLocationBId: string | null;
+  setCompareLocationAId: (id: string | null) => void;
+  setCompareLocationBId: (id: string | null) => void;
+  prioritizedLocationId: string | null;
+  setPrioritizedLocationId: (id: string | null) => void;
+  isComparisonBoxOpen: boolean;
+  setIsComparisonBoxOpen: (open: boolean) => void;
+
   // Navigation & Spatial Engine Mode
   activeNav: NavSection;
   setActiveNav: (nav: NavSection) => void;
@@ -206,6 +216,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       surveillanceZones: [zone, ...state.surveillanceZones],
       activeSurveillanceZone: zone,
     })),
+
+  // Relocation Comparison & Priority Decision
+  compareLocationAId: null,
+  compareLocationBId: null,
+  setCompareLocationAId: (id) => set({ compareLocationAId: id }),
+  setCompareLocationBId: (id) => set({ compareLocationBId: id }),
+  prioritizedLocationId: null,
+  setPrioritizedLocationId: (id) => set({ prioritizedLocationId: id }),
+  isComparisonBoxOpen: true,
+  setIsComparisonBoxOpen: (open) => set({ isComparisonBoxOpen: open }),
 
   // Navigation & Spatial Engine Mode
   activeNav: 'map',
