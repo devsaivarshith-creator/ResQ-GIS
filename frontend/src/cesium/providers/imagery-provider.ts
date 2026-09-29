@@ -70,7 +70,7 @@ export function createImageryProvider(
 
     case 'carto-dark':
       return new Cesium.UrlTemplateImageryProvider({
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=cb1_3rb7_2_6ffade6a2c1f6d15a74a8aaf',
         subdomains: ['a', 'b', 'c', 'd'],
         maximumLevel: 19,
         credit: '© CARTO © OpenStreetMap',
@@ -78,7 +78,7 @@ export function createImageryProvider(
 
     case 'carto-voyager':
       return new Cesium.UrlTemplateImageryProvider({
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3rb7_2_6ffade6a2c1f6d15a74a8aaf',
         subdomains: ['a', 'b', 'c', 'd'],
         maximumLevel: 19,
         credit: '© CARTO © OpenStreetMap',

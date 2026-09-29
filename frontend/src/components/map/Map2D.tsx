@@ -12,11 +12,13 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { WORLD_INVERTED_MASK } from '../../data/indiaBoundary';
+import { WORLD_INVERTED_MASK, INDIA_BORDER_LATLNGS } from '../../data/indiaBoundary';
 import { DISTRICT_COORDINATES, STATE_COORDINATES } from '../../cesium/camera';
 import { toRiskPercentage, getRiskColor, getRiskBandInfo, calculateWeightageBreakdown } from '../../utils/riskClassification';
 
 type BasemapType = 'osm' | 'satellite' | 'dark' | 'topo';
+
+const CARTO_API_KEY = 'cb1_3rb7_2_6ffade6a2c1f6d15a74a8aaf';
 
 const BASEMAP_URLS: Record<BasemapType, { url: string; attribution: string; maxZoom?: number; labelUrl?: string }> = {
   osm: {
@@ -31,7 +33,7 @@ const BASEMAP_URLS: Record<BasemapType, { url: string; attribution: string; maxZ
     labelUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
   },
   dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    url: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 19,
   },
@@ -53,6 +55,7 @@ export default function Map2D() {
   const layersGroupRef = useRef<L.FeatureGroup | null>(null);
   const pathwayGroupRef = useRef<L.FeatureGroup | null>(null);
   const indiaMaskRef = useRef<L.Polygon | null>(null);
+  const indiaBorderRef = useRef<L.Polyline | null>(null);
   const indiaStatesLayerRef = useRef<L.GeoJSON | null>(null);
 
   const [activeBasemap, setActiveBasemap] = useState<BasemapType>('satellite');
@@ -161,12 +164,22 @@ export default function Map2D() {
     tileLayerRef.current = L.tileLayer(def.url, {
       attribution: def.attribution,
       maxZoom: def.maxZoom || 18,
+      noWrap: true,
+      bounds: [
+        [-85.06, -180],
+        [85.06, 180],
+      ],
     }).addTo(mapRef.current);
 
     if (def.labelUrl && showLabels) {
       labelLayerRef.current = L.tileLayer(def.labelUrl, {
         maxZoom: def.maxZoom || 18,
         pane: 'overlayPane',
+        noWrap: true,
+        bounds: [
+          [-85.06, -180],
+          [85.06, 180],
+        ],
       }).addTo(mapRef.current);
     }
   }, [showLabels]);
@@ -179,6 +192,11 @@ export default function Map2D() {
       labelLayerRef.current = L.tileLayer(def.labelUrl, {
         maxZoom: def.maxZoom || 18,
         pane: 'overlayPane',
+        noWrap: true,
+        bounds: [
+          [-85.06, -180],
+          [85.06, 180],
+        ],
       }).addTo(mapRef.current);
     } else if (!showLabels && labelLayerRef.current) {
       mapRef.current.removeLayer(labelLayerRef.current);
@@ -193,35 +211,59 @@ export default function Map2D() {
     const map = L.map(containerRef.current, {
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
+      minZoom: 3,
       zoomControl: false,
+      maxBounds: [
+        [-85.06, -180],
+        [85.06, 180],
+      ],
+      maxBoundsViscosity: 1.0,
+      worldCopyJump: false,
     });
 
     const initialDef = BASEMAP_URLS[activeBasemap];
     tileLayerRef.current = L.tileLayer(initialDef.url, {
       attribution: initialDef.attribution,
       maxZoom: initialDef.maxZoom || 18,
+      noWrap: true,
+      bounds: [
+        [-85.06, -180],
+        [85.06, 180],
+      ],
     }).addTo(map);
 
     if (initialDef.labelUrl && showLabels) {
       labelLayerRef.current = L.tileLayer(initialDef.labelUrl, {
         maxZoom: initialDef.maxZoom || 18,
         pane: 'overlayPane',
+        noWrap: true,
+        bounds: [
+          [-85.06, -180],
+          [85.06, 180],
+        ],
       }).addTo(map);
     }
 
     layersGroupRef.current = L.featureGroup().addTo(map);
     pathwayGroupRef.current = L.featureGroup().addTo(map);
 
-    // Inverted Mask: Darkens world outside India, illuminates and highlights sovereign India
+    // Inverted Mask: Darkens world outside India, illuminates sovereign India (stroke disabled so outer box doesn't render)
     const mask = L.polygon(WORLD_INVERTED_MASK as any, {
       fillColor: '#030712',
       fillOpacity: 0.65,
+      stroke: false,
+      interactive: false,
+    }).addTo(map);
+    indiaMaskRef.current = mask;
+
+    // Sovereign India boundary contour (clean polyline without any outer +/-180 box)
+    const border = L.polyline(INDIA_BORDER_LATLNGS, {
       color: '#38bdf8',
       weight: 1.8,
       opacity: 0.95,
       interactive: false,
     }).addTo(map);
-    indiaMaskRef.current = mask;
+    indiaBorderRef.current = border;
 
     mapRef.current = map;
 
@@ -229,6 +271,10 @@ export default function Map2D() {
       if (indiaMaskRef.current) {
         indiaMaskRef.current.remove();
         indiaMaskRef.current = null;
+      }
+      if (indiaBorderRef.current) {
+        indiaBorderRef.current.remove();
+        indiaBorderRef.current = null;
       }
       map.remove();
       mapRef.current = null;
@@ -239,14 +285,20 @@ export default function Map2D() {
 
   // Toggle India Focus Mask layer visibility
   useEffect(() => {
-    if (!indiaMaskRef.current || !mapRef.current) return;
+    if (!mapRef.current) return;
     if (layerVisibility.india_focus) {
-      if (!mapRef.current.hasLayer(indiaMaskRef.current)) {
+      if (indiaMaskRef.current && !mapRef.current.hasLayer(indiaMaskRef.current)) {
         indiaMaskRef.current.addTo(mapRef.current);
       }
+      if (indiaBorderRef.current && !mapRef.current.hasLayer(indiaBorderRef.current)) {
+        indiaBorderRef.current.addTo(mapRef.current);
+      }
     } else {
-      if (mapRef.current.hasLayer(indiaMaskRef.current)) {
+      if (indiaMaskRef.current && mapRef.current.hasLayer(indiaMaskRef.current)) {
         mapRef.current.removeLayer(indiaMaskRef.current);
+      }
+      if (indiaBorderRef.current && mapRef.current.hasLayer(indiaBorderRef.current)) {
+        mapRef.current.removeLayer(indiaBorderRef.current);
       }
     }
   }, [layerVisibility.india_focus]);
