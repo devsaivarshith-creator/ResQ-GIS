@@ -234,7 +234,7 @@ export interface DistrictRiskReport {
 }
 
 // --- Navigation ---
-export type NavSection = 'map' | 'globe' | 'analysis' | 'habitations' | 'relocation' | 'alerts' | 'reports' | 'rivers' | 'layers' | 'datasources' | 'settings' | 'workspaces' | 'surveillance' | 'relocation_compare';
+export type NavSection = 'map' | 'globe' | 'analysis' | 'habitations' | 'relocation' | 'alerts' | 'reports' | 'rivers' | 'layers' | 'datasources' | 'workspaces' | 'surveillance' | 'relocation_compare';
 export type MapMode = '2d' | '3d';
 
 // --- Workspaces & Regional Folders ---

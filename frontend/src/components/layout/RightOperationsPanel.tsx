@@ -7,7 +7,6 @@ import AlertsPanel from '../panels/AlertsPanel';
 import RiversPanel from '../panels/RiversPanel';
 import LayerPanel from '../panels/LayerPanel';
 import DataSourcesPanel from '../panels/DataSourcesPanel';
-import SettingsPanel from '../panels/SettingsPanel';
 import SurveillancePanel from '../panels/SurveillancePanel';
 import { ChevronRight, ChevronLeft, X } from 'lucide-react';
 
@@ -171,7 +170,6 @@ export default function RightOperationsPanel() {
     activeNav === 'habitations' ||
     activeNav === 'relocation' ||
     activeNav === 'datasources' ||
-    activeNav === 'settings' ||
     activeNav === 'surveillance';
 
   const toolTitle =
@@ -181,8 +179,6 @@ export default function RightOperationsPanel() {
       ? 'Surveillance & AOI Marking'
       : activeNav === 'datasources'
       ? 'Data Feeds & Provenance'
-      : activeNav === 'settings'
-      ? 'System Preferences'
       : activeNav === 'rivers'
       ? 'Hydrology & Gauges'
       : activeNav === 'layers'
@@ -271,7 +267,6 @@ export default function RightOperationsPanel() {
             {activeNav === 'habitations' && <HabitationPanel />}
             {activeNav === 'relocation' && <RelocationPanel />}
             {activeNav === 'datasources' && <DataSourcesPanel />}
-            {activeNav === 'settings' && <SettingsPanel />}
           </div>
         </div>
       ) : (

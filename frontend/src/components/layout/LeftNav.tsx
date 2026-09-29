@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   FileText,
   Database,
-  Settings,
   ArrowLeftRight,
   Scan,
   ChevronLeft,
@@ -36,7 +35,6 @@ const NAV_ITEMS: NavItemDef[] = [
   { id: 'alerts', label: 'Alerts Feed', icon: AlertTriangle, targetPanel: 'alerts' },
   { id: 'reports', label: 'Travel & Evacuation', icon: FileText, targetPanel: 'reports' },
   { id: 'datasources', label: 'Data Sources', icon: Database, targetPanel: 'datasources' },
-  { id: 'settings', label: 'Settings', icon: Settings, targetPanel: 'settings' },
 ];
 
 export default function LeftNav() {
@@ -122,8 +120,7 @@ export default function LeftNav() {
               (item.id === 'infrastructure' && activeNav === 'rivers') ||
               (item.id === 'alerts' && activeNav === 'alerts') ||
               (item.id === 'reports' && activeNav === 'reports') ||
-              (item.id === 'datasources' && activeNav === 'datasources') ||
-              (item.id === 'settings' && activeNav === 'settings');
+              (item.id === 'datasources' && activeNav === 'datasources');
 
             return (
               <button
